@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="314 141 396 677" width="396" height="677">
+  <title>Hearth</title>
+  <defs>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7C77A"/><stop offset="1" stop-color="#C7802F"/></linearGradient>
+<linearGradient id="metalBase" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EDB565"/><stop offset="1" stop-color="#B06A28"/></linearGradient>
+    <radialGradient id="glass" cx="512" cy="610" r="260" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFB863"/><stop offset="0.55" stop-color="#FF8A4C"/><stop offset="1" stop-color="#D2522A"/></radialGradient>
+<radialGradient id="flame" cx="510" cy="650" r="170" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFFFF"/><stop offset="0.5" stop-color="#FFF1CF"/><stop offset="1" stop-color="#FFE29A"/></radialGradient>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="22"/></filter>
+  </defs>
+  <circle cx="512" cy="222" r="52" fill="none" stroke="url(#metal)" stroke-width="26"/>
+    <rect x="478" y="266" width="68" height="40" rx="12" fill="url(#metal)"/>
+    <path d="M432 300 H592 L680 372 H344 Z" fill="url(#metal)" stroke="url(#metal)" stroke-width="22" stroke-linejoin="round"/>
+    <rect x="362" y="372" width="300" height="368" rx="58" fill="url(#glass)" stroke="url(#metal)" stroke-width="22"/>
+    <rect x="378" y="388" width="268" height="336" rx="44" fill="none" stroke="#B9471F" stroke-opacity="0.35" stroke-width="6"/>
+    <rect x="394" y="414" width="22" height="280" rx="11" fill="#FFFFFF" opacity="0.24"/>
+    <path d="M522 440 C 528 492, 592 540, 592 612 C 592 660, 556 696, 512 696 C 468 696, 432 660, 432 612 C 432 552, 486 520, 522 440 Z" fill="#FFE6B0" opacity="0.85" filter="url(#soft)"/>
+    <path d="M522 440 C 528 492, 592 540, 592 612 C 592 660, 556 696, 512 696 C 468 696, 432 660, 432 612 C 432 552, 486 520, 522 440 Z" fill="url(#flame)"/>
+    <path d="M516 566 C 520 596, 552 616, 552 646 C 552 670, 534 684, 512 684 C 490 684, 472 670, 472 646 C 472 616, 504 600, 516 566 Z" fill="#FFFFFF" opacity="0.9"/>
+    <rect x="330" y="732" width="364" height="70" rx="26" fill="url(#metalBase)"/>
+</svg>

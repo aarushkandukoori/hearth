@@ -1,0 +1,96 @@
+# XcodeGen spec for Hearth. Regenerate with: cd ios && xcodegen
+name: Hearth
+options:
+  bundleIdPrefix: com.aarushkandukoori
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: 23653MLB58
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  Hearth:
+    type: application
+    platform: iOS
+    sources:
+      - path: Hearth
+        excludes:
+          - "Resources/Art"
+          - "Resources/*.json"
+      - path: Hearth/Resources/Art
+        type: folder
+        buildPhase: resources
+      - path: Hearth/Resources/lantern-bay.json
+        buildPhase: resources
+      - path: Hearth/Resources/art-jobs.json
+        buildPhase: resources
+    info:
+      path: Hearth/Info.plist
+      properties:
+        CFBundleDisplayName: Hearth
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIApplicationSupportsIndirectInputEvents: true
+        ITSAppUsesNonExemptEncryption: false
+        NSMicrophoneUsageDescription: Hearth uses the microphone for voice notes and calls. Your voice is turned into text on this iPhone and never leaves it.
+        NSSpeechRecognitionUsageDescription: Hearth turns your voice into text on this iPhone only, so you can talk with your characters.
+        NSFaceIDUsageDescription: Hearth can lock your chats with Face ID.
+        NSPhotoLibraryAddUsageDescription: Hearth can save pictures your characters send you.
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.aarushkandukoori.hearth.backup
+            UTTypeDescription: Hearth Backup
+            UTTypeConformsTo: [public.data]
+            UTTypeTagSpecification:
+              public.filename-extension: [hearth]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.aarushkandukoori.hearth
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks"
+        "FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]": "$(inherited) $(PROJECT_DIR)/Vendor/llama.xcframework/ios-arm64"
+        "OTHER_LDFLAGS[sdk=iphoneos*]": "$(inherited) -framework llama"
+    postBuildScripts:
+      - name: Embed llama.framework (device builds only)
+        basedOnDependencyAnalysis: false
+        script: |
+          if [ "$PLATFORM_NAME" = "iphoneos" ]; then
+            SRC="$PROJECT_DIR/Vendor/llama.xcframework/ios-arm64/llama.framework"
+            DST="$TARGET_BUILD_DIR/$FRAMEWORKS_FOLDER_PATH"
+            mkdir -p "$DST"
+            rm -rf "$DST/llama.framework"
+            cp -R "$SRC" "$DST/"
+            if [ -n "$EXPANDED_CODE_SIGN_IDENTITY" ]; then
+              codesign --force --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp=none "$DST/llama.framework"
+            fi
+          fi
+  HearthTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: HearthTests
+    dependencies:
+      - target: Hearth
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.aarushkandukoori.hearth.tests
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Hearth.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Hearth"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+schemes:
+  Hearth:
+    build:
+      targets:
+        Hearth: all
+        HearthTests: [test]
+    test:
+      targets: [HearthTests]

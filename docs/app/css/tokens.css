@@ -1,0 +1,147 @@
+/* Hearth design tokens: palette (from SPEC §3), type, spacing, radii, motion.
+   Dark is the default; light applies from the system setting or the manual toggle (html[data-theme]). */
+
+:root {
+  color-scheme: dark;
+
+  /* Palette (dark) */
+  --bg: #141110;
+  --surface: #1D1916;
+  --surface-2: #26211D;
+  --surface-3: #2F2924;
+  --line: #332C26;
+  --text: #F4EDE4;
+  --text-2: #B9AEA2;
+  --muted: #8A7F74;
+  --accent: #FF8A4C;
+  --gold: #F6C177;
+  --sea: #6FB7C9;
+  --success: #7FB69B;
+  --danger: #E5675B;
+
+  /* Derived */
+  --meta: #8A7F74;              /* small secondary text */
+  --accent-ink: #FF9D66;        /* accent used as text (links) */
+  --gold-ink: #F6C177;          /* gold used as text (the demo labels) */
+  --on-accent: #1A110A;         /* text on accent fills */
+  --accent-soft: rgba(255, 138, 76, 0.14);
+  --gold-soft: rgba(246, 193, 119, 0.14);
+  --sea-soft: rgba(111, 183, 201, 0.14);
+  --danger-soft: rgba(229, 103, 91, 0.14);
+  --hover: rgba(244, 237, 228, 0.06);
+  --press: rgba(244, 237, 228, 0.10);
+  --scrim: rgba(8, 6, 5, 0.62);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-2: 0 10px 30px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-3: 0 24px 60px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.35);
+  --glow: 0 0 0 1px rgba(255, 138, 76, 0.35), 0 8px 28px rgba(255, 138, 76, 0.18);
+
+  /* Type */
+  --font-ui: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: ui-serif, "New York", Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 15px;
+  --fs-lg: 17px;
+  --fs-xl: 22px;
+  --fs-2xl: 28px;
+  --fs-3xl: 34px;
+
+  /* Space and shape */
+  --gutter: 16px;
+  --r-xs: 8px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-pill: 999px;
+
+  /* Layout */
+  --sidebar-w: 272px;
+  --rail-w: 72px;
+  --topbar-h: 56px;
+  --chat-w: 760px;
+  --content-w: 1240px;
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 120ms;
+  --t-med: 220ms;
+  --t-slow: 360ms;
+
+  --z-sidebar: 30;
+  --z-topbar: 40;
+  --z-drawer: 60;
+  --z-menu: 80;
+  --z-modal: 90;
+  --z-toast: 100;
+}
+
+/* Light palette, shared by the system preference and the manual toggle. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg: #FBF7F2;
+    --surface: #FFFFFF;
+    --surface-2: #F3ECE3;
+    --surface-3: #EBE2D7;
+    --line: #E7DDD1;
+    --text: #211B16;
+    --text-2: #5C5047;
+    --muted: #8A7F74;
+    --accent: #E8682E;
+    --gold: #C98A2B;
+    --sea: #2F7F94;
+    --success: #3F8A66;
+    --danger: #C8473C;
+    --meta: #6F6358;
+    --accent-ink: #B4481A;
+    --gold-ink: #7A4E0E;
+    --on-accent: #1A110A;
+    --accent-soft: rgba(232, 104, 46, 0.12);
+    --gold-soft: rgba(201, 138, 43, 0.14);
+    --sea-soft: rgba(47, 127, 148, 0.12);
+    --danger-soft: rgba(200, 71, 60, 0.10);
+    --hover: rgba(33, 27, 22, 0.05);
+    --press: rgba(33, 27, 22, 0.09);
+    --scrim: rgba(33, 27, 22, 0.42);
+    --shadow-1: 0 1px 2px rgba(60, 40, 20, 0.08);
+    --shadow-2: 0 10px 30px rgba(60, 40, 20, 0.12), 0 2px 6px rgba(60, 40, 20, 0.06);
+    --shadow-3: 0 24px 60px rgba(60, 40, 20, 0.18), 0 4px 12px rgba(60, 40, 20, 0.08);
+    --glow: 0 0 0 1px rgba(232, 104, 46, 0.35), 0 8px 28px rgba(232, 104, 46, 0.16);
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #FBF7F2;
+  --surface: #FFFFFF;
+  --surface-2: #F3ECE3;
+  --surface-3: #EBE2D7;
+  --line: #E7DDD1;
+  --text: #211B16;
+  --text-2: #5C5047;
+  --muted: #8A7F74;
+  --accent: #E8682E;
+  --gold: #C98A2B;
+  --sea: #2F7F94;
+  --success: #3F8A66;
+  --danger: #C8473C;
+  --meta: #6F6358;
+  --accent-ink: #B4481A;
+  --gold-ink: #7A4E0E;
+  --on-accent: #1A110A;
+  --accent-soft: rgba(232, 104, 46, 0.12);
+  --gold-soft: rgba(201, 138, 43, 0.14);
+  --sea-soft: rgba(47, 127, 148, 0.12);
+  --danger-soft: rgba(200, 71, 60, 0.10);
+  --hover: rgba(33, 27, 22, 0.05);
+  --press: rgba(33, 27, 22, 0.09);
+  --scrim: rgba(33, 27, 22, 0.42);
+  --shadow-1: 0 1px 2px rgba(60, 40, 20, 0.08);
+  --shadow-2: 0 10px 30px rgba(60, 40, 20, 0.12), 0 2px 6px rgba(60, 40, 20, 0.06);
+  --shadow-3: 0 24px 60px rgba(60, 40, 20, 0.18), 0 4px 12px rgba(60, 40, 20, 0.08);
+  --glow: 0 0 0 1px rgba(232, 104, 46, 0.35), 0 8px 28px rgba(232, 104, 46, 0.16);
+}

@@ -1,0 +1,40 @@
+/* Settings page sections, rows, model choices and the privacy list. */
+
+.settings-page .page-head { margin-bottom: 8px; }
+.set-section {
+  display: grid; gap: 16px; margin-top: 16px; padding: 20px;
+  border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--line);
+  scroll-margin-top: 84px;
+}
+.set-h { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 750; }
+.set-h-icon { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-ink); }
+.set-intro { color: var(--text-2); font-size: 14px; }
+.set-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.set-row-text { min-width: 0; }
+.set-row-label { font-weight: 650; }
+.set-row-hint { font-size: 13px; color: var(--text-2); margin-top: 2px; max-width: 540px; }
+@media (max-width: 520px) { .set-row:has(.segmented), .set-row:has(.btn) { flex-direction: column; align-items: flex-start; } }
+.saved-note { font-size: 12px; font-weight: 650; color: var(--success); opacity: 0; transition: opacity var(--t-med); }
+.saved-note.show { opacity: 1; }
+.set-section .select { max-width: 420px; flex: 1 1 260px; }
+
+.model-status { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); font-size: 14px; }
+.model-choices { display: grid; gap: 10px; }
+.model-choice { display: flex; align-items: flex-start; gap: 12px; padding: 14px; border-radius: 14px; border: 1px solid var(--line); cursor: pointer; transition: border-color var(--t-fast), background-color var(--t-fast); }
+.model-choice:hover { background: var(--hover); }
+.model-choice.selected { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); background: var(--accent-soft); }
+.model-choice input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--accent); flex-shrink: 0; }
+.model-choice-text { display: grid; gap: 4px; min-width: 0; flex: 1; }
+.model-choice-name { font-weight: 750; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.model-choice-name .badge { margin-left: 6px; }
+.model-choice-note { font-size: 13px; color: var(--text-2); }
+.model-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.model-actions:empty { display: none; }
+
+.privacy-list { display: grid; gap: 14px; }
+.privacy-item { display: flex; gap: 12px; align-items: flex-start; }
+.privacy-item > span:last-child { display: grid; gap: 2px; font-size: 14px; }
+.privacy-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--surface-2); color: var(--text-2); flex-shrink: 0; }
+.help-list { display: grid; gap: 10px; font-size: 14px; }
+.help-actions { display: inline-flex; gap: 12px; margin-left: 10px; flex-wrap: wrap; }
+.credits { display: grid; gap: 6px; padding-top: 14px; border-top: 1px solid var(--line); }

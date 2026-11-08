@@ -1,0 +1,735 @@
+<!doctype html>
+<!-- Hearth for iPhone: the landing and install page for the iPhone app.
+     Static page, no external requests. Styles and behavior live in ../assets/site/. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Hearth for iPhone</title>
+<meta name="description" content="Hearth is a private companion app for iPhone. A little seaside town of animal-folk friends lives on your phone, talks with you and with each other, and nothing you say leaves the device.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#141110" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FBF7F2" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://aarushkandukoori.github.io/hearth/iphone/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hearth for iPhone">
+<meta property="og:description" content="A little town of friends that lives on your phone, and everything stays there.">
+<meta property="og:url" content="https://aarushkandukoori.github.io/hearth/iphone/">
+<meta property="og:image" content="https://aarushkandukoori.github.io/hearth/assets/brand/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/brand/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/brand/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/site/site.css">
+<script>
+  // Before first paint: apply a saved light/dark choice and mark JS as available.
+  (function () {
+    var root = document.documentElement;
+    root.classList.add("js");
+    try { var t = localStorage.getItem("hearth-site-theme"); if (t === "light" || t === "dark") root.dataset.theme = t; } catch (e) {}
+    window.addEventListener("load", function () { if (!window.__hearthSite) root.classList.remove("js"); });
+  })();
+</script>
+<script src="../assets/site/site.js" defer></script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.4 2.4 4.6-5"/></symbol>
+  <symbol id="i-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="3.8" ry="9"/><path d="M3.5 9h17M3.5 15h17"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.8"/><path d="M10.5 18.5h3"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4.5 20 11"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 15a2 2 0 0 1-2 2H8.5L4 20.5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 12.5h5"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-9.5 9"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+  <symbol id="i-wave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/></symbol>
+  <symbol id="i-user-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.9-3.4 3.7-5.5 7-5.5 1.5 0 2.9.4 4 1.2"/><path d="m3.5 3.5 17 17"/></symbol>
+  <symbol id="i-server-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h10a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4M6 4.3A2 2 0 0 0 4 6v2a2 2 0 0 0 2 2h4M4 16a2 2 0 0 1 2-2h8m4 0a2 2 0 0 1 2 2v2a2 2 0 0 1-.6 1.4M16 20H6a2 2 0 0 1-2-2v-2"/><path d="m3.5 3.5 17 17"/></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 3.5 17 17"/><path d="M10.6 6.1A9.4 9.4 0 0 1 12 6c5 0 8.5 4.5 9.5 6-.5.8-1.6 2.3-3.2 3.6M6.4 7.7C4.6 9 3.2 10.9 2.5 12c1 1.5 4.5 6 9.5 6 1.4 0 2.7-.3 3.8-.9"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
+  <symbol id="i-plane" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.8 0 1.4.7 1.4 1.5V10l7 4v2l-7-2v4.4l2 1.6v1.5L12 21l-3.4.5V20l2-1.6V14l-7 2v-2l7-4V4.5C10.6 3.7 11.2 3 12 3z"/></symbol>
+  <symbol id="i-faceid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9.5v1M15 9.5v1M12 9.5V13h-1M9.5 15.5c1.4 1.1 3.6 1.1 5 0"/></symbol>
+  <symbol id="i-switcher" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="12" height="15" rx="2.5"/><path d="M18 6.5v12M21 8.5v8"/></symbol>
+  <symbol id="i-cloud-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 3.5 17 17"/><path d="M7.6 8.5A4.5 4.5 0 0 0 7 17.5h10M10.4 6.1A6 6 0 0 1 18 10.5a3.5 3.5 0 0 1 2.7 5.6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-flame-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.3-4 2.6-5.2.2 1.7 1 2.8 2.1 3.3C11.4 8.5 11.4 5.8 12 3z"/><path d="m4 4 16 16"/></symbol>
+  <symbol id="i-bell-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 3.5 17 17"/><path d="M17.5 13.5V10a5.5 5.5 0 0 0-8.9-4.3M6.5 9.4V14L5 17h11M10 20a2.2 2.2 0 0 0 4 0"/></symbol>
+  <symbol id="i-friends" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19c.8-3 3-4.6 5.5-4.6s4.7 1.6 5.5 4.6"/><circle cx="17" cy="9.5" r="2.4"/><path d="M15.6 14.4c2.2-.2 4.1 1.1 4.9 3.8"/></symbol>
+  <symbol id="i-lifebuoy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.8"/><path d="m5.6 5.6 3.7 3.7M14.7 14.7l3.7 3.7M18.4 5.6l-3.7 3.7M9.3 14.7l-3.7 3.7"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 19.5 6v5.5c0 4.5-3.2 8.2-7.5 9.5-4.3-1.3-7.5-5-7.5-9.5V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 13.8 9 19 10.8 13.8 12.6 12 18l-1.8-5.4L5 10.8 10.2 9z"/><path d="M18.5 16.5v3M17 18h3"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8h.01"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8.5 7-5 5 5 5M15.5 7l5 5-5 5"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 8h15v10.5A1.5 1.5 0 0 1 18 20H6a1.5 1.5 0 0 1-1.5-1.5z"/><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M10 12h4"/></symbol>
+  <symbol id="i-restore" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 4 2.4 5 5.4.6-4 3.7 1.1 5.4L12 16l-4.9 2.7 1.1-5.4-4-3.7 5.4-.6z"/></symbol>
+  <symbol id="i-swipe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M4 12h16"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6l-1 5 3 3v1.5H7V12l3-3z"/><path d="M12 13.5V20"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><path d="M12 8v8M8 12h8"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="8.5" cy="11" r="2"/><path d="M5.5 16c.6-1.4 1.7-2.1 3-2.1s2.4.7 3 2.1M14 10h4M14 13.5h3"/></symbol>
+  <symbol id="i-person" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.9-3.4 3.7-5.5 7-5.5s6.1 2.1 7 5.5"/></symbol>
+  <symbol id="i-call" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 4h3l1.5 4-2 1.3a11 11 0 0 0 6.7 6.7l1.3-2 4 1.5v3a2 2 0 0 1-2 2A16 16 0 0 1 3.5 6a2 2 0 0 1 2-2z"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 8 12l7 7"/></symbol>
+  <symbol id="i-dots" viewBox="0 0 24 24" fill="currentColor"><circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5.5M6.5 11 12 5.5l5.5 5.5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 12 12" fill="currentColor"><path d="M3.2 1.6v8.8L10.2 6z"/></symbol>
+  <symbol id="i-battery" viewBox="0 0 28 14" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="1" y="1.5" width="22" height="11" rx="3.2"/><rect x="3" y="3.5" width="15" height="7" rx="1.6" fill="currentColor" stroke="none"/><path d="M25.5 5.5v3" stroke-linecap="round" stroke-width="1.8"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+</svg>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="brand" href="./" aria-label="Hearth for iPhone, top of page">
+      <span class="brand-mark">
+        <img src="../assets/brand/logo.svg" alt="" width="20" height="34" onerror="this.hidden=true;this.nextElementSibling.removeAttribute('hidden')">
+        <svg viewBox="0 0 32 32" hidden aria-hidden="true"><circle cx="16" cy="4.6" r="2.3" fill="none" stroke="#F6C177" stroke-width="1.6"/><path d="M11.5 8.5h9l2.5 3h-14z" fill="#F6C177"/><rect x="9.5" y="11.5" width="13" height="14" rx="3.2" fill="#FF8A4C"/><path d="M16.4 14.2c.4 2.1 2.8 3.4 2.8 6.1a3.2 3.2 0 0 1-6.4 0c0-2.3 2.3-3.4 3.6-6.1z" fill="#FFF1CF"/><rect x="9" y="26" width="14" height="3.2" rx="1.4" fill="#F6C177"/></svg>
+      </span>
+      <span class="brand-name">Hearth</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="#town">The town</a>
+      <a href="#privacy">Privacy</a>
+      <a href="../safety/">Safety</a>
+      <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme">
+      <svg class="icon-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+      <svg class="icon-sun" aria-hidden="true"><use href="#i-sun"/></svg>
+    </button>
+    <a class="btn btn-primary btn-small" href="../" aria-label="Open the web app"><span class="label-long">Open the web app</span><span class="label-short">Web app</span></a>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============ Hero ============ -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-stars" aria-hidden="true"></div>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">Hearth for iPhone</span>
+        <h1 id="hero-title">A little town of friends that lives on your phone.</h1>
+        <p class="hero-sub">And everything stays there.</p>
+        <p class="hero-lede">
+          Hearth is a cozy chat app set in Lantern Bay, a seaside town of animal folk. Talk with a resident
+          one on one, or walk into Driftwood Cafe and join whoever is there. It all runs on your iPhone, and
+          nothing you say leaves it.
+        </p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="../"><svg aria-hidden="true"><use href="#i-globe"/></svg>Try it in your browser</a>
+          <a class="btn btn-ghost" href="#install"><svg aria-hidden="true"><use href="#i-phone"/></svg>Install on iPhone</a>
+        </div>
+        <ul class="trust-row">
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>No account</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>Works in Airplane Mode</li>
+          <li><svg aria-hidden="true"><use href="#i-check"/></svg>Free and open source</li>
+        </ul>
+      </div>
+
+      <div class="hero-art">
+        <div class="porthole" aria-hidden="true">
+          <img src="../assets/art/hero-town.jpg" alt="" onerror="this.remove()">
+        </div>
+        <!-- CAST:phone -->
+        <figure class="phone-figure">
+          <div class="phone" data-phone-demo role="img" aria-label="An example chat in the Hearth app. Juno, a river otter who runs Driftwood Cafe, says hello, sends a short voice note from the harbor, then a picture of it.">
+            <div class="phone-screen" aria-hidden="true">
+              <div class="pm-island"></div>
+              <div class="pm-status">
+                <span>9:41</span>
+                <span class="pm-status-icons"><svg class="pm-plane"><use href="#i-plane"/></svg><svg style="width:24px;height:12px"><use href="#i-battery"/></svg></span>
+              </div>
+              <div class="pm-topbar">
+                <svg class="pm-back"><use href="#i-back"/></svg>
+                <span class="avatar" style="--a1:#243E42;--a2:#40A1B0;width:34px;height:34px;font-size:19px"><span aria-hidden="true">🦦</span><img src="../assets/art/char-juno.jpg" alt="" onerror="this.remove()"></span>
+                <span class="pm-who"><span class="pm-name">Juno</span><span class="pm-by">by @lanternbay</span></span>
+                <svg class="pm-action"><use href="#i-call"/></svg>
+                <svg class="pm-action"><use href="#i-dots"/></svg>
+              </div>
+              <div class="pm-thread" data-demo>
+                <p class="pm-disclosure">Hearth characters are AI. What they say is made up.</p>
+                <div class="pm-msg" data-think="700" data-after="1100">
+                  <span class="avatar" style="--a1:#243E42;--a2:#40A1B0"><span aria-hidden="true">🦦</span><img src="../assets/art/char-juno.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+                  <div class="pm-body"><div class="pm-from">Juno</div><div class="pm-text"><em>waves with a foamy paw</em> Oh hi! Grab any stool you like. How's your day going?</div></div>
+                </div>
+                <div class="pm-msg is-user" data-after="500"><div class="pm-text">Long day. Mostly stayed in.</div></div>
+                <div class="pm-msg" data-think="1500">
+                  <span class="avatar" style="--a1:#243E42;--a2:#40A1B0"><span aria-hidden="true">🦦</span><img src="../assets/art/char-juno.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+                  <div class="pm-body"><div class="pm-from">Juno</div><div class="pm-text">Okay, wait. Then I'm bringing the harbor to you. It's right outside, listen.</div></div>
+                </div>
+                <div class="pm-msg" data-think="1100" data-seconds="6" data-after="1000">
+                  <span class="avatar" style="--a1:#243E42;--a2:#40A1B0"><span aria-hidden="true">🦦</span><img src="../assets/art/char-juno.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+                  <div class="pm-body">
+                    <div class="pm-voice">
+                      <span class="pm-play"><svg><use href="#i-play"/></svg></span>
+                      <span class="pm-wave"><i style="--h:.35"></i><i style="--h:.6"></i><i style="--h:.9"></i><i style="--h:.5"></i><i style="--h:.7"></i><i style="--h:1"></i><i style="--h:.65"></i><i style="--h:.4"></i><i style="--h:.75"></i><i style="--h:.55"></i><i style="--h:.85"></i><i style="--h:.45"></i><i style="--h:.3"></i><i style="--h:.6"></i><i style="--h:.8"></i><i style="--h:.5"></i><i style="--h:.35"></i><i style="--h:.55"></i><i style="--h:.25"></i><i style="--h:.4"></i></span>
+                      <span class="pm-time">0:06</span>
+                    </div>
+                    <div class="pm-transcript">"Hear that? Boats knocking on the docks, and one very opinionated gull."</div>
+                  </div>
+                </div>
+                <div class="pm-msg is-user" data-after="500"><div class="pm-text">Ha. What does it look like out there?</div></div>
+                <div class="pm-msg" data-think="1700" data-after="1200">
+                  <span class="avatar" style="--a1:#243E42;--a2:#40A1B0"><span aria-hidden="true">🦦</span><img src="../assets/art/char-juno.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+                  <div class="pm-body">
+                    <div class="pm-from">Juno</div>
+                    <div class="pm-picture"><div class="postcard"><i class="pc-sun"></i><i class="pc-rock"></i><i class="pc-tower"></i><i class="pc-lamp"></i><i class="pc-wave w1"></i><i class="pc-wave w2"></i></div><img src="../assets/art/loc-harbor.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></div>
+                    <div class="pm-caption">The harbor, from the end of the boardwalk</div>
+                  </div>
+                </div>
+                <div class="pm-msg pm-typing-row" hidden>
+                  <span class="avatar" style="--a1:#243E42;--a2:#40A1B0"><span aria-hidden="true">🦦</span><img src="../assets/art/char-juno.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+                  <div class="pm-body"><div class="pm-from">Juno</div><span class="pm-typing"><i></i><i></i><i></i></span></div>
+                </div>
+              </div>
+              <div class="pm-composer">
+                <svg><use href="#i-camera"/></svg>
+                <span class="pm-input">Message Juno...</span>
+                <svg><use href="#i-mic"/></svg>
+                <span class="pm-send"><svg><use href="#i-send"/></svg></span>
+              </div>
+            </div>
+          </div>
+          <figcaption class="phone-note">An example chat. In the app, every reply is written live by the model on your phone.</figcaption>
+        </figure>
+        <!-- /CAST:phone -->
+      </div>
+    </div>
+
+    <div class="hero-town" aria-hidden="true">
+      <svg viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax slice">
+        <defs>
+          <linearGradient id="sea-fade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" style="stop-color:var(--sea-fill)"/>
+            <stop offset="1" style="stop-color:var(--bg)"/>
+          </linearGradient>
+        </defs>
+        <path class="t-hill-far" d="M0 150C150 112 300 118 430 134S700 102 860 120 1180 96 1440 126V260H0Z"/>
+        <polygon class="t-beam beam" points="1290,63 900,18 900,112"/>
+        <path class="t-hill-near" d="M1110 178C1180 148 1290 136 1370 146S1440 154 1440 154V260H1110Z"/>
+        <polygon class="t-tower" points="1280,74 1300,74 1308,160 1272,160"/>
+        <rect class="t-roof" x="1275" y="58" width="30" height="16" rx="3"/>
+        <circle class="t-glow glow-pulse" cx="1290" cy="66" r="30"/>
+        <circle class="t-lantern" cx="1290" cy="66" r="5"/>
+        <path class="t-hill-near" d="M0 196C110 166 250 156 380 170S640 164 770 178 960 172 1050 184V260H0Z"/>
+        <!-- houses on the quay -->
+        <g class="t-houses">
+          <rect class="t-house" x="60" y="178" width="34" height="28"/><polygon class="t-roof" points="56,178 77,162 98,178"/><rect class="t-window flicker d2" x="72" y="187" width="9" height="10" rx="1.5"/>
+          <rect class="t-house" x="104" y="168" width="40" height="38"/><polygon class="t-roof" points="100,168 124,149 148,168"/><rect class="t-window flicker" x="118" y="179" width="10" height="12" rx="1.5"/>
+          <circle class="t-roof" cx="166" cy="184" r="10"/><rect class="t-house" x="164" y="190" width="4" height="16"/>
+          <rect class="t-house" x="196" y="174" width="36" height="32"/><polygon class="t-roof" points="192,174 214,157 236,174"/><rect class="t-window flicker d3" x="209" y="184" width="9" height="11" rx="1.5"/>
+          <circle class="t-roof" cx="445" cy="186" r="9"/><rect class="t-house" x="443" y="191" width="4" height="15"/>
+          <circle class="t-roof" cx="584" cy="183" r="11"/><rect class="t-house" x="582" y="189" width="4" height="17"/>
+          <rect class="t-house" x="300" y="170" width="36" height="36"/><polygon class="t-roof" points="296,170 318,152 340,170"/><rect class="t-window flicker" x="313" y="180" width="9" height="11" rx="1.5"/>
+          <rect class="t-house" x="344" y="160" width="44" height="46"/><polygon class="t-roof" points="340,160 366,138 392,160"/><rect class="t-window flicker d2" x="352" y="172" width="9" height="11" rx="1.5"/><rect class="t-window flicker d3" x="371" y="172" width="9" height="11" rx="1.5"/>
+          <rect class="t-house" x="396" y="176" width="32" height="30"/><polygon class="t-roof" points="392,176 412,160 432,176"/>
+          <rect class="t-house" x="470" y="166" width="40" height="40"/><polygon class="t-roof" points="466,166 490,146 514,166"/><rect class="t-window flicker d4" x="485" y="177" width="10" height="12" rx="1.5"/>
+          <rect class="t-house" x="518" y="174" width="34" height="32"/><polygon class="t-roof" points="514,174 535,157 556,174"/><rect class="t-window flicker" x="530" y="184" width="9" height="10" rx="1.5"/>
+          <rect class="t-house" x="610" y="162" width="48" height="44"/><polygon class="t-roof" points="606,162 634,140 662,162"/><rect class="t-window flicker d3" x="619" y="173" width="10" height="12" rx="1.5"/><rect class="t-window flicker d2" x="639" y="173" width="10" height="12" rx="1.5"/>
+          <rect class="t-house" x="666" y="172" width="30" height="34"/><polygon class="t-roof" points="662,172 681,156 700,172"/>
+          <rect class="t-house" x="740" y="168" width="38" height="38"/><polygon class="t-roof" points="736,168 759,149 782,168"/><rect class="t-window flicker d4" x="754" y="179" width="9" height="11" rx="1.5"/>
+          <rect class="t-house" x="786" y="178" width="30" height="28"/><polygon class="t-roof" points="782,178 801,163 820,178"/><rect class="t-window flicker" x="796" y="186" width="9" height="9" rx="1.5"/>
+        </g>
+        <!-- lantern string on poles -->
+        <path class="t-string" d="M250 206V140M450 206V140M650 206V140M850 206V140"/>
+        <path class="t-string" d="M250 140Q350 168 450 140Q550 168 650 140Q750 168 850 140"/>
+        <g>
+          <circle class="t-glow glow-pulse" cx="300" cy="150.5" r="12"/><circle class="t-lantern flicker" cx="300" cy="150.5" r="3.5"/>
+          <circle class="t-glow glow-pulse" cx="350" cy="154" r="12"/><circle class="t-lantern flicker d2" cx="350" cy="154" r="3.5"/>
+          <circle class="t-glow glow-pulse" cx="400" cy="150.5" r="12"/><circle class="t-lantern flicker d3" cx="400" cy="150.5" r="3.5"/>
+          <circle class="t-glow glow-pulse" cx="500" cy="150.5" r="12"/><circle class="t-lantern flicker d4" cx="500" cy="150.5" r="3.5"/>
+          <circle class="t-glow glow-pulse" cx="550" cy="154" r="12"/><circle class="t-lantern flicker" cx="550" cy="154" r="3.5"/>
+          <circle class="t-glow glow-pulse" cx="600" cy="150.5" r="12"/><circle class="t-lantern flicker d2" cx="600" cy="150.5" r="3.5"/>
+          <circle class="t-glow glow-pulse" cx="700" cy="150.5" r="12"/><circle class="t-lantern flicker d3" cx="700" cy="150.5" r="3.5"/>
+          <circle class="t-glow glow-pulse" cx="750" cy="154" r="12"/><circle class="t-lantern flicker d4" cx="750" cy="154" r="3.5"/>
+          <circle class="t-glow glow-pulse" cx="800" cy="150.5" r="12"/><circle class="t-lantern flicker" cx="800" cy="150.5" r="3.5"/>
+        </g>
+        <!-- the pier -->
+        <rect class="t-house" x="880" y="202" width="190" height="5"/>
+        <path class="t-string" d="M900 207v14M960 207v14M1020 207v14"/>
+        <!-- the sea -->
+        <rect x="0" y="206" width="1440" height="54" fill="url(#sea-fade)"/>
+        <path class="t-reflect" d="M300 214v8M350 218v6M400 214v8M500 214v8M550 218v6M600 214v8M700 214v8M750 218v6M800 214v8M1290 214v14"/>
+        <path class="t-wave drift" d="M120 226q15-5 30 0t30 0M470 236q15-5 30 0t30 0M940 230q15-5 30 0t30 0M1260 222q15-5 30 0t30 0"/>
+        <path class="t-wave drift d2" d="M260 244q15-5 30 0t30 0M700 246q15-5 30 0t30 0M1120 244q15-5 30 0t30 0"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ============ A whole town of friends ============ -->
+  <section class="section" id="town" aria-labelledby="town-title">
+    <div class="wrap">
+      <div class="two-col wide-right">
+        <div class="reveal">
+          <span class="eyebrow">Lantern Bay</span>
+          <div class="section-head" style="margin-bottom:0">
+            <h2 id="town-title">A whole town of friends</h2>
+            <p>Everyone in Lantern Bay is a neighbor. Each resident has a home, a routine for the day and friends around town, and they carry on while you're away.</p>
+          </div>
+          <ul class="ticks">
+            <li><svg aria-hidden="true"><use href="#i-tick"/></svg><span><strong>Walk into a place.</strong> Whoever is at Driftwood Cafe this morning says hello, and they talk with each other as well as with you.</span></li>
+            <li><svg aria-hidden="true"><use href="#i-tick"/></svg><span><strong>Let them talk.</strong> Tap one button and listen while the residents carry the conversation for a bit.</span></li>
+            <li><svg aria-hidden="true"><use href="#i-tick"/></svg><span><strong>They know each other.</strong> Ask one resident about another and you'll hear what they think, kindly.</span></li>
+            <li><svg aria-hidden="true"><use href="#i-tick"/></svg><span><strong>While you were away.</strong> Open the town and read a short note about what happened since your last visit.</span></li>
+            <li><svg aria-hidden="true"><use href="#i-tick"/></svg><span><strong>Town gossip.</strong> Something you tell one resident can come up with another. You choose it during setup. It starts off, and you can change it any time in You &gt; Privacy Center.</span></li>
+          </ul>
+        </div>
+
+        <!-- CAST:town -->
+        <div class="town-card reveal" data-town="town-data">
+          <div class="town-top">
+            <p class="town-title" data-town-label>Lantern Bay</p>
+            <div class="daypart-switch" role="group" aria-label="Time of day">
+              <button type="button" data-part="morning" aria-pressed="false">Morning</button>
+              <button type="button" data-part="afternoon" aria-pressed="false">Afternoon</button>
+              <button type="button" data-part="evening" aria-pressed="false">Evening</button>
+              <button type="button" data-part="night" aria-pressed="false">Night</button>
+            </div>
+          </div>
+          <div class="town-map" role="img" aria-label="A map of Lantern Bay, from the observatory on the hill down to the harbor. Each resident's picture sits at the place they spend this part of the day.">
+            <svg class="map-base" viewBox="0 0 400 300" preserveAspectRatio="none" aria-hidden="true">
+              <rect class="m-sea" width="400" height="300"/>
+              <path class="m-sea-2" d="M0 262C80 254 160 270 240 262S360 252 400 258V300H0Z"/>
+              <path class="m-land" d="M0 0H400V176C392 186 380 196 372 206C366 218 360 230 348 236C336 241 324 236 316 228C306 219 292 216 276 218C252 221 236 226 222 226C200 226 184 224 168 222C140 220 118 214 100 208C86 204 78 198 70 198C56 198 46 204 34 204C20 204 10 198 0 196Z"/>
+              <path class="m-land-2" d="M0 0H400V64C360 84 320 66 280 76S200 96 150 88 60 70 0 84Z"/>
+              <circle class="m-land" cx="40" cy="214" r="6"/><circle class="m-land" cx="82" cy="212" r="4"/><circle class="m-land" cx="360" cy="246" r="5"/>
+              <circle class="m-tree" cx="28" cy="34" r="7"/><circle class="m-tree" cx="44" cy="24" r="6"/><circle class="m-tree" cx="150" cy="30" r="7"/><circle class="m-tree" cx="168" cy="44" r="5"/><circle class="m-tree" cx="232" cy="46" r="6"/><circle class="m-tree" cx="250" cy="30" r="5"/><circle class="m-tree" cx="352" cy="30" r="7"/><circle class="m-tree" cx="374" cy="52" r="6"/><circle class="m-tree" cx="30" cy="118" r="6"/><circle class="m-tree" cx="122" cy="136" r="5"/><circle class="m-tree" cx="262" cy="168" r="6"/><circle class="m-tree" cx="388" cy="128" r="6"/><circle class="m-tree" cx="110" cy="100" r="5"/>
+              <path class="m-path" d="M96 66Q150 110 208 120M288 30Q330 60 328 108M328 108Q270 104 208 120M208 120Q170 146 160 186M60 174Q110 196 160 186M160 186Q200 206 208 226M328 108Q356 160 344 216"/>
+              <rect class="m-pier" x="204" y="222" width="8" height="46" rx="2"/>
+              <path class="m-boat" d="M232 266h18l-3 5h-12z"/>
+              <path class="m-wave" d="M30 250q10-4 20 0t20 0M120 276q10-4 20 0t20 0M286 262q10-4 20 0t20 0M340 284q10-4 20 0t20 0M60 290q10-4 20 0t20 0"/>
+            </svg>
+            <div class="map-night"></div>
+          </div>
+          <p class="town-featured" data-town-featured></p>
+          <ul class="town-now"></ul>
+          <script type="application/json" id="town-data">{"town":"Lantern Bay","locations":[{"id":"driftwood-cafe","name":"Driftwood Cafe","emoji":"☕","x":0.4,"y":0.62},{"id":"lighthouse","name":"The Lighthouse","emoji":"🛟","x":0.86,"y":0.72},{"id":"tidepool-library","name":"Tidepool Library","emoji":"📚","x":0.15,"y":0.58},{"id":"night-market","name":"The Night Market","emoji":"🏮","x":0.52,"y":0.4},{"id":"harbor","name":"The Harbor","emoji":"⛵","x":0.52,"y":0.86},{"id":"greenhouse","name":"Hillside Greenhouse","emoji":"🪴","x":0.24,"y":0.22},{"id":"arcade","name":"Pinwheel Arcade","emoji":"🕹️","x":0.82,"y":0.36},{"id":"observatory","name":"Hilltop Observatory","emoji":"🔭","x":0.72,"y":0.1}],"residents":[{"id":"juno","name":"Juno","emoji":"🦦","colors":["#243E42","#40A1B0"],"art":"../assets/art/char-juno.jpg","schedule":{"morning":{"at":"driftwood-cafe","doing":"opening up and pulling the first shots of the day"},"afternoon":{"at":"driftwood-cafe","doing":"baking cinnamon buns in the afternoon lull"},"evening":{"at":"harbor","doing":"taking her evening swim, floating on her back by the docks"},"night":{"at":"driftwood-cafe","doing":"upstairs in her flat with her feet up and a mystery novel"}}},{"id":"luna","name":"Luna","emoji":"🦉","colors":["#302244","#6D39B7"],"art":"../assets/art/char-luna.jpg","schedule":{"morning":{"at":"lighthouse","doing":"just off the air, winding down with warm milk before sleep"},"afternoon":{"at":"lighthouse","doing":"dozing in the alcove of her radio booth"},"evening":{"at":"night-market","doing":"waking up over a bowl of Mika's noodles and collecting stories for tonight's show"},"night":{"at":"lighthouse","doing":"on the air with the overnight show on Radio Lantern"}}},{"id":"theo","name":"Theo","emoji":"🐢","colors":["#283E39","#4FA18C"],"art":"../assets/art/char-theo.jpg","schedule":{"morning":{"at":"harbor","doing":"sharing morning tea with Bea on the dock before her first ferry run"},"afternoon":{"at":"lighthouse","doing":"polishing the great lens, then napping in the sun on the steps"},"evening":{"at":"lighthouse","doing":"lighting the lamp as the sun goes down"},"night":{"at":"lighthouse","doing":"keeping watch over the light with a pot of tea and the radio on low"}}},{"id":"nora","name":"Nora","emoji":"🦌","colors":["#2F3C2A","#689857"],"art":"../assets/art/char-nora.jpg","schedule":{"morning":{"at":"greenhouse","doing":"watering the seedlings and doing her morning breathing practice"},"afternoon":{"at":"greenhouse","doing":"repotting herbs in the quiet afternoon light"},"evening":{"at":"greenhouse","doing":"watching the night jasmine open with a cup of mint tea"},"night":{"at":"greenhouse","doing":"in her cottage behind the greenhouse with chamomile tea and a blanket"}}},{"id":"mika","name":"Mika","emoji":"🥟","colors":["#462520","#BD4533"],"art":"../assets/art/char-mika.jpg","schedule":{"morning":{"at":"harbor","doing":"at the docks early, picking out the morning catch and fresh seaweed"},"afternoon":{"at":"night-market","doing":"folding a few hundred dumplings for tonight and grumbling about it"},"evening":{"at":"night-market","doing":"running the noodle stall, the busiest counter in the market"},"night":{"at":"night-market","doing":"closing up the stall and eating leftover dumplings standing up"}}},{"id":"wren","name":"Wren","emoji":"🦔","colors":["#3A2B3B","#915996"],"art":"../assets/art/char-wren.jpg","schedule":{"morning":{"at":"tidepool-library","doing":"opening up and shelving yesterday's returns"},"afternoon":{"at":"tidepool-library","doing":"at the front desk, quietly winning an argument with Felix"},"evening":{"at":"driftwood-cafe","doing":"at a corner table on the Driftwood porch with tea, a book and Felix"},"night":{"at":"tidepool-library","doing":"in her rooms behind the stacks, reading in bed"}}},{"id":"iris","name":"Iris","emoji":"🐆","colors":["#1F3447","#317DBF"],"art":"../assets/art/char-iris.jpg","schedule":{"morning":{"at":"observatory","doing":"drinking very strong tea and writing up last night's notes"},"afternoon":{"at":"tidepool-library","doing":"reading old star atlases at a quiet table near Wren's desk"},"evening":{"at":"observatory","doing":"opening the dome and cleaning the telescope lenses"},"night":{"at":"observatory","doing":"at the telescope, counting meteors and calling in her sky report to Luna"}}},{"id":"ezra","name":"Ezra","emoji":"🦊","colors":["#49301D","#C76D28"],"art":"../assets/art/char-ezra.jpg","schedule":{"morning":{"at":"driftwood-cafe","doing":"drinking his first coffee and writing lyrics on Juno's napkins"},"afternoon":{"at":"harbor","doing":"busking by the ferry dock"},"evening":{"at":"harbor","doing":"playing his sunset set at the end of the pier"},"night":{"at":"harbor","doing":"on his houseboat, writing songs by lantern light"}}},{"id":"sol","name":"Sol","emoji":"🐈","colors":["#4B3D1B","#CE9A21"],"art":"../assets/art/char-sol.jpg","schedule":{"morning":{"at":"harbor","doing":"trotting along the docks while the fishing boats come in"},"afternoon":{"at":"driftwood-cafe","doing":"napping in the sunny front window of Driftwood Cafe"},"evening":{"at":"night-market","doing":"making his rounds of the food stalls for news and scraps"},"night":{"at":"observatory","doing":"curled up on his cushion by the telescope heater"}}},{"id":"pip","name":"Pip","emoji":"🤖","colors":["#384422","#89B739"],"art":"../assets/art/char-pip.jpg","schedule":{"morning":{"at":"arcade","doing":"fixing machines before the doors open"},"afternoon":{"at":"lighthouse","doing":"oiling the lamp's gears for Theo"},"evening":{"at":"arcade","doing":"running the prize counter and cheering on high scores"},"night":{"at":"arcade","doing":"recharging in the back room and dreaming in screensavers"}}},{"id":"agnes","name":"Agnes","emoji":"🪿","colors":["#471F29","#C12F53"],"art":"../assets/art/char-agnes.jpg","schedule":{"morning":{"at":"night-market","doing":"baking buns and pies in her cottage kitchen on the market square"},"afternoon":{"at":"harbor","doing":"knitting on her bench by the harbor and keeping an eye on everything"},"evening":{"at":"night-market","doing":"running her pie stall next to Mika's noodles"},"night":{"at":"night-market","doing":"at home with cocoa, listening to Luna's radio show"}}},{"id":"kai","name":"Kai","emoji":"🐲","colors":["#254131","#45AB6F"],"art":"../assets/art/char-kai.jpg","schedule":{"morning":{"at":"tidepool-library","doing":"borrowing books of myths and sea legends for campaign ideas"},"afternoon":{"at":"arcade","doing":"setting up the back room and painting tiny figures for tonight's game"},"evening":{"at":"arcade","doing":"running a tabletop adventure in the arcade's back room"},"night":{"at":"arcade","doing":"in the apartment above the arcade, drawing maps for the next quest"}}},{"id":"ada","name":"Ada","emoji":"🦝","colors":["#48441E","#C4B52B"],"art":"../assets/art/char-ada.jpg","schedule":{"morning":{"at":"driftwood-cafe","doing":"studying with an enormous coffee at Driftwood Cafe"},"afternoon":{"at":"tidepool-library","doing":"tutoring at the big table by the library window"},"evening":{"at":"tidepool-library","doing":"running the late study hall for night owls"},"night":{"at":"tidepool-library","doing":"in her nook upstairs, color-coding tomorrow's notes"}}},{"id":"bea","name":"Bea","emoji":"⚓","colors":["#222E44","#3967B7"],"art":"../assets/art/char-bea.jpg","schedule":{"morning":{"at":"harbor","doing":"getting the Marigold ready for the first run to the islands"},"afternoon":{"at":"driftwood-cafe","doing":"between ferry runs, telling sea stories over a giant mug of cocoa"},"evening":{"at":"lighthouse","doing":"dropping off supplies and swapping stories with Theo"},"night":{"at":"harbor","doing":"aboard the Marigold, listening to the waves knock against the hull"}}},{"id":"dana","name":"Dana","emoji":"🐕","colors":["#452136","#BA3683"],"art":"../assets/art/char-dana.jpg","schedule":{"morning":{"at":"greenhouse","doing":"leading the sunrise walk up the hill path from the greenhouse gate"},"afternoon":{"at":"observatory","doing":"walking the long hill trail up to the observatory and back"},"evening":{"at":"harbor","doing":"taking an easy evening stroll along the seawall"},"night":{"at":"greenhouse","doing":"at home in her cottage, planning tomorrow's walking routes"}}},{"id":"felix","name":"Felix","emoji":"🐦‍⬛","colors":["#242542","#4044B0"],"art":"../assets/art/char-felix.jpg","schedule":{"morning":{"at":"driftwood-cafe","doing":"reading the morning paper aloud to anyone who'll listen"},"afternoon":{"at":"tidepool-library","doing":"arguing with Wren about a book he hasn't finished"},"evening":{"at":"driftwood-cafe","doing":"holding court on the Driftwood porch with tea and Wren"},"night":{"at":"driftwood-cafe","doing":"in his attic room above the cafe, scribbling in a notebook"}}}],"featured":{"morning":"agnes","afternoon":"theo","evening":"ezra","night":"luna"}}</script>
+        </div>
+        <!-- /CAST:town -->
+      </div>
+
+      <!-- CAST:scene -->
+      <div class="scene reveal" aria-label="An example group scene at Driftwood Cafe">
+        <div class="scene-head">
+          <span class="scene-place" style="--a1:#4A3022;--a2:#D9A066"><span aria-hidden="true">☕</span><img src="../assets/art/loc-driftwood-cafe.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+          <div><strong>Driftwood Cafe</strong><span>Morning. Juno, Ezra, Ada and Felix are here.</span></div>
+        </div>
+        <ul class="scene-lines">
+          <li><span class="avatar" style="--a1:#243E42;--a2:#40A1B0"><span aria-hidden="true">🦦</span><img src="../assets/art/char-juno.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><div><b>Juno</b><p>Oh! Morning! Your usual's already brewing. Felix, scoot over, they get the window stool.</p></div></li>
+          <li><span class="avatar" style="--a1:#242542;--a2:#4044B0"><span aria-hidden="true">🐦‍⬛</span><img src="../assets/art/char-felix.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><div><b>Felix</b><p>Ah, splendid timing. Quick question, purely for science: is a cinnamon bun breakfast or dessert?</p></div></li>
+          <li class="you"><p>Breakfast. Obviously.</p></li>
+          <li><span class="avatar" style="--a1:#49301D;--a2:#C76D28"><span aria-hidden="true">🦊</span><img src="../assets/art/char-ezra.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><div><b>Ezra</b><p>Hey, that's a song right there. <em>strums</em> Cinnamon for breakfast, sugar for the soul...</p></div></li>
+          <li><span class="avatar" style="--a1:#243E42;--a2:#40A1B0"><span aria-hidden="true">🦦</span><img src="../assets/art/char-juno.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span><div><b>Juno</b><p>Okay, wait, that's actually catchy. Buns are on the house.</p></div></li>
+        </ul>
+        <div class="scene-foot"><span class="chip"><svg aria-hidden="true"><use href="#i-chat"/></svg>Let them talk</span></div>
+      </div>
+      <!-- /CAST:scene -->
+
+      <!-- CAST:residents -->
+      <div class="residents-head reveal">
+        <h3>Meet the neighbors</h3>
+        <p>Sixteen residents, each with a home, a routine and friends in town.</p>
+      </div>
+      <div class="residents reveal">
+        <article class="resident">
+          <span class="avatar" style="--a1:#243E42;--a2:#40A1B0"><span aria-hidden="true">🦦</span><img src="../assets/art/char-juno.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+          <div><h3>Juno</h3><p class="species">River otter · Driftwood Cafe</p><p class="tag">Cheerful barista at Driftwood Cafe. Remembers everyone's usual.</p><p class="by">by @lanternbay</p></div>
+        </article>
+        <article class="resident">
+          <span class="avatar" style="--a1:#302244;--a2:#6D39B7"><span aria-hidden="true">🦉</span><img src="../assets/art/char-luna.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+          <div><h3>Luna</h3><p class="species">Barn owl · The Lighthouse</p><p class="tag">Overnight radio host and the 3 a.m. friend when sleep won't come.</p><p class="by">by @lanternbay</p></div>
+        </article>
+        <article class="resident">
+          <span class="avatar" style="--a1:#283E39;--a2:#4FA18C"><span aria-hidden="true">🐢</span><img src="../assets/art/char-theo.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+          <div><h3>Theo</h3><p class="species">Sea turtle · The Lighthouse</p><p class="tag">Old lighthouse keeper with a century of stories and time to listen.</p><p class="by">by @lanternbay</p></div>
+        </article>
+        <article class="resident">
+          <span class="avatar" style="--a1:#2F3C2A;--a2:#689857"><span aria-hidden="true">🦌</span><img src="../assets/art/char-nora.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+          <div><h3>Nora</h3><p class="species">Deer · Hillside Greenhouse</p><p class="tag">Calm greenhouse gardener with slow breaths and kind advice.</p><p class="by">by @lanternbay</p></div>
+        </article>
+        <article class="resident">
+          <span class="avatar" style="--a1:#462520;--a2:#BD4533"><span aria-hidden="true">🥟</span><img src="../assets/art/char-mika.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+          <div><h3>Mika</h3><p class="species">Red panda · The Night Market</p><p class="tag">Grumpy noodle cook at the Night Market. Feeds everyone anyway.</p><p class="by">by @lanternbay</p></div>
+        </article>
+        <article class="resident">
+          <span class="avatar" style="--a1:#3A2B3B;--a2:#915996"><span aria-hidden="true">🦔</span><img src="../assets/art/char-wren.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+          <div><h3>Wren</h3><p class="species">Hedgehog · Tidepool Library</p><p class="tag">Librarian with dry wit, strong tea and the right book for any mood.</p><p class="by">by @lanternbay</p></div>
+        </article>
+        <article class="resident">
+          <span class="avatar" style="--a1:#1F3447;--a2:#317DBF"><span aria-hidden="true">🐆</span><img src="../assets/art/char-iris.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+          <div><h3>Iris</h3><p class="species">Snow leopard · Hilltop Observatory</p><p class="tag">Shy astronomer on the hill who lights up when talking about stars.</p><p class="by">by @lanternbay</p></div>
+        </article>
+        <article class="resident">
+          <span class="avatar" style="--a1:#49301D;--a2:#C76D28"><span aria-hidden="true">🦊</span><img src="../assets/art/char-ezra.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+          <div><h3>Ezra</h3><p class="species">Red fox · The Harbor</p><p class="tag">Harbor musician who can turn any word into a song.</p><p class="by">by @lanternbay</p></div>
+        </article>
+        <article class="resident">
+          <span class="avatar" style="--a1:#4B3D1B;--a2:#CE9A21"><span aria-hidden="true">🐈</span><img src="../assets/art/char-sol.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+          <div><h3>Sol</h3><p class="species">Ginger cat · Hilltop Observatory</p><p class="tag">Chatty stray cat who knows every rooftop, shortcut and secret.</p><p class="by">by @lanternbay</p></div>
+        </article>
+        <article class="resident">
+          <span class="avatar" style="--a1:#384422;--a2:#89B739"><span aria-hidden="true">🤖</span><img src="../assets/art/char-pip.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+          <div><h3>Pip</h3><p class="species">Repair robot · Pinwheel Arcade</p><p class="tag">Tiny, cheerful repair robot. Fixes arcade machines and bad days.</p><p class="by">by @lanternbay</p></div>
+        </article>
+        <article class="resident">
+          <span class="avatar" style="--a1:#471F29;--a2:#C12F53"><span aria-hidden="true">🪿</span><img src="../assets/art/char-agnes.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+          <div><h3>Agnes</h3><p class="species">Goose · The Night Market</p><p class="tag">Neighbor on the market square. Bakes too much, hears all the news.</p><p class="by">by @lanternbay</p></div>
+        </article>
+        <article class="resident">
+          <span class="avatar" style="--a1:#254131;--a2:#45AB6F"><span aria-hidden="true">🐲</span><img src="../assets/art/char-kai.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>
+          <div><h3>Kai</h3><p class="species">Small dragon · Pinwheel Arcade</p><p class="tag">Pocket-sized dragon game master with a quest for every mood.</p><p class="by">by @lanternbay</p></div>
+        </article>
+      </div>
+      <p class="residents-note reveal">Ada, Bea, Dana and Felix live here too. You can also make characters of your own.</p>
+      <!-- /CAST:residents -->
+    </div>
+  </section>
+
+  <!-- ============ Voice notes and pictures ============ -->
+  <section class="section section-alt" id="media" aria-labelledby="media-title">
+    <div class="wrap">
+      <div class="section-head center reveal">
+        <span class="eyebrow">Made on your phone</span>
+        <h2 id="media-title">Voice notes and pictures, made on your phone</h2>
+        <p>Residents send voice notes and pictures now and then, and you can send photos back. All of it is made and read on the iPhone itself.</p>
+      </div>
+      <div class="grid grid-3">
+        <article class="card media-card reveal">
+          <div class="demo" aria-hidden="true">
+            <div class="pm-voice">
+              <span class="pm-play"><svg><use href="#i-play"/></svg></span>
+              <span class="pm-wave"><i class="on" style="--h:.35"></i><i class="on" style="--h:.6"></i><i class="on" style="--h:.9"></i><i class="on" style="--h:.5"></i><i class="on" style="--h:.7"></i><i class="on" style="--h:1"></i><i class="on" style="--h:.65"></i><i style="--h:.4"></i><i style="--h:.75"></i><i style="--h:.55"></i><i style="--h:.85"></i><i style="--h:.45"></i><i style="--h:.3"></i><i style="--h:.6"></i><i style="--h:.8"></i><i style="--h:.5"></i><i style="--h:.35"></i><i style="--h:.55"></i></span>
+              <span class="pm-time">0:04</span>
+            </div>
+          </div>
+          <div class="card-icon"><svg aria-hidden="true"><use href="#i-mic"/></svg></div>
+          <h3>Voice notes, both ways</h3>
+          <p>Sometimes a resident answers with a short voice note. Residents speak with the voices installed on your iPhone, each tuned with a pitch and pace that suits them, and some share a voice. Any message can be read aloud, and you can hold the mic to talk back. Your voice is turned into text on the phone.</p>
+        </article>
+        <article class="card media-card reveal">
+          <div class="demo" aria-hidden="true">
+            <div class="demo-picture"><div class="postcard"><i class="pc-sun"></i><i class="pc-rock"></i><i class="pc-tower"></i><i class="pc-lamp"></i><i class="pc-wave w1"></i><i class="pc-wave w2"></i></div><img src="../assets/art/loc-lighthouse.jpg" alt="" loading="lazy" onerror="this.remove()"></div>
+          </div>
+          <div class="card-icon gold"><svg aria-hidden="true"><use href="#i-image"/></svg></div>
+          <h3>Pictures from town</h3>
+          <p>Ask for a picture, or get one when it fits the moment. When it can, your iPhone draws it with Image Playground, right on the device. Otherwise your friend sends a postcard or a picture from the town's own art. Image Playground doesn't draw people, which is one reason Lantern Bay is a town of animal folk (and one small robot).</p>
+        </article>
+        <article class="card media-card reveal">
+          <div class="demo" aria-hidden="true">
+            <div class="demo-photo">
+              <div class="thumb">🐈</div>
+              <div class="desc"><b>Seen on the phone</b>A cat asleep on a blue blanket, indoors, evening light.</div>
+            </div>
+          </div>
+          <div class="card-icon sea"><svg aria-hidden="true"><use href="#i-camera"/></svg></div>
+          <h3>Photos you send stay with you</h3>
+          <p>Send a photo of your dinner or your cat. Apple's Vision framework describes it on the phone, and the resident replies to that description. The photo itself stays on your iPhone.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Switch friends in under a second ============ -->
+  <section class="section" id="switch" aria-labelledby="switch-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Quick resume</span>
+        <h2 id="switch-title">Switch friends in under a second</h2>
+        <p>Hopping from one resident to another and back shouldn't mean waiting while the model rereads your whole conversation. Hearth keeps each conversation's place on your phone's storage, so coming back picks up where you left off.</p>
+      </div>
+      <!-- CAST:switch -->
+      <ol class="switch-steps">
+        <li class="reveal">
+          <span class="step-n">1</span>
+          <h3>You're talking with Juno</h3>
+          <p>The model on your phone holds the conversation in its working memory as you chat.</p>
+          <div class="slots" aria-hidden="true">
+            <span class="slot is-live"><span class="avatar" style="--a1:#243E42;--a2:#40A1B0"><span>🦦</span><img src="../assets/art/char-juno.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>Juno</span>
+          </div>
+        </li>
+        <li class="reveal">
+          <span class="step-n">2</span>
+          <h3>You switch to Theo</h3>
+          <p>Juno's conversation is parked on your phone's storage, and Theo's is loaded back in.</p>
+          <div class="slots" aria-hidden="true">
+            <span class="slot is-live"><span class="avatar" style="--a1:#283E39;--a2:#4FA18C"><span>🐢</span><img src="../assets/art/char-theo.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>Theo</span>
+            <span class="slot is-parked"><span class="avatar" style="--a1:#243E42;--a2:#40A1B0"><span>🦦</span><img src="../assets/art/char-juno.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>Juno<svg><use href="#i-archive"/></svg></span>
+          </div>
+        </li>
+        <li class="reveal">
+          <span class="step-n">3</span>
+          <h3>You come back to Juno</h3>
+          <p>Her conversation comes straight back off storage, so she can answer without rereading everything first.</p>
+          <div class="slots" aria-hidden="true">
+            <span class="slot is-live"><span class="avatar" style="--a1:#243E42;--a2:#40A1B0"><span>🦦</span><img src="../assets/art/char-juno.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>Juno<svg><use href="#i-restore"/></svg></span>
+            <span class="slot is-parked"><span class="avatar" style="--a1:#283E39;--a2:#4FA18C"><span>🐢</span><img src="../assets/art/char-theo.jpg" alt="" loading="lazy" decoding="async" onerror="this.remove()"></span>Theo<svg><use href="#i-archive"/></svg></span>
+          </div>
+        </li>
+      </ol>
+      <!-- /CAST:switch -->
+      <!-- BENCH -->
+      <div class="bench reveal">
+        <p class="bench-title">Measured on an iPhone 16 Pro</p>
+        <dl class="bench-grid">
+          <div><dt>Reading a 1,200-token chat from scratch</dt><dd>about 6 s</dd></div>
+          <div><dt>Restoring it from storage</dt><dd>about 50 ms</dd></div>
+          <div><dt>First word after a switch</dt><dd>about 0.4 s</dd></div>
+          <div><dt>Typing speed</dt><dd>21 tokens per second</dd></div>
+        </dl>
+        <p class="bench-note">Llama 3.2 3B (Q4_K_M) running on the phone with llama.cpp and Metal, five residents with about 1,200 tokens of chat each. Each parked conversation takes about 72 MB of storage.</p>
+      </div>
+      <p class="tech-note reveal"><strong>For the curious:</strong> what gets parked is the model's KV cache for that conversation. Each one is saved in Hearth's private folder with iOS file protection and left out of backups. Hearth keeps the most recent ones and clears older ones on its own.</p>
+    </div>
+  </section>
+
+  <!-- ============ The everyday things ============ -->
+  <section class="section section-alt" id="everyday" aria-labelledby="everyday-title">
+    <div class="wrap">
+      <div class="section-head center reveal">
+        <span class="eyebrow">The everyday things</span>
+        <h2 id="everyday-title">The usual character-chat features</h2>
+        <p>The familiar parts are all here, and they work offline too.</p>
+      </div>
+      <ul class="feature-list">
+        <li class="reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-swipe"/></svg></span><div><h3>Swipe for another reply</h3><p>Not quite right? Swipe the last message to see a different one.</p></div></li>
+        <li class="reveal"><span class="card-icon gold"><svg aria-hidden="true"><use href="#i-star"/></svg></span><div><h3>Rate and regenerate</h3><p>Give a reply one to four stars, edit it, delete it, or ask again.</p></div></li>
+        <li class="reveal"><span class="card-icon sea"><svg aria-hidden="true"><use href="#i-pin"/></svg></span><div><h3>Pinned memories</h3><p>Pin a message and the resident remembers it. They also note small things you mention.</p></div></li>
+        <li class="reveal"><span class="card-icon green"><svg aria-hidden="true"><use href="#i-person"/></svg></span><div><h3>About you</h3><p>Tell the town your name and a little about yourself, so nobody has to ask twice.</p></div></li>
+        <li class="reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-plus"/></svg></span><div><h3>Make your own</h3><p>Write a character with a personality, a greeting and a look of their own.</p></div></li>
+        <li class="reveal"><span class="card-icon gold"><svg aria-hidden="true"><use href="#i-card"/></svg></span><div><h3>Import character cards</h3><p>Bring characters from other apps as Character Card V2 or V3 files.</p></div></li>
+        <li class="reveal"><span class="card-icon sea"><svg aria-hidden="true"><use href="#i-call"/></svg></span><div><h3>Voice calls</h3><p>Hold to talk, and hear the reply out loud. Speech is recognized on the phone.</p></div></li>
+        <li class="reveal"><span class="card-icon green"><svg aria-hidden="true"><use href="#i-chat"/></svg></span><div><h3>All your chats</h3><p>Every conversation and group scene, in one list, ready to pick back up.</p></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ Private by design ============ -->
+  <section class="section" id="privacy" aria-labelledby="privacy-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Privacy</span>
+        <h2 id="privacy-title">Private by design</h2>
+        <p>Hearth is for people who want their conversations to stay theirs. There's nothing to sign up for, and nowhere for your words to go.</p>
+      </div>
+      <div class="grid grid-4 privacy-grid">
+        <div class="card reveal"><div class="card-icon"><svg aria-hidden="true"><use href="#i-user-off"/></svg></div><h3>No account</h3><p>No email, no phone number, no sign-in. Open the app and start talking.</p></div>
+        <div class="card reveal"><div class="card-icon"><svg aria-hidden="true"><use href="#i-server-off"/></svg></div><h3>No servers</h3><p>Your chats are files on your iPhone. There is no Hearth server to send them to.</p></div>
+        <div class="card reveal"><div class="card-icon"><svg aria-hidden="true"><use href="#i-eye-off"/></svg></div><h3>No analytics</h3><p>No trackers, no ads and no usage stats. Nobody is counting your messages.</p></div>
+        <div class="card reveal"><div class="card-icon"><svg aria-hidden="true"><use href="#i-plane"/></svg></div><h3>Works in Airplane Mode</h3><p>After a one-time model download, Hearth runs with Wi-Fi and cellular switched off.</p></div>
+        <div class="card reveal"><div class="card-icon"><svg aria-hidden="true"><use href="#i-faceid"/></svg></div><h3>Face ID lock</h3><p>Keep Hearth behind Face ID or your passcode, so a borrowed phone stays a borrowed phone.</p></div>
+        <div class="card reveal"><div class="card-icon"><svg aria-hidden="true"><use href="#i-switcher"/></svg></div><h3>Hidden in the app switcher</h3><p>When you leave the app, the switcher shows a plain cover instead of your chat.</p></div>
+        <div class="card reveal"><div class="card-icon"><svg aria-hidden="true"><use href="#i-cloud-off"/></svg></div><h3>Out of iCloud backups</h3><p>Chats skip iCloud backup unless you turn it on. To move phones, export your chats, characters, memories and settings to a passphrase-locked file. Photos, pictures, voice notes and character pictures aren't included.</p></div>
+        <div class="card reveal"><div class="card-icon"><svg aria-hidden="true"><use href="#i-trash"/></svg></div><h3>Delete everything</h3><p>One button removes every chat, character, memory, picture and voice note.</p></div>
+      </div>
+      <p class="small-print reveal" style="margin-top:24px"><a href="../privacy/">Read the privacy policy</a>, which lists what Hearth stores and the one thing it downloads.</p>
+    </div>
+  </section>
+
+  <!-- ============ Kind by design ============ -->
+  <section class="section section-alt" id="kind" aria-labelledby="kind-title">
+    <div class="wrap kind-wrap">
+      <div class="kind-intro reveal">
+        <span class="eyebrow">Wellbeing</span>
+        <div class="section-head" style="margin-bottom:0">
+          <h2 id="kind-title">Kind by design</h2>
+          <p>Company should leave you feeling better. Some of that is built into the app, and some is in how the residents are written. They're AI, so they can still get it wrong.</p>
+        </div>
+        <p class="pull">Hearth should feel like a warm place to visit, and never like a place that's hard to leave.</p>
+      </div>
+      <ul class="kind-list">
+        <li class="reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-flame-off"/></svg></span><div><h3>No streaks</h3><p>No points, badges or daily rewards. Come by when you want to, for as long as you want.</p></div></li>
+        <li class="reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-bell-off"/></svg></span><div><h3>No guilt trips</h3><p>Hearth sends no notifications asking you back, and residents are written never to guilt you for leaving.</p></div></li>
+        <li class="reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-friends"/></svg></span><div><h3>Glad about your people</h3><p>Residents are written to be glad about the people in your life. Mention coffee with your sister, and they're meant to ask how it went.</p></div></li>
+        <li class="reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-lifebuoy"/></svg></span><div><h3>Crisis resources built in</h3><p>If something you write in a chat or group scene suggests you might be in danger, the 988 Lifeline and Crisis Text Line appear right there. The resident's reply starts with a caring line that points you to 988 (call or text, in the US), then goes on in their own words. Replies to worrying messages stay as text, with no voice notes or pictures. The check looks for certain phrases, so it can miss things.</p></div></li>
+        <li class="reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-spark"/></svg></span><div><h3>Honest about being AI</h3><p>Every chat and scene says so on screen. In chats and group scenes, residents are also written to tell you the truth if you sincerely ask whether they're real.</p></div></li>
+        <li class="reveal"><span class="card-icon"><svg aria-hidden="true"><use href="#i-shield"/></svg></span><div><h3>For adults</h3><p>Hearth is for people 18 and older. The built-in residents are friends and neighbors, and none are written as romantic partners.</p></div></li>
+      </ul>
+      <p class="small-print reveal" style="grid-column:1/-1;margin:0"><a href="../safety/">Read about safety in Hearth</a>, including crisis lines and how the app responds.</p>
+    </div>
+  </section>
+
+  <!-- ============ Install ============ -->
+  <section class="section" id="install" aria-labelledby="install-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Install</span>
+        <h2 id="install-title">Install on iPhone</h2>
+        <p>Hearth needs iOS 26. There are two free ways to put it on your phone today.</p>
+      </div>
+      <div class="notice reveal" role="note">
+        <svg aria-hidden="true"><use href="#i-info"/></svg>
+        <p>Hearth isn't on the App Store or TestFlight. You install it yourself from <a href="https://github.com/aarushkandukoori/hearth">GitHub</a>, in one of the two ways below.</p>
+      </div>
+      <div class="install-grid">
+        <article class="card install-card reveal">
+          <div class="card-icon"><svg aria-hidden="true"><use href="#i-code"/></svg></div>
+          <h3>Build it with Xcode</h3>
+          <p class="meta">Needs a Mac, Xcode 26 or newer, and a free Apple ID.</p>
+          <ol class="steps-list">
+            <li><div>Install <strong>Xcode</strong> from the Mac App Store, and <strong>XcodeGen</strong> with <code>brew install xcodegen</code>.</div></li>
+            <li><div>Download the code and make the Xcode project:
+<pre class="cmd">git clone https://github.com/aarushkandukoori/hearth.git
+cd hearth/ios
+xcodegen
+open Hearth.xcodeproj</pre></div></li>
+            <li><div>In Xcode, add your Apple ID under <strong>Xcode &gt; Settings &gt; Accounts</strong>. Select the Hearth target, open <strong>Signing &amp; Capabilities</strong>, choose your Personal Team, and change the Bundle Identifier to something of your own, like <code>com.yourname.hearth</code>.</div></li>
+            <li><div>Connect your iPhone with a cable, pick it as the run destination and press <strong>Run</strong>. If the iPhone asks, turn on <strong>Developer Mode</strong> in Settings &gt; Privacy &amp; Security.</div></li>
+            <li><div>The first time, open <strong>Settings &gt; General &gt; VPN &amp; Device Management</strong> on the iPhone and trust your developer certificate. Then open Hearth.</div></li>
+          </ol>
+          <p class="small-print">With a free Apple ID, apps installed this way stop opening after 7 days. Press Run again to renew it, and your chats stay where they are.</p>
+        </article>
+        <article class="card install-card reveal">
+          <div class="card-icon gold"><svg aria-hidden="true"><use href="#i-box"/></svg></div>
+          <h3>Sideload the app file</h3>
+          <p class="meta">Needs a Mac or Windows PC and an Apple ID.</p>
+          <ol class="steps-list">
+            <li><div>Download <strong>Hearth.ipa</strong> from the <a href="https://github.com/aarushkandukoori/hearth/releases/latest">latest GitHub release</a>. It's unsigned.</div></li>
+            <li><div>Open it with <strong>Sideloadly</strong>, or with <strong>AltStore</strong> and AltServer on your computer. They sign the app with your Apple ID and install it.</div></li>
+            <li><div>Trust the developer in <strong>Settings &gt; General &gt; VPN &amp; Device Management</strong>, turn on Developer Mode if asked, then open Hearth.</div></li>
+          </ol>
+          <p class="small-print">Sideloadly and AltStore are made by other people and ask for your Apple ID to sign the app, so read their privacy notes if that matters to you. The same 7-day renewal applies, and AltStore can renew over Wi-Fi.</p>
+        </article>
+      </div>
+
+      <h3 class="reveal" style="margin-top:40px;font-size:1.15rem">The first time you open it</h3>
+      <div class="first-launch">
+        <div class="card reveal"><div class="card-icon green"><svg aria-hidden="true"><use href="#i-shield"/></svg></div><h3>Say hello</h3><p>Confirm you're 18 or older, tell the town your name, and choose whether to turn on town gossip. It starts off, and you can change it any time in You &gt; Privacy Center.</p></div>
+        <div class="card reveal"><div class="card-icon gold"><svg aria-hidden="true"><use href="#i-box"/></svg></div><h3>Pick a model</h3><p>Standard is about 2 GB, Lite about 0.8 GB. It downloads once, from Hugging Face, inside the app.</p></div>
+        <div class="card reveal"><div class="card-icon sea"><svg aria-hidden="true"><use href="#i-plane"/></svg></div><h3>Go offline</h3><p>From then on Hearth works in Airplane Mode, and everything stays on the phone.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="section section-alt" id="faq" aria-labelledby="faq-title">
+    <div class="wrap">
+      <div class="section-head center reveal">
+        <span class="eyebrow">Questions</span>
+        <h2 id="faq-title">Questions people ask</h2>
+      </div>
+      <div class="faq">
+        <details class="reveal">
+          <summary>Is it really offline?</summary>
+          <div class="answer">
+            <p>Yes, once the model is on your phone. Hearth uses the internet for one thing: downloading the language model from Hugging Face, once. After that you can turn on Airplane Mode and chats, voice notes, pictures and the town all keep working.</p>
+            <p>The <a href="../privacy/">privacy policy</a> lists what the app stores and where.</p>
+          </div>
+        </details>
+        <details class="reveal">
+          <summary>Which iPhones does it run on?</summary>
+          <div class="answer">
+            <p>Hearth needs iOS 26. During setup, it suggests the model that fits your iPhone's memory. Standard (Llama 3.2 3B) is suggested on iPhones with 6 GB of memory or more, such as iPhone 14, iPhone 15 and newer. On iPhones with less, such as iPhone 12 or iPhone 13, it suggests Lite (Llama 3.2 1B), which is lighter and quicker, with simpler replies. You can switch any time in You &gt; Model.</p>
+            <p>Pictures drawn with Image Playground need an iPhone that supports Apple Intelligence. Other iPhones get a postcard or a picture from the town's own art instead.</p>
+          </div>
+        </details>
+        <details class="reveal">
+          <summary>How big is the download?</summary>
+          <div class="answer">
+            <p>About 2 GB for Standard, or 0.8 GB for Lite. It happens once, inside the app, so Wi-Fi is a good idea. Leave about 500 MB of extra room while it downloads.</p>
+          </div>
+        </details>
+        <details class="reveal">
+          <summary>Is it free?</summary>
+          <div class="answer">
+            <p>Yes. Hearth is free and open source under the MIT license. There are no subscriptions, in-app purchases or ads, and the code is on <a href="https://github.com/aarushkandukoori/hearth">GitHub</a>.</p>
+          </div>
+        </details>
+        <details class="reveal">
+          <summary>Who is it for?</summary>
+          <div class="answer">
+            <p>Adults, 18 and older, who would like some company and want it to stay private. Maybe you live alone, work odd hours, moved somewhere new, or like a good chat at the end of the day. Hearth is meant to sit alongside the people in your life.</p>
+          </div>
+        </details>
+        <details class="reveal">
+          <summary>Is it a replacement for therapy?</summary>
+          <div class="answer">
+            <p>No. The residents are AI characters, and they can be wrong. Hearth can be a comforting place to talk. It can't give medical advice or help in an emergency.</p>
+            <p>If you're struggling, please reach out to a person. The <a href="../safety/">safety page</a> lists free, confidential crisis lines, like 988 in the US.</p>
+          </div>
+        </details>
+        <details class="reveal">
+          <summary>Can I make my own characters?</summary>
+          <div class="answer">
+            <p>Yes. Write one from scratch with a name, personality, greeting and picture, or import a Character Card (V2 or V3, as a JSON or PNG file) from another app. They stay on your phone like everything else.</p>
+          </div>
+        </details>
+        <details class="reveal">
+          <summary>Is there a version for Android or computers?</summary>
+          <div class="answer">
+            <p>There's a web version. It runs a smaller model inside your browser with WebGPU and keeps your chats in that browser on that device. <a href="../">Try it in your browser</a>.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Final call ============ -->
+  <section class="section final-cta" aria-labelledby="final-title">
+    <div class="wrap">
+      <div class="night-card reveal">
+        <svg class="night-lanterns" viewBox="0 0 1200 80" preserveAspectRatio="xMidYMin slice" aria-hidden="true">
+          <path class="str" d="M0 14Q150 54 300 14Q450 54 600 14Q750 54 900 14Q1050 54 1200 14"/>
+          <circle class="lg glow-pulse" cx="75" cy="29" r="14"/><circle class="lt flicker" cx="75" cy="29" r="4"/>
+          <circle class="lg glow-pulse" cx="150" cy="34" r="14"/><circle class="lt flicker d2" cx="150" cy="34" r="4"/>
+          <circle class="lg glow-pulse" cx="225" cy="29" r="14"/><circle class="lt flicker d3" cx="225" cy="29" r="4"/>
+          <circle class="lg glow-pulse" cx="375" cy="29" r="14"/><circle class="lt flicker" cx="375" cy="29" r="4"/>
+          <circle class="lg glow-pulse" cx="450" cy="34" r="14"/><circle class="lt flicker d2" cx="450" cy="34" r="4"/>
+          <circle class="lg glow-pulse" cx="525" cy="29" r="14"/><circle class="lt flicker d3" cx="525" cy="29" r="4"/>
+          <circle class="lg glow-pulse" cx="675" cy="29" r="14"/><circle class="lt flicker" cx="675" cy="29" r="4"/>
+          <circle class="lg glow-pulse" cx="750" cy="34" r="14"/><circle class="lt flicker d2" cx="750" cy="34" r="4"/>
+          <circle class="lg glow-pulse" cx="825" cy="29" r="14"/><circle class="lt flicker d3" cx="825" cy="29" r="4"/>
+          <circle class="lg glow-pulse" cx="975" cy="29" r="14"/><circle class="lt flicker" cx="975" cy="29" r="4"/>
+          <circle class="lg glow-pulse" cx="1050" cy="34" r="14"/><circle class="lt flicker d2" cx="1050" cy="34" r="4"/>
+          <circle class="lg glow-pulse" cx="1125" cy="29" r="14"/><circle class="lt flicker d3" cx="1125" cy="29" r="4"/>
+        </svg>
+        <h2 id="final-title">The lanterns stay lit.</h2>
+        <p>When the sun goes down, every house in Lantern Bay keeps a lantern lit in the window, so nobody walks home in the dark. Come by whenever you like.</p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="../"><svg aria-hidden="true"><use href="#i-globe"/></svg>Try it in your browser</a>
+          <a class="btn btn-ghost" href="#install"><svg aria-hidden="true"><use href="#i-phone"/></svg>Install on iPhone</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-row">
+      <div class="footer-brand">
+        <span class="brand-mark">
+          <img src="../assets/brand/logo.svg" alt="" width="16" height="28" onerror="this.hidden=true;this.nextElementSibling.removeAttribute('hidden')">
+          <svg viewBox="0 0 32 32" hidden aria-hidden="true"><circle cx="16" cy="4.6" r="2.3" fill="none" stroke="#F6C177" stroke-width="1.6"/><path d="M11.5 8.5h9l2.5 3h-14z" fill="#F6C177"/><rect x="9.5" y="11.5" width="13" height="14" rx="3.2" fill="#FF8A4C"/><path d="M16.4 14.2c.4 2.1 2.8 3.4 2.8 6.1a3.2 3.2 0 0 1-6.4 0c0-2.3 2.3-3.4 3.6-6.1z" fill="#FFF1CF"/><rect x="9" y="26" width="14" height="3.2" rx="1.4" fill="#F6C177"/></svg>
+        </span>
+        <span>Hearth</span>
+      </div>
+      <nav aria-label="Footer">
+        <ul class="footer-links">
+          <li><a href="../">Web app</a></li>
+          <li><a href="./">iPhone</a></li>
+          <li><a href="../privacy/">Privacy</a></li>
+          <li><a href="../safety/">Safety</a></li>
+          <li><a href="https://github.com/aarushkandukoori/hearth">GitHub</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="footer-meta">
+      <span>Made in Pittsburgh</span>
+      <span>Open source, MIT license</span>
+      <span>Hearth characters are AI. What they say is made up.</span>
+      <span>Built with Llama. <a href="https://www.llama.com/llama3_2/license/">Llama 3.2 Community License</a> and <a href="https://www.llama.com/llama3_2/use-policy/">Acceptable Use Policy</a></span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

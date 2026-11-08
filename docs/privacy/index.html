@@ -1,0 +1,219 @@
+<!doctype html>
+<!-- Hearth privacy policy in plain language (iPhone app and website).
+     Static page, no external requests. Styles and behavior live in ../assets/site/. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Hearth Privacy Policy</title>
+<meta name="description" content="What Hearth stores, where it stores it, and the one thing it downloads. No account, no servers, no analytics, no cookies.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#141110" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FBF7F2" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://aarushkandukoori.github.io/hearth/privacy/">
+<link rel="icon" href="../assets/brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/brand/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/brand/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/site/site.css">
+<script>
+  (function () {
+    var root = document.documentElement;
+    root.classList.add("js");
+    try { var t = localStorage.getItem("hearth-site-theme"); if (t === "light" || t === "dark") root.dataset.theme = t; } catch (e) {}
+    window.addEventListener("load", function () { if (!window.__hearthSite) root.classList.remove("js"); });
+  })();
+</script>
+<script src="../assets/site/site.js" defer></script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.4 2.4 4.6-5"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
+</svg>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="brand" href="../iphone/" aria-label="Hearth for iPhone">
+      <span class="brand-mark">
+        <img src="../assets/brand/logo.svg" alt="" width="20" height="34" onerror="this.hidden=true;this.nextElementSibling.removeAttribute('hidden')">
+        <svg viewBox="0 0 32 32" hidden aria-hidden="true"><circle cx="16" cy="4.6" r="2.3" fill="none" stroke="#F6C177" stroke-width="1.6"/><path d="M11.5 8.5h9l2.5 3h-14z" fill="#F6C177"/><rect x="9.5" y="11.5" width="13" height="14" rx="3.2" fill="#FF8A4C"/><path d="M16.4 14.2c.4 2.1 2.8 3.4 2.8 6.1a3.2 3.2 0 0 1-6.4 0c0-2.3 2.3-3.4 3.6-6.1z" fill="#FFF1CF"/><rect x="9" y="26" width="14" height="3.2" rx="1.4" fill="#F6C177"/></svg>
+      </span>
+      <span class="brand-name">Hearth</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="../iphone/">iPhone app</a>
+      <a href="./" aria-current="page">Privacy</a>
+      <a href="../safety/">Safety</a>
+      <a href="../iphone/#install">Install</a>
+    </nav>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme">
+      <svg class="icon-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+      <svg class="icon-sun" aria-hidden="true"><use href="#i-sun"/></svg>
+    </button>
+    <a class="btn btn-primary btn-small" href="../" aria-label="Open the web app"><span class="label-long">Open the web app</span><span class="label-short">Web app</span></a>
+  </div>
+</header>
+
+<main id="main">
+  <header class="page-hero">
+    <div class="wrap">
+      <span class="eyebrow">Privacy policy</span>
+      <h1>Your conversations stay with you</h1>
+      <p class="lede">Hearth keeps everything on your device. This page explains what that means in practice: what is stored, where it lives, and the few times anything touches the internet.</p>
+      <p class="dated">Effective November 2026. Covers the Hearth iPhone app and this website.</p>
+    </div>
+  </header>
+
+  <div class="page-body">
+    <div class="wrap page-layout">
+      <nav class="toc" aria-label="On this page">
+        <p>On this page</p>
+        <ol>
+          <li><a href="#short">The short version</a></li>
+          <li><a href="#stored">What the app stores</a></li>
+          <li><a href="#network">When the app goes online</a></li>
+          <li><a href="#apple">Apple features it uses</a></li>
+          <li><a href="#website">This website</a></li>
+          <li><a href="#export">Export and delete</a></li>
+          <li><a href="#age">Age</a></li>
+          <li><a href="#changes">Changes</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ol>
+      </nav>
+
+      <article class="prose">
+        <section id="short" aria-labelledby="short-title">
+          <h2 id="short-title">The short version</h2>
+          <ul class="summary-list">
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><strong>No account.</strong> There's no sign-in, and Hearth never asks for an email address or phone number.</span></li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><strong>Everything stays on your device.</strong> What you write, and everything the residents write back, is stored only on your iPhone (or, for the web app, in your browser).</span></li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><strong>Nothing to collect it.</strong> Hearth has no servers, no analytics, no ads, no cookies and no tracking.</span></li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><strong>One download.</strong> The iPhone app goes online for one thing: downloading the language model once, from Hugging Face.</span></li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><strong>Yours to take or erase.</strong> You can export your chats, characters, memories and settings to a backup file, or delete all of it, whenever you like.</span></li>
+          </ul>
+        </section>
+
+        <section id="stored" aria-labelledby="stored-title">
+          <h2 id="stored-title">What the iPhone app stores, and where</h2>
+          <p>Everything below stays on your iPhone. Unless a row says otherwise, it lives in Hearth's private folder (Application Support), which other apps can't read, and iOS keeps it encrypted while your phone is locked.</p>
+          <table class="store-table">
+            <tbody>
+              <tr><th scope="row">Your chats and group scenes</th><td>One file per conversation, including any alternate replies, ratings and pins.</td></tr>
+              <tr><th scope="row">Characters you make or import</th><td>Their descriptions and pictures.</td></tr>
+              <tr><th scope="row">Memories</th><td>Messages you pinned, and small facts a resident noted from your chats, like your dog's name. Facts are only shared with other residents when town gossip is on. You choose it during setup. It starts off, and you can change it any time in You &gt; Privacy Center on iPhone, or in Settings in the web app.</td></tr>
+              <tr><th scope="row">"About you" and settings</th><td>The name you'd like to be called, anything you wrote about yourself, and your choices in Settings.</td></tr>
+              <tr><th scope="row">Photos you send</th><td>A resized copy of the photo and a short text description made on the phone. The original stays wherever it came from.</td></tr>
+              <tr><th scope="row">Voice notes and pictures</th><td>Audio and image files made on the phone for your chats.</td></tr>
+              <tr><th scope="row">Parked conversations</th><td>Files that let a chat resume quickly when you switch back to it (the model's KV cache). They contain conversation content, so they get the same protection, are left out of backups, and older ones are cleared on their own.</td></tr>
+              <tr><th scope="row">The language model</th><td>About 2 GB for Standard or 0.8 GB for Lite. It contains nothing about you. iOS data protection keeps it encrypted until you first unlock your phone after it restarts. After that it stays readable, so Hearth can keep using it while the phone is locked.</td></tr>
+              <tr><th scope="row">Diagnostic notes</th><td>Timings and counts used for troubleshooting, such as how long a reply took. Hearth writes them only to iOS's own system log on the phone and keeps no log file of its own (developer test builds aside). They never include what you or the residents write.</td></tr>
+            </tbody>
+          </table>
+          <h3>Backups</h3>
+          <p>By default, Hearth's folder is left out of iCloud and computer backups, so your chats exist only on the phone. If you turn backups on in the app's Privacy center, iOS includes Hearth's data in your backups like any other app's, and Apple's terms for backups apply.</p>
+        </section>
+
+        <section id="network" aria-labelledby="network-title">
+          <h2 id="network-title">When the iPhone app goes online</h2>
+          <p><strong>Downloading a model.</strong> When you choose a model, Hearth downloads it from Hugging Face (huggingface.co), a site that hosts open AI models. Like any download, Hugging Face receives the request, which includes your IP address and the name of the file. Nothing you've written is part of it. Before using the file, Hearth checks it against a SHA-256 fingerprint built into the app.</p>
+          <p><strong>That's all.</strong> Hearth has no analytics, crash reporting, ads, accounts or update checks of its own, and it never uploads your data. Once the model is on your phone, you can turn on Airplane Mode and keep using every part of the app. The Privacy center shows how much Hearth has downloaded.</p>
+        </section>
+
+        <section id="apple" aria-labelledby="apple-title">
+          <h2 id="apple-title">Apple features Hearth uses</h2>
+          <p>Hearth leans on features built into iOS. All of these run on the device.</p>
+          <ul>
+            <li><strong>Face ID or passcode lock</strong> is handled by iOS. Hearth only learns whether unlocking worked.</li>
+            <li><strong>Speech recognition</strong>, for voice messages and calls, uses Apple's on-device mode. If your iPhone can't recognize speech on the device, Hearth tells you and doesn't send audio anywhere. The microphone is only used while you're recording or on a call.</li>
+            <li><strong>Voices</strong> come from the speech voices installed in iOS. If you download extra voices in iOS Settings, iOS gets them from Apple.</li>
+            <li><strong>Photo descriptions</strong> come from Apple's Vision framework.</li>
+            <li><strong>Pictures from residents</strong> are drawn with Apple's Image Playground on iPhones with Apple Intelligence. Otherwise a resident sends a postcard or a picture from the town's own art.</li>
+            <li><strong>Apple's on-device language model</strong> can stand in for the downloaded model on iPhones with Apple Intelligence.</li>
+            <li><strong>Your photo library</strong>: Hearth only asks for permission when you choose to save a picture there.</li>
+          </ul>
+        </section>
+
+        <section id="website" aria-labelledby="website-title">
+          <h2 id="website-title">This website and the web app</h2>
+          <p><strong>Hosting.</strong> This site is hosted on GitHub Pages. When you open a page, GitHub receives an ordinary web request, including your IP address, and may keep server logs as its own privacy statement describes. Hearth doesn't get those logs.</p>
+          <p><strong>Nothing from other sites.</strong> These information pages load no fonts, analytics, ads or embedded videos from anywhere else, and their security policy tells your browser to refuse anything from other sites. The web app reaches other sites only for the model download described below.</p>
+          <p><strong>Your data in the web app.</strong> Your chats, memories, characters and any photos you send are kept in your browser's own storage (IndexedDB) on that device, and are never uploaded. Photos are shrunk first, which also strips location data.</p>
+          <p><strong>A shared address.</strong> The web app is served from aarushkandukoori.github.io, an address other project pages share. Browsers keep stored data by address, so those pages could in principle read Hearth's browser data. The iPhone app keeps your data in its own private folder, so it's the most private way to use Hearth.</p>
+          <p><strong>Safari can clear it.</strong> Safari may delete a website's stored data after 7 days without a visit. On the web, add Hearth to your Home Screen or Dock, and export a backup now and then. A Home Screen or Dock copy keeps its own data, so use a backup to bring your chats over.</p>
+          <p><strong>Running the model.</strong> To run a model in your browser, the web app uses WebLLM, which downloads the model files from Hugging Face and its WebGPU runtime from GitHub when the model first loads. Your browser keeps them in its cache, so later visits don't download them again. Nothing else is fetched. If your browser can't run WebGPU, the web app offers a clearly labeled demo mode that runs entirely in the page.</p>
+          <p><strong>Reading aloud.</strong> The web app only uses voices installed on your device. Online voices are skipped, because they would send the text to a server.</p>
+          <p><strong>Preferences.</strong> Small choices, like light or dark mode and whether the sidebar is open, are saved in your browser's local storage. There are no cookies.</p>
+        </section>
+
+        <section id="export" aria-labelledby="export-title">
+          <h2 id="export-title">Exporting and deleting</h2>
+          <h3>On iPhone</h3>
+          <ul>
+            <li><strong>Export</strong> from the Privacy center in the You tab. Hearth writes a <code>.hearth</code> file with your chats, characters, memories and settings, sealed with AES-GCM, using a key made from a passphrase you choose. Photos, pictures, voice notes and character pictures aren't included. Keep the passphrase safe: without it, nobody can open the file, including you.</li>
+            <li><strong>Import</strong> that file on another iPhone with the same passphrase.</li>
+            <li><strong>Delete everything</strong>, also in the Privacy center, removes every chat, character you made, memory, picture, voice note and parked conversation. You can choose whether to remove the model too.</li>
+            <li><strong>Deleting the app</strong> removes everything it stored.</li>
+          </ul>
+          <h3>On the web</h3>
+          <ul>
+            <li><strong>Export a backup</strong> from Settings in the web app. It saves one JSON file with your chats, memories, characters and settings. It isn't encrypted, so keep it somewhere private. Safari may delete a website's stored data after 7 days without a visit, so export one now and then, and add Hearth to your Home Screen or Dock.</li>
+            <li><strong>Delete everything</strong>, also in Settings, erases every chat, memory, character you made and setting from that browser, and can remove the downloaded model files too.</li>
+            <li><strong>Clearing this site's data</strong> in your browser's settings removes everything as well.</li>
+          </ul>
+          <p>Because Hearth has no servers, there's nothing to delete on our side, and no way for us to recover anything you delete.</p>
+        </section>
+
+        <section id="age" aria-labelledby="age-title">
+          <h2 id="age-title">Age</h2>
+          <p>Hearth is meant for adults, 18 and older, and asks you to confirm your age the first time you open it. It doesn't collect information from anyone, of any age.</p>
+        </section>
+
+        <section id="changes" aria-labelledby="changes-title">
+          <h2 id="changes-title">Changes to this policy</h2>
+          <p>If this policy changes, the new version will be posted here with a new effective date. Every earlier version stays visible in the project's public history on GitHub.</p>
+        </section>
+
+        <section id="contact" aria-labelledby="contact-title">
+          <h2 id="contact-title">Contact</h2>
+          <p>Questions or worries? Open an issue at <a href="https://github.com/aarushkandukoori/hearth/issues">github.com/aarushkandukoori/hearth/issues</a>. Issues are public, so please leave out anything personal.</p>
+        </section>
+      </article>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-row">
+      <div class="footer-brand">
+        <span class="brand-mark">
+          <img src="../assets/brand/logo.svg" alt="" width="16" height="28" onerror="this.hidden=true;this.nextElementSibling.removeAttribute('hidden')">
+          <svg viewBox="0 0 32 32" hidden aria-hidden="true"><circle cx="16" cy="4.6" r="2.3" fill="none" stroke="#F6C177" stroke-width="1.6"/><path d="M11.5 8.5h9l2.5 3h-14z" fill="#F6C177"/><rect x="9.5" y="11.5" width="13" height="14" rx="3.2" fill="#FF8A4C"/><path d="M16.4 14.2c.4 2.1 2.8 3.4 2.8 6.1a3.2 3.2 0 0 1-6.4 0c0-2.3 2.3-3.4 3.6-6.1z" fill="#FFF1CF"/><rect x="9" y="26" width="14" height="3.2" rx="1.4" fill="#F6C177"/></svg>
+        </span>
+        <span>Hearth</span>
+      </div>
+      <nav aria-label="Footer">
+        <ul class="footer-links">
+          <li><a href="../">Web app</a></li>
+          <li><a href="../iphone/">iPhone</a></li>
+          <li><a href="./" aria-current="page">Privacy</a></li>
+          <li><a href="../safety/">Safety</a></li>
+          <li><a href="https://github.com/aarushkandukoori/hearth">GitHub</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="footer-meta">
+      <span>Made in Pittsburgh</span>
+      <span>Open source, MIT license</span>
+      <span>Hearth characters are AI. What they say is made up.</span>
+      <span>Built with Llama. <a href="https://www.llama.com/llama3_2/license/">Llama 3.2 Community License</a> and <a href="https://www.llama.com/llama3_2/use-policy/">Acceptable Use Policy</a></span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

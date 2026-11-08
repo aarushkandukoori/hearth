@@ -1,0 +1,132 @@
+[
+  {
+    "id": "char-juno",
+    "prompt": "A cheerful river otter wearing a green cafe apron and holding a steaming coffee mug, head-and-shoulders portrait, centered, soft simple aqua background",
+    "style": "animation"
+  },
+  {
+    "id": "char-theo",
+    "prompt": "A wise old sea turtle wearing round spectacles and a knitted blue scarf, head-and-shoulders portrait, centered, soft simple pale sea green background",
+    "style": "animation"
+  },
+  {
+    "id": "char-wren",
+    "prompt": "A small hedgehog wearing half-moon reading glasses and a plum cardigan, holding an old book, head-and-shoulders portrait, centered, soft simple mauve background",
+    "style": "animation"
+  },
+  {
+    "id": "char-mika",
+    "prompt": "A grumpy but adorable red panda wearing a white headband and a stained apron, holding a ladle, head-and-shoulders portrait, centered, soft simple pale coral background",
+    "style": "animation"
+  },
+  {
+    "id": "char-iris",
+    "prompt": "A shy snow leopard with a long fluffy tail curled over one shoulder, wearing a knitted scarf with little stars, head-and-shoulders portrait, centered, soft simple pale icy blue background",
+    "style": "animation"
+  },
+  {
+    "id": "char-sol",
+    "prompt": "A scruffy ginger stray cat with one nicked ear and a cheeky grin, head-and-shoulders portrait, centered, soft simple pale marigold background",
+    "style": "animation"
+  },
+  {
+    "id": "char-pip",
+    "prompt": "A tiny round repair robot with big glowing eyes, a little antenna and a screwdriver arm, head-and-shoulders portrait, centered, soft simple lime green background",
+    "style": "animation"
+  },
+  {
+    "id": "char-nora",
+    "prompt": "A calm deer with soft brown fur and gentle eyes wearing a straw sun hat with a sprig of flowers, head-and-shoulders portrait, centered, soft simple sage green background",
+    "style": "animation"
+  },
+  {
+    "id": "char-ezra",
+    "prompt": "A red fox wearing a knit beanie with a guitar strap over one shoulder, head-and-shoulders portrait, centered, soft simple pale warm orange background",
+    "style": "animation"
+  },
+  {
+    "id": "char-dana",
+    "prompt": "An energetic black and white border collie wearing a sporty headband with a whistle on a cord, head-and-shoulders portrait, centered, soft simple berry pink background",
+    "style": "animation"
+  },
+  {
+    "id": "char-agnes",
+    "prompt": "A kind elderly white goose wearing a flowery headscarf and a string of pearls, with a dusting of flour on the feathers, head-and-shoulders portrait, centered, soft simple rose pink background",
+    "style": "animation"
+  },
+  {
+    "id": "char-kai",
+    "prompt": "A small friendly dragon with pale mint scales, tiny wings and a cream belly, holding a twenty-sided die, head-and-shoulders portrait, centered, soft simple emerald background",
+    "style": "animation"
+  },
+  {
+    "id": "char-ada",
+    "prompt": "A clever raccoon wearing big round glasses and a cozy hoodie, with a pencil tucked behind one ear, head-and-shoulders portrait, centered, soft simple lemon yellow background",
+    "style": "animation"
+  },
+  {
+    "id": "char-felix",
+    "prompt": "A thoughtful black crow wearing a tweed vest and a tiny bow tie, head-and-shoulders portrait, centered, soft simple periwinkle background",
+    "style": "animation"
+  },
+  {
+    "id": "char-luna",
+    "prompt": "A gentle barn owl wearing big cozy headphones beside an old radio microphone, head-and-shoulders portrait, centered, soft simple violet background",
+    "style": "animation"
+  },
+  {
+    "id": "char-bea",
+    "prompt": "A cheerful old walrus with a gray mustache and a blue knitted sweater, portrait, centered, soft ocean blue background",
+    "style": "animation"
+  },
+  {
+    "id": "loc-driftwood-cafe",
+    "prompt": "A cozy wooden cafe built from driftwood on a seaside boardwalk, warm light in steamy windows, potted plants and a chalkboard sign out front, the calm sea behind it, wide view",
+    "style": "illustration"
+  },
+  {
+    "id": "loc-lighthouse",
+    "prompt": "A tall white and red striped lighthouse on a rocky point above a calm sea, its lamp glowing warm gold, a small stone cottage at its base, wide view",
+    "style": "illustration"
+  },
+  {
+    "id": "loc-tidepool-library",
+    "prompt": "A round stone library on seaside rocks beside glowing tide pools, tall arched windows with warm green lamps inside, gentle waves, wide view",
+    "style": "illustration"
+  },
+  {
+    "id": "loc-night-market",
+    "prompt": "A cobbled town square at dusk with strings of red paper lanterns, small wooden food stalls with steam rising, buckets of flowers and string lights, wide view",
+    "style": "illustration"
+  },
+  {
+    "id": "loc-harbor",
+    "prompt": "A small fishing harbor with colorful wooden boats, a little red and white ferry at a long pier, stacked crates and coiled ropes, seagulls, calm blue sea, wide view",
+    "style": "illustration"
+  },
+  {
+    "id": "loc-greenhouse",
+    "prompt": "An old glass greenhouse on a green hillside, full of tomato vines, herbs and a large fig tree, sunlight through misted glass, a small cottage beside it, wide view",
+    "style": "illustration"
+  },
+  {
+    "id": "loc-arcade",
+    "prompt": "A cozy retro arcade full of glowing cabinets, a claw machine stuffed with plush sea creatures, pinball machines and neon signs, a wooden game table with dice in a back room, wide view",
+    "style": "illustration"
+  },
+  {
+    "id": "loc-observatory",
+    "prompt": "An old domed observatory on top of a grassy hill at night, the dome open with a brass telescope pointing at a starry sky, the sea far below, wide view",
+    "style": "illustration"
+  },
+  {
+    "id": "hero-town",
+    "prompt": "A small seaside town of wooden and stone houses climbing a green hill at dusk, seen from the sea, every window glowing with warm lanterns, a striped lighthouse on the rocky point, a domed observatory on the hilltop, calm water reflecting the lights, wide view",
+    "style": "illustration"
+  },
+  {
+    "id": "hero-night",
+    "prompt": "A small seaside town at night under a sky full of stars, warm lanterns glowing in the windows and along the harbor, a lighthouse beam sweeping over calm water, a domed observatory on the hill, wide view",
+    "style": "illustration"
+  }
+]

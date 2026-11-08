@@ -1,0 +1,126 @@
+<!doctype html>
+<!-- Hearth 404 page. GitHub Pages serves it for any missing path, at any depth, so it is self-contained
+     (inline styles, no relative links) and works out the site's base path with a tiny script. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>Page Not Found - Hearth</title>
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#141110" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FBF7F2" media="(prefers-color-scheme: light)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231D1916'/%3E%3Ccircle cx='16' cy='5.6' r='2.1' fill='none' stroke='%23F6C177' stroke-width='1.5'/%3E%3Cpath d='M11.8 9h8.4l2.3 2.8H9.5z' fill='%23F6C177'/%3E%3Crect x='10' y='11.8' width='12' height='12.6' rx='3' fill='%23FF8A4C'/%3E%3Cpath d='M16.3 14.3c.4 1.9 2.6 3.1 2.6 5.6a2.9 2.9 0 0 1-5.8 0c0-2.1 2.1-3.1 3.2-5.6z' fill='%23FFF1CF'/%3E%3Crect x='9.5' y='24.8' width='13' height='3' rx='1.3' fill='%23F6C177'/%3E%3C/svg%3E">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #141110; --sky: #1f1714; --surface: #1d1916; --surface-2: #26211d; --line: #332c26;
+    --text: #f4ede4; --text-2: #b9aea2; --muted: #8a7f74; --accent: #ff8a4c; --on-accent: #1a0f08;
+    --gold: #f6c177; --fog: rgba(185, 174, 162, 0.08);
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      color-scheme: light;
+      --bg: #fbf7f2; --sky: #f7e2cf; --surface: #ffffff; --surface-2: #f3ece3; --line: #e7ddd1;
+      --text: #211b16; --text-2: #5c5047; --muted: #746a60; --accent: #e8682e; --on-accent: #1f120a;
+      --gold: #c98a2b; --fog: rgba(92, 80, 71, 0.07);
+    }
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #fbf7f2; --sky: #f7e2cf; --surface: #ffffff; --surface-2: #f3ece3; --line: #e7ddd1;
+    --text: #211b16; --text-2: #5c5047; --muted: #746a60; --accent: #e8682e; --on-accent: #1f120a;
+    --gold: #c98a2b; --fog: rgba(92, 80, 71, 0.07);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: linear-gradient(180deg, var(--bg) 0%, var(--sky) 100%);
+    color: var(--text);
+    font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    display: grid;
+    place-items: center;
+    padding: 32px 16px;
+    overflow-x: hidden;
+  }
+  main { max-width: 520px; text-align: center; position: relative; }
+  .fog {
+    position: fixed; inset: auto -10% 0 -10%; height: 45vh; pointer-events: none;
+    background:
+      radial-gradient(40% 60% at 20% 80%, var(--fog), transparent 70%),
+      radial-gradient(45% 55% at 70% 85%, var(--fog), transparent 70%),
+      radial-gradient(35% 50% at 50% 100%, var(--fog), transparent 70%);
+  }
+  .lantern { width: 96px; height: 120px; margin: 0 auto 24px; display: block; }
+  .glow { fill: var(--gold); opacity: 0.22; animation: glow 4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  .flame { fill: var(--gold); animation: flicker 3s ease-in-out infinite; }
+  .frame { fill: none; stroke: var(--text-2); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+  @keyframes glow { 0%, 100% { opacity: 0.16; transform: scale(1); } 50% { opacity: 0.28; transform: scale(1.1); } }
+  @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+  .code { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  h1 {
+    margin: 10px 0 0;
+    font-family: ui-serif, "New York", "Iowan Old Style", Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(2rem, 7vw, 2.8rem);
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  p { margin: 14px 0 0; color: var(--text-2); }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 28px; }
+  a.btn {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 48px;
+    padding: 0.7em 1.3em; border-radius: 999px; font-weight: 650; text-decoration: none;
+    border: 1px solid transparent; transition: transform 0.15s ease;
+  }
+  a.btn:hover { transform: translateY(-1px); }
+  .primary { background: var(--accent); color: var(--on-accent); }
+  .ghost { background: var(--surface); color: var(--text); border-color: var(--line) !important; }
+  .small { margin-top: 26px; font-size: 0.9rem; color: var(--muted); }
+  .small a { color: var(--text-2); }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 8px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+<script>
+  (function () {
+    try { var t = localStorage.getItem("hearth-site-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+<div class="fog" aria-hidden="true"></div>
+<main>
+  <svg class="lantern" viewBox="0 0 96 120" aria-hidden="true">
+    <circle class="glow" cx="48" cy="68" r="44"/>
+    <path class="frame" d="M40 14h16M48 6v8M34 26h28l-4 8H38z"/>
+    <path class="frame" d="M38 34h20l6 44H32z"/>
+    <path class="flame" d="M48 48c2 5 7 8 7 15a7 7 0 0 1-14 0c0-4 2-6 4-8 .3 2.2 1.2 3.4 2.4 4C47 56 47 52 48 48z"/>
+    <path class="frame" d="M30 78h36l-4 10H34z"/>
+  </svg>
+  <p class="code">404, page not found</p>
+  <h1>This path leads into the fog.</h1>
+  <p>Even in Lantern Bay, a few paths go nowhere. The lanterns will walk you home.</p>
+  <div class="row">
+    <a class="btn primary" href="/hearth/" data-path="">Back to Hearth</a>
+    <a class="btn ghost" href="/hearth/iphone/" data-path="iphone/">Hearth for iPhone</a>
+  </div>
+  <p class="small"><a href="/hearth/privacy/" data-path="privacy/">Privacy</a> &middot; <a href="/hearth/safety/" data-path="safety/">Safety</a></p>
+</main>
+<script>
+  // GitHub Pages serves this site under /hearth/. Anywhere else (a local server, a custom domain) the site is at /.
+  (function () {
+    var base = location.pathname.indexOf("/hearth/") === 0 ? "/hearth/" : "/";
+    var links = document.querySelectorAll("a[data-path]");
+    for (var i = 0; i < links.length; i++) links[i].setAttribute("href", base + links[i].getAttribute("data-path"));
+  })();
+</script>
+</body>
+</html>

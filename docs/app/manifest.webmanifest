@@ -1,0 +1,14 @@
+{
+  "name": "Hearth",
+  "short_name": "Hearth",
+  "description": "A little town of AI friends that lives in your browser. Your chats never leave your device.",
+  "start_url": "../",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#141110",
+  "theme_color": "#141110",
+  "icons": [
+    { "src": "../assets/brand/app-icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "../assets/brand/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

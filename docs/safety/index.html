@@ -1,0 +1,208 @@
+<!doctype html>
+<!-- Hearth safety page: AI disclosure, crisis resources, how the app responds to danger, healthy use.
+     Static page, no external requests. Styles and behavior live in ../assets/site/. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Hearth Safety</title>
+<meta name="description" content="Hearth characters are AI. Crisis lines, how Hearth responds when someone may be in danger, and how it tries to stay a healthy place to visit.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#141110" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FBF7F2" media="(prefers-color-scheme: light)">
+<link rel="canonical" href="https://aarushkandukoori.github.io/hearth/safety/">
+<link rel="icon" href="../assets/brand/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/brand/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/brand/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/site/site.css">
+<script>
+  (function () {
+    var root = document.documentElement;
+    root.classList.add("js");
+    try { var t = localStorage.getItem("hearth-site-theme"); if (t === "light" || t === "dark") root.dataset.theme = t; } catch (e) {}
+    window.addEventListener("load", function () { if (!window.__hearthSite) root.classList.remove("js"); });
+  })();
+</script>
+<script src="../assets/site/site.js" defer></script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 13.8 9 19 10.8 13.8 12.6 12 18l-1.8-5.4L5 10.8 10.2 9z"/><path d="M18.5 16.5v3M17 18h3"/></symbol>
+  <symbol id="i-call" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 4h3l1.5 4-2 1.3a11 11 0 0 0 6.7 6.7l1.3-2 4 1.5v3a2 2 0 0 1-2 2A16 16 0 0 1 3.5 6a2 2 0 0 1 2-2z"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 15a2 2 0 0 1-2 2H8.5L4 20.5V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 12.5h5"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="3.8" ry="9"/><path d="M3.5 9h17M3.5 15h17"/></symbol>
+</svg>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="brand" href="../iphone/" aria-label="Hearth for iPhone">
+      <span class="brand-mark">
+        <img src="../assets/brand/logo.svg" alt="" width="20" height="34" onerror="this.hidden=true;this.nextElementSibling.removeAttribute('hidden')">
+        <svg viewBox="0 0 32 32" hidden aria-hidden="true"><circle cx="16" cy="4.6" r="2.3" fill="none" stroke="#F6C177" stroke-width="1.6"/><path d="M11.5 8.5h9l2.5 3h-14z" fill="#F6C177"/><rect x="9.5" y="11.5" width="13" height="14" rx="3.2" fill="#FF8A4C"/><path d="M16.4 14.2c.4 2.1 2.8 3.4 2.8 6.1a3.2 3.2 0 0 1-6.4 0c0-2.3 2.3-3.4 3.6-6.1z" fill="#FFF1CF"/><rect x="9" y="26" width="14" height="3.2" rx="1.4" fill="#F6C177"/></svg>
+      </span>
+      <span class="brand-name">Hearth</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="../iphone/">iPhone app</a>
+      <a href="../privacy/">Privacy</a>
+      <a href="./" aria-current="page">Safety</a>
+      <a href="../iphone/#install">Install</a>
+    </nav>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme">
+      <svg class="icon-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+      <svg class="icon-sun" aria-hidden="true"><use href="#i-sun"/></svg>
+    </button>
+    <a class="btn btn-primary btn-small" href="../" aria-label="Open the web app"><span class="label-long">Open the web app</span><span class="label-short">Web app</span></a>
+  </div>
+</header>
+
+<main id="main">
+  <header class="page-hero">
+    <div class="wrap">
+      <span class="eyebrow">Safety</span>
+      <h1>Safety and wellbeing</h1>
+      <p class="lede">Hearth is meant to be a gentle place to spend some time. Here's how it tries to stay one, and where to find a real person when you need one.</p>
+      <div class="disclosure-banner">
+        <svg aria-hidden="true"><use href="#i-spark"/></svg>
+        <p>Hearth characters are AI. What they say is made up.</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-body">
+    <div class="wrap">
+      <section class="crisis" id="help" aria-labelledby="help-title">
+        <h2 id="help-title">If you might be in danger right now</h2>
+        <p>If you're thinking about suicide, or worried you might hurt yourself, please reach out to a person now. These services are free and confidential, and they're there any time of day.</p>
+        <ul class="crisis-list">
+          <li>
+            <b>988 Suicide &amp; Crisis Lifeline</b>
+            <span>Call or text 988 in the US.</span>
+            <span class="actions">
+              <a class="btn btn-primary" href="tel:988"><svg aria-hidden="true"><use href="#i-call"/></svg>Call 988</a>
+              <a class="btn btn-ghost" href="sms:988"><svg aria-hidden="true"><use href="#i-chat"/></svg>Text 988</a>
+            </span>
+          </li>
+          <li>
+            <b>Crisis Text Line</b>
+            <span>Text HOME to 741741 in the US.</span>
+            <span class="actions">
+              <a class="btn btn-ghost" href="sms:741741?&amp;body=HOME"><svg aria-hidden="true"><use href="#i-chat"/></svg>Text HOME</a>
+            </span>
+          </li>
+          <li>
+            <b>Outside the US</b>
+            <span>Find a free helpline in your country at findahelpline.com.</span>
+            <span class="actions">
+              <a class="btn btn-ghost" href="https://findahelpline.com"><svg aria-hidden="true"><use href="#i-globe"/></svg>findahelpline.com</a>
+            </span>
+          </li>
+        </ul>
+        <p style="margin-top:16px">If you're in immediate danger, call your local emergency number (911 in the US).</p>
+      </section>
+
+      <div class="page-layout" style="margin-top:clamp(40px,6vw,64px)">
+        <nav class="toc" aria-label="On this page">
+          <p>On this page</p>
+          <ol>
+            <li><a href="#ai">Hearth characters are AI</a></li>
+            <li><a href="#danger">When someone may be in danger</a></li>
+            <li><a href="#adults">Made for adults</a></li>
+            <li><a href="#healthy">Keeping it healthy</a></li>
+            <li><a href="#report">Reporting a problem</a></li>
+          </ol>
+        </nav>
+
+        <article class="prose">
+          <section id="ai" aria-labelledby="ai-title">
+            <h2 id="ai-title">Hearth characters are AI</h2>
+            <p>The residents of Lantern Bay are characters written for Hearth. Their words come from a language model running on your device. They can be wrong, forget things, or say something odd, and they can't stand in for a doctor, therapist, lawyer or financial advisor.</p>
+            <p>Every chat shows a quiet reminder that the characters are AI. In chats and group scenes, the residents are also written to tell you they're AI characters in Hearth if you sincerely ask whether they're real. They can get this wrong, so trust the reminder on screen.</p>
+          </section>
+
+          <section id="danger" aria-labelledby="danger-title">
+            <h2 id="danger-title">When someone may be in danger</h2>
+            <p>Hearth keeps a simple watch for signs that someone may be in danger. Here is what it does, and what it can't do.</p>
+            <ul>
+              <li><strong>It notices worrying words.</strong> The app looks for certain phrases that suggest someone may be thinking about self-harm or is in danger, like saying they want to end their life. It's a fixed list, so it can miss the same thing said another way. The check runs on your device, and nothing is reported anywhere.</li>
+              <li><strong>It shows help without taking over.</strong> When it notices something in a chat or group scene, the crisis lines above appear right there. It doesn't lock you out or end the conversation. Get support, in any chat or scene menu, brings the lines back whenever you want them.</li>
+              <li><strong>The reply starts with care.</strong> When the words sound serious, the iPhone app always starts the resident's reply with a fixed, caring line that points you to 988 (call or text, in the US). Then the resident goes on in their own words, told to step out of the story and stay with you. The resident is AI and may not get that part right, which is why the app shows the crisis lines itself.</li>
+              <li><strong>On the web, a fixed reply.</strong> In the web app, a message that sounds serious gets a fixed, caring reply that lists the crisis lines, and it never goes to the AI model.</li>
+              <li><strong>Replies stay as text.</strong> A reply to a worrying message never comes as a voice note or a picture.</li>
+              <li><strong>It errs on the side of care.</strong> Even a passing mention, like "I would never hurt myself", brings up the resources softly, just in case.</li>
+            </ul>
+            <p>This safety net can miss things, and it can misread a joke. It's no substitute for a person.</p>
+            <p>Because nothing leaves your device, Hearth can't call or alert anyone for you. If you're in danger, please contact a crisis line or emergency services yourself, or ask someone near you for help.</p>
+          </section>
+
+          <section id="adults" aria-labelledby="adults-title">
+            <h2 id="adults-title">Made for adults</h2>
+            <p>Hearth is for people 18 and older, and asks you to confirm your age the first time you open it. The built-in residents are friends and neighbors, and none of them are written as romantic partners.</p>
+            <p>Characters you create or import are yours to shape, and the same safety net applies to every chat.</p>
+          </section>
+
+          <section id="healthy" aria-labelledby="healthy-title">
+            <h2 id="healthy-title">How Hearth tries to keep things healthy</h2>
+            <ul>
+              <li><strong>No streaks.</strong> No points, badges or daily rewards for coming back.</li>
+              <li><strong>No notifications.</strong> Hearth never pings you to return.</li>
+              <li><strong>No guilt.</strong> Residents are written never to pressure you to stay or make you feel bad for leaving.</li>
+              <li><strong>Your people come first.</strong> Residents are written to be glad when you mention friends, family or plans.</li>
+              <li><strong>Honesty.</strong> Every chat carries the AI reminder, and residents are written to answer truthfully about being AI.</li>
+            </ul>
+            <p>No streaks, no notifications and the AI reminder are built into the app. The rest is how the residents are written. They're AI, so they can still get it wrong. If one does, please <a href="#report">tell us</a>.</p>
+            <h3>A few things that can help</h3>
+            <ul>
+              <li>Use Hearth as one part of your day, alongside people, time outside, rest and the things you enjoy.</li>
+              <li>If you notice you're skipping things you care about to stay in the app, it may be a good moment for a break, or to talk with someone you trust.</li>
+              <li>If you'd like more company in person, libraries, community centers, clubs, faith groups and volunteering are good places to meet people at your own pace.</li>
+              <li>In many US states, warmlines offer free peer support by phone for hard days that aren't emergencies.</li>
+            </ul>
+          </section>
+
+          <section id="report" aria-labelledby="report-title">
+            <h2 id="report-title">Reporting a problem</h2>
+            <p>If a resident says something hurtful or unsafe, please tell us by opening an issue at <a href="https://github.com/aarushkandukoori/hearth/issues">github.com/aarushkandukoori/hearth/issues</a>, so the characters and the safety net can get better. Issues are public, so describe what happened without sharing personal details.</p>
+          </section>
+        </article>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-row">
+      <div class="footer-brand">
+        <span class="brand-mark">
+          <img src="../assets/brand/logo.svg" alt="" width="16" height="28" onerror="this.hidden=true;this.nextElementSibling.removeAttribute('hidden')">
+          <svg viewBox="0 0 32 32" hidden aria-hidden="true"><circle cx="16" cy="4.6" r="2.3" fill="none" stroke="#F6C177" stroke-width="1.6"/><path d="M11.5 8.5h9l2.5 3h-14z" fill="#F6C177"/><rect x="9.5" y="11.5" width="13" height="14" rx="3.2" fill="#FF8A4C"/><path d="M16.4 14.2c.4 2.1 2.8 3.4 2.8 6.1a3.2 3.2 0 0 1-6.4 0c0-2.3 2.3-3.4 3.6-6.1z" fill="#FFF1CF"/><rect x="9" y="26" width="14" height="3.2" rx="1.4" fill="#F6C177"/></svg>
+        </span>
+        <span>Hearth</span>
+      </div>
+      <nav aria-label="Footer">
+        <ul class="footer-links">
+          <li><a href="../">Web app</a></li>
+          <li><a href="../iphone/">iPhone</a></li>
+          <li><a href="../privacy/">Privacy</a></li>
+          <li><a href="./" aria-current="page">Safety</a></li>
+          <li><a href="https://github.com/aarushkandukoori/hearth">GitHub</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="footer-meta">
+      <span>Made in Pittsburgh</span>
+      <span>Open source, MIT license</span>
+      <span>Hearth characters are AI. What they say is made up.</span>
+      <span>Built with Llama. <a href="https://www.llama.com/llama3_2/license/">Llama 3.2 Community License</a> and <a href="https://www.llama.com/llama3_2/use-policy/">Acceptable Use Policy</a></span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

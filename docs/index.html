@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <title>Hearth - A little town of friends</title>
+  <meta name="description" content="Hearth is a little town of AI friends that lives in your browser. No account, no servers: your chats never leave your device.">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#141110">
+  <meta name="referrer" content="no-referrer">
+  <!-- Privacy you can check: this page, and the worker that runs the model, may only talk to itself, plus the one-time model download hosts. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' data: blob:; connect-src 'self' https://huggingface.co https://*.huggingface.co https://*.hf.co https://raw.githubusercontent.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'; frame-src 'none'">
+  <link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/brand/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+  <!-- Lets Hearth be added to the Home Screen or Dock, where Safari doesn't clear its data after 7 days away. -->
+  <link rel="manifest" href="app/manifest.webmanifest">
+  <meta name="apple-mobile-web-app-title" content="Hearth">
+  <link rel="canonical" href="https://aarushkandukoori.github.io/hearth/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Hearth - A little town of friends">
+  <meta property="og:description" content="Private AI companions in a cozy seaside town. Runs in your browser; your chats never leave your device.">
+  <meta property="og:url" content="https://aarushkandukoori.github.io/hearth/">
+  <meta property="og:image" content="https://aarushkandukoori.github.io/hearth/assets/brand/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <script src="app/js/boot-theme.js"></script>
+  <link rel="stylesheet" href="app/css/tokens.css">
+  <link rel="stylesheet" href="app/css/base.css">
+  <link rel="stylesheet" href="app/css/shell.css">
+  <link rel="stylesheet" href="app/css/components.css">
+  <link rel="stylesheet" href="app/css/discover.css">
+  <link rel="stylesheet" href="app/css/chat.css">
+  <link rel="stylesheet" href="app/css/settings.css">
+  <script type="module" src="app/js/main.js"></script>
+</head>
+<body>
+  <div id="app" class="app">
+    <div class="splash" id="splash" aria-live="polite">
+      <div class="splash-mark" aria-hidden="true"></div>
+      <p>Lighting the lanterns...</p>
+    </div>
+  </div>
+  <noscript>
+    <p class="noscript">Hearth needs JavaScript to run. It all runs inside your browser, and nothing you type is sent to a server.</p>
+  </noscript>
+</body>
+</html>

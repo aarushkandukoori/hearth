@@ -1,0 +1,15 @@
+.DS_Store
+ios/build/
+ios/*.xcodeproj/
+ios/DerivedData/
+*.gguf
+*.kvstate
+xcuserdata/
+node_modules/
+/scratch/
+# full-size art originals (regenerate with Image Playground); compressed copies live in art/opt
+art/*.png
+art/artgen.log
+# internal build notes
+SPEC.md
+ios/scripts/.phase1-api-digest.md
