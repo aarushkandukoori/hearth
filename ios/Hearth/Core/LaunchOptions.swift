@@ -12,6 +12,8 @@ struct LaunchOptions: Sendable {
     var modelFile: String?
     var benchmark = false
     var uiTour = false
+    /// With -HearthUITour: also save the window about 10 times a second to Documents/tour/footage (trailer footage).
+    var footage = false
     var artGen = false
     var reset = false
     var skipOnboarding = false
@@ -34,6 +36,7 @@ struct LaunchOptions: Sendable {
         modelFile = value("-HearthModel")
         benchmark = flag("-HearthBenchmark")
         uiTour = flag("-HearthUITour")
+        footage = flag("-HearthFootage")
         artGen = flag("-HearthArtGen")
         reset = flag("-HearthReset")
         skipOnboarding = flag("-HearthSkipOnboarding")

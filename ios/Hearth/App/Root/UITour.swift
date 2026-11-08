@@ -1,6 +1,7 @@
 // Dev: -HearthUITour 1 walks every screen, runs real conversations, and saves screenshots of the app's own
 // window to Documents/tour/NN-name.png (there is no screenshot tool for a physical iPhone on this Mac).
 // Pull them with: xcrun devicectl device copy from ... --source Documents/tour
+// Add -HearthFootage 1 to also record the window about 10 times a second (Documents/tour/footage), for a trailer.
 
 import SwiftUI
 import UIKit
@@ -8,12 +9,20 @@ import UIKit
 @MainActor
 enum UITour {
     private static var step = 0
+    private static var footage: TourFootage?
     private static let folder = HearthPaths.documents.appendingPathComponent("tour", isDirectory: true)
 
     static func run(app: AppModel) async {
         try? FileManager.default.removeItem(at: folder)
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         step = 0
+        UIApplication.shared.isIdleTimerDisabled = true // the phone must not lock in the middle of the tour
+        defer { UIApplication.shared.isIdleTimerDisabled = false }
+        if LaunchOptions.shared.footage {
+            footage = TourFootage(folder: folder.appendingPathComponent("footage", isDirectory: true))
+            footage?.begin(fps: 10)
+        }
+        defer { footage?.finish(); footage = nil }
         app.settingsStore.update { $0.showEngineStats = true }
         let router = app.router
         let world = app.library.world
@@ -165,6 +174,7 @@ enum UITour {
 
     private static func snap(_ name: String) async {
         await pause(0.9)
+        footage?.mark(name)
         step += 1
         let file = folder.appendingPathComponent(String(format: "%02d-%@.png", step, name))
         guard let window = UIApplication.shared.connectedScenes
@@ -180,5 +190,70 @@ enum UITour {
             try? data.write(to: file)
             HearthLog.emit("HEARTHTOUR shot \(file.lastPathComponent)")
         }
+    }
+}
+
+/// Saves the app's own window about `fps` times a second as JPEGs (Documents/tour/footage/00001.jpg...) plus
+/// index.json with each frame's time and the tour's named moments, so a trailer can use real footage. Dev only.
+@MainActor
+final class TourFootage {
+    private let folder: URL
+    private var timer: Timer?
+    private var count = 0
+    private var times: [Double] = []
+    private var marks: [[String: Any]] = []
+    private var inFlight = 0 // frames rendered but not yet written; frames are skipped while the writer is behind
+    private var skipped = 0
+    private let start = Date()
+    private let writer = DispatchQueue(label: "hearth.tour.footage", qos: .utility)
+
+    init(folder: URL) {
+        self.folder = folder
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+    }
+
+    func begin(fps: Double) {
+        timer = Timer.scheduledTimer(withTimeInterval: 1 / fps, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.capture() }
+        }
+        HearthLog.emit("HEARTHTOUR footage start fps=\(Int(fps))")
+    }
+
+    func mark(_ name: String) {
+        let t = Date().timeIntervalSince(start)
+        marks.append(["name": name, "t": t, "frame": count])
+        HearthLog.emit(String(format: "HEARTHTOUR mark %@ t=%.2f frame=%d", name, t, count))
+    }
+
+    private func capture() {
+        guard let window = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .flatMap(\.windows)
+            .first(where: \.isKeyWindow) else { return }
+        guard inFlight < 3 else { skipped += 1; return } // never pile up full-size images in memory
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1.5
+        let image = UIGraphicsImageRenderer(bounds: window.bounds, format: format).image { _ in
+            _ = window.drawHierarchy(in: window.bounds, afterScreenUpdates: false)
+        }
+        count += 1
+        times.append(Date().timeIntervalSince(start))
+        let file = folder.appendingPathComponent(String(format: "%05d.jpg", count))
+        inFlight += 1
+        writer.async { [weak self] in
+            if let data = image.jpegData(compressionQuality: 0.8) { try? data.write(to: file) }
+            DispatchQueue.main.async { MainActor.assumeIsolated { self?.inFlight -= 1 } }
+        }
+    }
+
+    func finish() {
+        timer?.invalidate()
+        timer = nil
+        let index: [String: Any] = ["frames": times, "marks": marks]
+        let file = folder.appendingPathComponent("index.json")
+        writer.sync {
+            if let data = try? JSONSerialization.data(withJSONObject: index, options: [.prettyPrinted]) { try? data.write(to: file) }
+        }
+        HearthLog.emit("HEARTHTOUR footage done frames=\(count) skipped=\(skipped)")
     }
 }
