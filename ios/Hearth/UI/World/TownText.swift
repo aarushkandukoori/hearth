@@ -113,6 +113,7 @@ enum TownText {
         var parts = [stats.engine, "\(stats.promptTokens) prompt", "\(stats.reusedTokens) reused"]
         parts.append(String(format: "%.2f s first word", stats.timeToFirstToken))
         if stats.decodeTokensPerSecond > 0 { parts.append(String(format: "%.0f tok/s", stats.decodeTokensPerSecond)) }
+        // Only lines from the engine before Pie carry this (see GenerationStats.restoredFromDisk).
         if stats.restoredFromDisk { parts.append("resumed from flash") }
         return parts.joined(separator: " · ")
     }

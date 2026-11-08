@@ -1,7 +1,7 @@
 // The 1:1 chat screen (Character.AI layout in Hearth's colors): avatar, name and "by @creator" up top
 // with Call and a menu, the messages (the support card follows the one that called for it), then engine
 // and error cards, the composer and a quiet AI disclosure. ChatView uses one ChatController (shared with
-// a call or a reply still being written) and parks the chat's KV cache when the screen goes away.
+// a call or a reply still being written) and deactivates it when the screen goes away.
 
 import SwiftUI
 

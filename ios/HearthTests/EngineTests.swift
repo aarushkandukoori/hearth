@@ -1,4 +1,4 @@
-// Engine layer unit tests: MockEngine streaming, EngineHost queueing and cancel, parked-KV LRU eviction,
+// Engine layer unit tests: MockEngine streaming, EngineHost queueing and cancel, the Pie inferlet contract,
 // the model catalog, and the streaming text helpers (UTF-8 reassembly, stop strings, label stripping).
 
 import XCTest
@@ -159,95 +159,69 @@ final class EngineTests: XCTestCase {
         XCTAssertEqual(w.pieces, 0, "a request cancelled while waiting never starts")
     }
 
-    // MARK: - KVStateCache
-
-    private func park(_ cache: KVStateCache, _ key: String, bytes: Int) throws {
-        try Data(repeating: 1, count: bytes).write(to: cache.temporaryURL(for: key))
-        try cache.commit(key: key, tokens: bytes / 10)
-    }
-
-    func testKVStateCacheEvictsLeastRecentlyUsed() throws {
-        let cache = KVStateCache(modelID: "test-model", root: temporaryFolder(), maxBytes: 10_000, maxFiles: 3, minFreeBytes: 0)
-        try park(cache, "a", bytes: 1_000)
-        try park(cache, "b", bytes: 1_000)
-        try park(cache, "c", bytes: 1_000)
-        cache.touch(key: "a") // "b" is now the least recently used
-        try park(cache, "d", bytes: 1_000)
-        XCTAssertEqual(Set(cache.entries().map(\.key)), ["a", "c", "d"])
-        XCTAssertNil(cache.entry(for: "b"))
-
-        try park(cache, "e", bytes: 9_500) // over the byte limit: everything else goes, the newest stays
-        XCTAssertEqual(cache.entries().map(\.key), ["e"])
-        XCTAssertEqual(cache.totalBytes(), 9_500)
-        XCTAssertEqual(cache.entry(for: "e")?.tokens, 950)
-    }
-
-    func testKVStateCacheGivesWayWhenThePhoneIsShortOnSpace() throws {
-        // A reserve no volume can meet: every save evicts all the others, and the newest always stays.
-        let cache = KVStateCache(modelID: "test-model", root: temporaryFolder(), minFreeBytes: .max)
-        try park(cache, "a", bytes: 1_000)
-        try park(cache, "b", bytes: 1_000)
-        XCTAssertEqual(cache.entries().map(\.key), ["b"])
-        XCTAssertNotNil(KVStateCache.freeBytes(at: cache.directory))
-    }
-
-    func testKVStateCacheFolderComesBackAfterAWipe() throws {
-        let root = temporaryFolder()
-        let cache = KVStateCache(modelID: "test-model", root: root, minFreeBytes: 0)
-        try park(cache, "a", bytes: 100)
-        KVStateCache.purgeAll(root: root) // "Clear" removes every model's folder, the loaded one's too
-        XCTAssertFalse(FileManager.default.fileExists(atPath: cache.directory.path))
-        cache.ensureFolder() // what parking does first
-        try park(cache, "b", bytes: 100)
-        XCTAssertEqual(cache.entries().map(\.key), ["b"])
-    }
-
-    func testKVStateCacheRemovePurgeAndSweep() throws {
-        let root = temporaryFolder()
-        let cache = KVStateCache(modelID: "test-model", root: root, minFreeBytes: 0)
-        try park(cache, "keep", bytes: 100)
-        try park(cache, "drop", bytes: 100)
-        cache.remove(key: "drop")
-        XCTAssertEqual(cache.entries().map(\.key), ["keep"])
-
-        // A crash mid-save leaves a .tmp file; sweep() cleans it up.
-        try Data([1, 2, 3]).write(to: cache.temporaryURL(for: "half"))
-        cache.sweep()
-        XCTAssertFalse(FileManager.default.fileExists(atPath: cache.temporaryURL(for: "half").path))
-
-        XCTAssertEqual(cache.stateURL(for: "keep").deletingLastPathComponent().lastPathComponent, "test-model")
-        XCTAssertFalse(cache.stateURL(for: "keep").lastPathComponent.contains("keep"), "file names are hashed, not the key")
-        KVStateCache.removeEverywhere(key: "keep", root: root)
-        XCTAssertNil(cache.entry(for: "keep"))
-        try park(cache, "again", bytes: 100)
-        cache.purge()
-        XCTAssertTrue(cache.entries().isEmpty)
-        XCTAssertEqual(cache.totalBytes(), 0)
-    }
-
     // MARK: - ModelCatalog
 
     func testModelCatalogIntegrity() {
         let all = ModelCatalog.all
-        XCTAssertEqual(all.count, 3)
+        XCTAssertEqual(all.count, 2)
         XCTAssertEqual(Set(all.map(\.id)).count, all.count, "ids are unique")
-        XCTAssertEqual(all.filter(\.recommended).map(\.id), ["llama-3.2-3b"])
+        XCTAssertEqual(all.filter(\.recommended).map(\.id), ["qwen3.5-2b"])
         for spec in all {
             XCTAssertEqual(spec.sha256.count, 64, spec.id)
             XCTAssertTrue(spec.sha256.allSatisfy { $0.isHexDigit && !$0.isUppercase }, spec.id)
             XCTAssertGreaterThan(spec.bytes, 500_000_000, spec.id)
             XCTAssertEqual(spec.url.scheme, "https", spec.id)
-            XCTAssertEqual(spec.url.host, "huggingface.co", spec.id)
+            XCTAssertEqual(spec.url.host, "github.com", spec.id)
             XCTAssertEqual(spec.url.lastPathComponent, spec.fileName, spec.id)
-            XCTAssertTrue(spec.fileName.hasSuffix(".gguf"), spec.id)
-            XCTAssertTrue([4096, 8192].contains(spec.contextLength), spec.id)
+            XCTAssertTrue(spec.fileName.hasSuffix(".metal.zt"), "a Pie Metal artifact: \(spec.id)")
+            XCTAssertTrue(spec.deployment.hasPrefix("qwen35-"), spec.id)
+            XCTAssertEqual(spec.contextLength, 4096, spec.id)
             XCTAssertFalse(spec.blurb.contains("\u{2014}"), "no em dashes in user-facing copy")
+            XCTAssertFalse(spec.displayName.lowercased().contains("llama"), spec.id)
             XCTAssertEqual(ModelCatalog.spec(id: spec.id), spec)
         }
-        XCTAssertEqual(ModelCatalog.spec(id: "llama-3.2-1b")?.contextLength, 8192)
-        XCTAssertEqual(ModelCatalog.spec(id: "llama-3.2-3b")?.bytes, 2_019_377_696)
+        XCTAssertEqual(ModelCatalog.spec(id: "qwen3.5-0.8b")?.vision, true)
+        XCTAssertEqual(ModelCatalog.standard.modelName, "Qwen3.5 2B")
         XCTAssertNil(ModelCatalog.spec(id: "nope"))
-        XCTAssertEqual(ModelCatalog.recommended.id, "llama-3.2-3b")
+        XCTAssertEqual(ModelCatalog.recommended.id, "qwen3.5-2b")
+    }
+
+    // MARK: - What PieEngine sends Hearth's inferlet
+
+    func testInferletInputCarriesTheWholeRequestInSnakeCase() throws {
+        var sampling = SamplingParams()
+        sampling.temperature = 0.9
+        sampling.seed = 7
+        let request = GenerationRequest(conversationKey: "scene-1",
+                                        turns: [ChatTurn(role: .system, content: "You are Theo."),
+                                                ChatTurn(role: .user, content: "Hi!")],
+                                        assistantPrefix: "Theo:", maxTokens: 90, stop: ["\nSam:"], sampling: sampling,
+                                        replyOpener: "*sits close*")
+        let json = try JSONSerialization.jsonObject(with: JSONEncoder.pie.encode(InferletInput(request))) as? [String: Any]
+        let turns = json?["turns"] as? [[String: String]]
+        XCTAssertEqual(turns?.map { $0["role"] }, ["system", "user"])
+        XCTAssertEqual(json?["prefix"] as? String, "Theo:")
+        XCTAssertEqual(json?["opener"] as? String, "*sits close*")
+        XCTAssertEqual(json?["max_tokens"] as? Int, 90)
+        XCTAssertEqual(json?["stop"] as? [String], ["\nSam:"])
+        XCTAssertEqual((json?["top_p"] as? Double).map { ($0 * 100).rounded() }, 95)
+        XCTAssertEqual(json?["seed"] as? Int, 7)
+        XCTAssertNotNil(json?["repeat_penalty"])
+
+        let plain = GenerationRequest(conversationKey: "c", turns: [ChatTurn(role: .user, content: "Hi")])
+        let bare = try JSONSerialization.jsonObject(with: JSONEncoder.pie.encode(InferletInput(plain))) as? [String: Any]
+        XCTAssertNil(bare?["prefix"], "absent options are left out, so the inferlet's defaults apply")
+        XCTAssertNil(bare?["opener"])
+        XCTAssertNil(bare?["seed"])
+    }
+
+    func testInferletOutputDecodesPieStats() throws {
+        let json = #"{"text":"Hi!","prompt_tokens":120,"reused_tokens":96,"prefilled_tokens":24,"generated_tokens":5,"stopped_by":"max_tokens","ttft_ms":180.5,"prefill_ms":180.5,"decode_ms":90,"decode_tokens_per_second":44.4,"page_size":16}"#
+        let out = try JSONDecoder.pie.decode(InferletOutput.self, from: Data(json.utf8))
+        XCTAssertEqual(out.reusedTokens, 96)
+        XCTAssertEqual(out.prefilledTokens, 24)
+        XCTAssertEqual(out.stoppedBy, "max_tokens")
+        XCTAssertEqual(out.decodeTokensPerSecond, 44.4, accuracy: 0.001)
     }
 
     // MARK: - ModelDownloader (the part after the network)
@@ -258,7 +232,7 @@ final class EngineTests: XCTestCase {
 
         let payload = Data((0..<100_000).map { UInt8($0 % 251) })
         let digest = try ModelDownloader.sha256Hex(of: writeTemporary(payload))
-        var spec = ModelCatalog.customSpec(fileName: "engine-test-\(UUID().uuidString).gguf",
+        var spec = ModelCatalog.customSpec(fileName: "engine-test-\(UUID().uuidString).metal.zt",
                                            url: HearthPaths.models, bytes: Int64(payload.count))
         let final = HearthPaths.models.appendingPathComponent(spec.fileName)
         addTeardownBlock {
@@ -277,6 +251,26 @@ final class EngineTests: XCTestCase {
         XCTAssertNil(ModelDownloader.verifyAndInstall(spec))
         XCTAssertEqual(ModelCatalog.fileSize(final), Int64(payload.count))
         XCTAssertFalse(FileManager.default.fileExists(atPath: ModelDownloader.stagingURL(for: spec).path))
+    }
+
+    func testFailedResumeStartsOverOnlyWhenTheSavedProgressIsUseless() {
+        func error(_ code: Int, _ domain: String = NSURLErrorDomain) -> NSError { NSError(domain: domain, code: code) }
+        // It never took: an expired or removed link, a stale range, a temporary file that is gone.
+        XCTAssertTrue(ModelDownloader.resumeDidNotTake(status: 0, error: error(NSURLErrorFileDoesNotExist)))
+        XCTAssertTrue(ModelDownloader.resumeDidNotTake(status: 403, error: error(NSURLErrorBadServerResponse)))
+        XCTAssertTrue(ModelDownloader.resumeDidNotTake(status: 410, error: error(NSURLErrorBadServerResponse)))
+        XCTAssertTrue(ModelDownloader.resumeDidNotTake(status: 416, error: error(NSURLErrorBadServerResponse)))
+        XCTAssertTrue(ModelDownloader.resumeDidNotTake(status: 0, error: error(Int(ENOENT), NSPOSIXErrorDomain)))
+        // Temporary trouble, or it resumed and then dropped: the saved progress is still good.
+        XCTAssertFalse(ModelDownloader.resumeDidNotTake(status: 503, error: error(NSURLErrorBadServerResponse)))
+        XCTAssertFalse(ModelDownloader.resumeDidNotTake(status: 429, error: error(NSURLErrorBadServerResponse)))
+        XCTAssertFalse(ModelDownloader.resumeDidNotTake(status: 0, error: error(NSURLErrorUnknown)))
+        XCTAssertFalse(ModelDownloader.resumeDidNotTake(status: 0, error: error(NSURLErrorSecureConnectionFailed)))
+        XCTAssertFalse(ModelDownloader.resumeDidNotTake(status: 206, error: error(NSURLErrorUnknown)))
+        XCTAssertFalse(ModelDownloader.resumeDidNotTake(status: 206, error: error(NSURLErrorNetworkConnectionLost)))
+        XCTAssertFalse(ModelDownloader.resumeDidNotTake(status: 0, error: error(NSURLErrorNotConnectedToInternet)))
+        XCTAssertFalse(ModelDownloader.resumeDidNotTake(status: 0, error: error(NSURLErrorTimedOut)))
+        XCTAssertFalse(ModelDownloader.resumeDidNotTake(status: 0, error: error(NSURLErrorCancelled)))
     }
 
     private func writeTemporary(_ data: Data) throws -> URL {
@@ -322,23 +316,5 @@ final class EngineTests: XCTestCase {
         XCTAssertEqual(out, "Morning")
         var passthrough = LeadingLabelStripper(label: "Theo:")
         XCTAssertEqual(passthrough.feed("Morning all"), "Morning all")
-    }
-
-    func testApplePlanTrimsOldestHistoryToFit() {
-        var turns = [ChatTurn(role: .system, content: "You are Mira, a fox.")]
-        for i in 0..<50 {
-            turns.append(ChatTurn(role: .user, content: "line \(i) " + String(repeating: "x", count: 300)))
-            turns.append(ChatTurn(role: .assistant, content: "Theo: reply \(i)"))
-            turns.append(ChatTurn(role: .assistant, content: "Mira: reply \(i)"))
-        }
-        turns.append(ChatTurn(role: .user, content: "newest"))
-        let plan = AppleEngine.plan(for: GenerationRequest(conversationKey: "k", turns: turns, assistantPrefix: "Mira:"), budget: 1_500)
-        XCTAssertLessThanOrEqual(plan.estimatedTokens, 1_500)
-        XCTAssertGreaterThan(plan.droppedTurns, 0)
-        XCTAssertTrue(plan.prompt.hasPrefix("newest"))
-        XCTAssertTrue(plan.prompt.contains("Mira's next line"))
-        XCTAssertEqual(plan.instructions, "You are Mira, a fox.")
-        XCTAssertTrue(zip(plan.history, plan.history.dropFirst()).allSatisfy { $0.role != $1.role }, "turns alternate")
-        XCTAssertEqual(plan.history.last?.content, "Theo: reply 49\nMira: reply 49", "newest turns are kept")
     }
 }

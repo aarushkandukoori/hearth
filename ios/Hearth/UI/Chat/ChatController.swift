@@ -94,7 +94,7 @@ import Observation
     }
 
     /// A screen stops using this chat. When the last one leaves: stop audio, run a memory summary
-    /// that is due, and park the KV cache on flash so coming back is instant.
+    /// that is due, and tell the engine the chat is idle (Pie keeps recent chats' KV in memory on its own).
     func deactivate() async {
         holders = max(0, holders - 1)
         guard holders == 0 else { return }
@@ -154,7 +154,8 @@ import Observation
         await respond(toUserText: clean)
     }
 
-    /// Sends a photo (shrunk, stripped of metadata and described on this iPhone) with an optional caption.
+    /// Sends a photo (shrunk, stripped of metadata and described on this iPhone, by Pie when the model has
+    /// vision) with an optional caption.
     @discardableResult
     func sendPhoto(_ data: Data, caption: String) async -> Bool {
         guard canSend else { return false }
@@ -163,7 +164,13 @@ import Observation
         isReplying = true
         app.chats.append(placeholder, to: conversationID)
         do {
-            let photo = try await PhotoReader.importPhoto(data)
+            var photo = try await PhotoReader.importPhoto(data)
+            // A model with its own vision (Hearth Lite) describes the photo through Pie; otherwise the
+            // on-device Vision labels PhotoReader wrote stay.
+            if let file = photo.file, let jpeg = try? Data(contentsOf: HearthPaths.mediaURL(file)),
+               let seen = await app.engine.describePhoto(jpeg) {
+                photo.caption = seen
+            }
             guard var stored = storedMessage(placeholder.id) else {
                 Self.removeMediaFile(photo.file)
                 isReplying = false
@@ -684,7 +691,7 @@ import Observation
             finished = false
         }
         Self.summaryRunning = false
-        // The summary's KV cache holds chat text and is never reused: drop it instead of parking it.
+        // The summary's prompt holds chat text and is never reused: tell the engine to forget it.
         await app.engine.forget(conversationKey: request.conversationKey)
         guard finished else {
             summarizedBlocks = previous // try again after a later reply
@@ -709,8 +716,10 @@ import Observation
         app.chats.conversation(conversationID)?.messages.first { $0.id == id }
     }
 
-    /// The model's saved memory of this chat (in memory and parked on flash) still holds words that were just
-    /// deleted, edited or forgotten: drop it so they are really gone. The next reply reads the chat afresh.
+    /// Words were just deleted, edited or forgotten: the next reply reads the chat afresh without them. Pie may
+    /// still hold cached KV pages of earlier prompts in memory (or its KV disk tier) until it evicts them;
+    /// Pie has no call yet to drop one chat's pages, so `forget` can't purge them today. They are never shown
+    /// and never leave the phone, and Delete everything empties the disk tier.
     private func forgetParkedMemory() {
         let key = conversation.engineKey
         Task { await app.engine.forget(conversationKey: key) }

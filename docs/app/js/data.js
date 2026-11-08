@@ -15,7 +15,7 @@ export const DEFAULT_SETTINGS = {
   persona: { name: '', about: '' },
   onboardingDone: false,
   confirmedAdult: false,
-  modelId: 'Llama-3.2-1B-Instruct-q4f16_1-MLC',
+  modelId: 'qwen3.5-0.8b-vision',
   modelOptIn: false,       // the user chose to download the real model; load it on later visits
   voiceNotesEnabled: true,
   picturesEnabled: true,   // characters may send pictures (bundled art or postcards)
@@ -126,6 +126,8 @@ export async function loadSettings() {
     ...(saved || {}),
     persona: { ...DEFAULT_SETTINGS.persona, ...(saved?.persona || {}) },
   };
+  // There is one model now; a choice saved by an earlier version points at the current one.
+  currentSettings.modelId = DEFAULT_SETTINGS.modelId;
   return currentSettings;
 }
 

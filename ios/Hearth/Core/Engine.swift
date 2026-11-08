@@ -1,4 +1,4 @@
-// The contract every language engine implements (llama.cpp, Apple's on-device model, mock).
+// The contract every language engine implements (Pie, and the mock used for demos and tests).
 // UI and Brain code only ever talk to `LanguageEngine` through EngineHost.
 
 import Foundation
@@ -24,7 +24,9 @@ struct SamplingParams: Codable, Hashable, Sendable {
 }
 
 struct GenerationRequest: Sendable {
-    /// Identifies whose KV cache this is (Conversation.engineKey). Switching keys parks the old cache on flash.
+    /// Which conversation this is (Conversation.engineKey). EngineHost remembers the last one it served; Pie
+    /// doesn't need it, since it reuses KV for any prompt that starts the same way, from memory (nothing is
+    /// saved to flash).
     var conversationKey: String
     var turns: [ChatTurn]
     /// Forced text right after the assistant header, e.g. "Theo:" in group scenes. Not included in the output.
@@ -33,16 +35,16 @@ struct GenerationRequest: Sendable {
     var stop: [String] = []
     var sampling = SamplingParams()
     /// Fixed start of the reply that the person DOES see, e.g. the caring opener for a crisis message.
-    /// Engines that can prefill (llama) put it right after the assistant header (and after
-    /// `assistantPrefix`) and write only the rest. The output never includes it: the caller shows
-    /// `replyOpener + " " + output`. On a 3B model this stops canned "I cannot continue" refusals.
+    /// Hearth's Pie inferlet writes it right after the assistant header (and after `assistantPrefix`)
+    /// and generates only the rest. The output never includes it: the caller shows
+    /// `replyOpener + " " + output`. On small models this stops canned "I cannot continue" refusals.
     var replyOpener: String?
 }
 
 struct GenerationStats: Codable, Hashable, Sendable {
     var engine: String
     var promptTokens: Int = 0
-    /// Tokens already in the KV cache (prefix reuse or restored from flash).
+    /// Prompt tokens whose KV was already in memory (Pie maps earlier turns back in), so they weren't computed again.
     var reusedTokens: Int = 0
     /// Tokens that had to be computed for this request's prompt.
     var prefilledTokens: Int = 0
@@ -50,8 +52,12 @@ struct GenerationStats: Codable, Hashable, Sendable {
     var timeToFirstToken: Double = 0
     var prefillTokensPerSecond: Double = 0
     var decodeTokensPerSecond: Double = 0
+    /// True when the reply's KV cache was read back from a file first, and how long that took. Only the engine
+    /// before Pie did that (it parked each chat's cache on flash); Pie never sets these, but replies saved
+    /// back then still carry them, so they stay for decoding old chats.
     var restoredFromDisk: Bool = false
     var restoreMilliseconds: Double?
+    /// How long saving the previous chat's KV cache to a file took. Also only from that earlier engine.
     var parkMilliseconds: Double?
     var stoppedBy: String = "eos"
 }
@@ -62,7 +68,7 @@ enum GenerationEvent: Sendable {
 }
 
 struct EngineDescriptor: Hashable, Sendable {
-    /// ModelSpec id, "apple" or "mock".
+    /// ModelSpec id or "mock".
     var id: String
     var displayName: String
     var modelName: String
@@ -92,7 +98,7 @@ enum EngineError: LocalizedError, Sendable {
     }
 }
 
-/// Implemented by LlamaEngine, AppleEngine and MockEngine.
+/// Implemented by PieEngine and MockEngine.
 protocol LanguageEngine: AnyObject, Sendable {
     var descriptor: EngineDescriptor { get }
     /// Load weights / warm up. Safe to call more than once.
@@ -103,9 +109,10 @@ protocol LanguageEngine: AnyObject, Sendable {
     func cancelCurrent()
     /// Rough token count for prompt budgeting.
     func countTokens(_ text: String) async -> Int
-    /// Save this conversation's KV cache to flash now (no-op if unsupported).
+    /// Keep this conversation's KV cache for later. Pie and the mock keep nothing on disk, so for them this
+    /// does nothing.
     func park(conversationKey: String) async
-    /// Delete every parked KV file.
+    /// Delete any KV cache kept on disk (none with Pie or the mock).
     func purgeParkedState() async
     /// Free memory (model weights, contexts).
     func shutdown() async

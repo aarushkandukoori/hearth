@@ -125,7 +125,7 @@ import Observation
     }
 
     /// Takes a character out of every group scene: their lines, their invite notes (narrator notes with their
-    /// id) and their place in the cast. Returns the scenes that changed, whose parked caches still hold the lines.
+    /// id) and their place in the cast. Returns the scenes that changed, so the engine can forget them too.
     /// The scenes keep their place in the chat list.
     @discardableResult
     func removeFromScenes(characterID: String) -> [Conversation] {

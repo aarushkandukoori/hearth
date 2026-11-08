@@ -5,6 +5,11 @@ options:
   deploymentTarget:
     iOS: "26.0"
   createIntermediateGroups: true
+packages:
+  # Pie's Swift package (in-process Metal engine + client), vendored from pie-project/pie.
+  # Its binary half comes from scripts/build-pie.sh.
+  Pie:
+    path: Vendor/PieSwift
 settings:
   base:
     SWIFT_VERSION: "5.0"
@@ -21,14 +26,20 @@ targets:
       - path: Hearth
         excludes:
           - "Resources/Art"
+          - "Resources/Pie"
           - "Resources/*.json"
       - path: Hearth/Resources/Art
         type: folder
         buildPhase: resources
+      # Hearth's Pie inferlet (built from /inferlet by inferlet/build.sh).
+      - path: Hearth/Resources/Pie
+        type: folder
+        buildPhase: resources
       - path: Hearth/Resources/lantern-bay.json
         buildPhase: resources
-      - path: Hearth/Resources/art-jobs.json
-        buildPhase: resources
+    dependencies:
+      - package: Pie
+        product: PieServer
     info:
       path: Hearth/Info.plist
       properties:
@@ -57,22 +68,6 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks"
-        "FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]": "$(inherited) $(PROJECT_DIR)/Vendor/llama.xcframework/ios-arm64"
-        "OTHER_LDFLAGS[sdk=iphoneos*]": "$(inherited) -framework llama"
-    postBuildScripts:
-      - name: Embed llama.framework (device builds only)
-        basedOnDependencyAnalysis: false
-        script: |
-          if [ "$PLATFORM_NAME" = "iphoneos" ]; then
-            SRC="$PROJECT_DIR/Vendor/llama.xcframework/ios-arm64/llama.framework"
-            DST="$TARGET_BUILD_DIR/$FRAMEWORKS_FOLDER_PATH"
-            mkdir -p "$DST"
-            rm -rf "$DST/llama.framework"
-            cp -R "$SRC" "$DST/"
-            if [ -n "$EXPANDED_CODE_SIGN_IDENTITY" ]; then
-              codesign --force --sign "$EXPANDED_CODE_SIGN_IDENTITY" --timestamp=none "$DST/llama.framework"
-            fi
-          fi
   HearthTests:
     type: bundle.unit-test
     platform: iOS

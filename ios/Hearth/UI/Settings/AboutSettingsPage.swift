@@ -48,10 +48,11 @@ struct AboutSettingsPage: View {
                     SectionHeader("Credits and licenses")
                     HearthCard {
                         VStack(alignment: .leading, spacing: Spacing.l) {
-                            Credit(name: "llama.cpp", license: "MIT License",
-                                   detail: "Runs Hearth's models on the iPhone's own chip.")
-                            DisclosureGroup("llama.cpp license text") {
-                                Text(ThirdPartyLicenses.llamaCpp)
+                            Credit(name: "Pie", license: "Apache License 2.0",
+                                   detail: "Yale's programmable LLM serving system (pie-project/pie). Runs every one of Hearth's models on the iPhone's GPU, through Hearth's own inferlet.",
+                                   links: SettingsModelActions.licenseLinks("Apache 2.0"))
+                            DisclosureGroup("Pie notice") {
+                                Text(ThirdPartyLicenses.pieNotice)
                                     .font(HearthFont.caption)
                                     .foregroundStyle(.hearthText2)
                                     .textSelection(.enabled)
@@ -60,14 +61,24 @@ struct AboutSettingsPage: View {
                             }
                             .font(HearthFont.callout)
                             .tint(.hearthAccentText)
-                            Credit(name: "Llama 3.2", license: "Llama 3.2 Community License",
-                                   detail: "Powers Hearth Standard and Hearth Lite. Built with Llama.",
-                                   links: SettingsModelActions.licenseLinks("Llama 3.2 Community License"))
-                            Credit(name: "Qwen3", license: "Apache License 2.0",
-                                   detail: "Powers Hearth Plus.",
+                            DisclosureGroup("Rust crates in Pie") {
+                                VStack(alignment: .leading, spacing: Spacing.m) {
+                                    Text(ThirdPartyLicenses.pieCratesNote)
+                                    Text(ThirdPartyLicenses.mitLicense)
+                                }
+                                .font(HearthFont.caption)
+                                .foregroundStyle(.hearthText2)
+                                .textSelection(.enabled)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.top, Spacing.s)
+                            }
+                            .font(HearthFont.callout)
+                            .tint(.hearthAccentText)
+                            Credit(name: "Qwen3.5", license: "Apache License 2.0",
+                                   detail: "The models behind Hearth Standard (2B) and Hearth Lite (0.8B, with vision), converted for Pie.",
                                    links: SettingsModelActions.licenseLinks("Apache 2.0"))
                             Credit(name: "Apple frameworks", license: "Part of iOS",
-                                   detail: "Foundation Models, Image Playground, Speech, Vision, AVFoundation and LocalAuthentication.")
+                                   detail: "Speech (on-device dictation), AVFoundation (voices), Vision (photo labels when the model has no vision of its own) and LocalAuthentication.")
                             Credit(name: "Lantern Bay art", license: "Made for Hearth",
                                    detail: "The residents and places were drawn with Image Playground.")
                         }

@@ -1,9 +1,10 @@
-// Pictures characters send, drawn on this iPhone with Image Playground (animal folk, places and
-// things, never people), one at a time. When that can't happen: bundled town art or a postcard.
+// Pictures characters send: a picture from the town's own art that matches the caption, else a postcard
+// drawn on the phone. Hearth no longer uses another company's image model; Pie can draw (FLUX.2 klein runs
+// on Pie), but Pie runs one model per process, and on the iPhone that model is the characters' language
+// model, so drawing new pictures waits for Pie to host two models at once.
 
 import CoreGraphics
 import Foundation
-import ImagePlayground
 import Observation
 
 enum PictureError: LocalizedError {
@@ -11,112 +12,46 @@ enum PictureError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .unavailable: return "Image Playground isn't available on this iPhone, so Hearth can't draw new pictures here."
-        case .needsAnimalOrPlace: return "Image Playground can draw animals, places and things, but not people. Try describing an animal friend."
-        case .appInBackground: return "Pictures can only be drawn while Hearth is open on screen."
+        case .unavailable: return "Hearth can't draw new pictures on this iPhone yet. Characters send pictures from the town's own art and postcards instead."
+        case .needsAnimalOrPlace: return "Pictures show animals, places and things, but not people. Try describing an animal friend."
+        case .appInBackground: return "Pictures can only be made while Hearth is open on screen."
         case .failed: return "That picture didn't come out. Please try again."
         }
     }
 }
 
 @MainActor @Observable final class PictureMaker {
-    /// True while a picture is being drawn (or waiting its turn).
+    /// True while a picture is being made (or waiting its turn).
     private(set) var isWorking = false
 
-    /// Whether Image Playground can draw on this iPhone. The first read starts a quick check;
-    /// it reads false until that finishes, then updates.
-    var isAvailable: Bool {
-        if !checkStarted {
-            checkStarted = true
-            Task { await self.loadCreator() }
-        }
-        return available
-    }
+    /// Whether new pictures can be drawn on this iPhone. Always false for now (see the file comment).
+    var isAvailable: Bool { false }
 
-    private var available = false
-    @ObservationIgnored private var checkStarted = false
-    @ObservationIgnored private var creator: ImageCreator?
     @ObservationIgnored private var queueTail: Task<Void, Never>?
     @ObservationIgnored private var jobs = 0
 
-    /// A picture for a character's message. Never fails outright: if Image Playground can't draw it,
-    /// the attachment uses bundled art or a drawn postcard (status .failed only if even that failed).
+    /// A picture for a character's message: matching town art, else a postcard (status .failed only if
+    /// even that failed).
     func makePicture(caption: String, for c: Character?, style: PictureStyle) async -> Attachment {
-        await oneAtATime { await self.drawPicture(caption: caption, for: c, style: style) }
+        _ = style
+        return await oneAtATime { await self.pickPicture(caption: caption, for: c) }
     }
 
-    /// PNG data for a new character's avatar (Create). Throws PictureError with a friendly message.
+    /// PNG data for a new character's avatar (Create). Drawing isn't available, so this always throws.
     func makeAvatar(prompt: String, style: PictureStyle) async throws -> Data {
-        let result: Result<Data, PictureError> = await oneAtATime {
-            let clean = Self.sanitize(prompt)
-            guard !clean.isEmpty else { return .failure(.needsAnimalOrPlace) }
-            switch await self.generate(prompt: clean, style: style) {
-            case .success(let image):
-                guard let png = await Self.encodePNG(image) else { return .failure(.failed) }
-                return .success(png)
-            case .failure(let error):
-                return .failure(error)
-            }
-        }
-        return try result.get()
+        _ = (prompt, style)
+        throw PictureError.unavailable
     }
 
-    // MARK: Drawing
+    // MARK: Picking
 
-    private func drawPicture(caption: String, for c: Character?, style: PictureStyle) async -> Attachment {
-        let started = Date()
+    private func pickPicture(caption: String, for c: Character?) async -> Attachment {
         let shown = Self.cleanCaption(caption)
-        let prompt = Self.sanitize(caption)
-        if !prompt.isEmpty, case .success(let image) = await generate(prompt: prompt, style: style),
-           let relative = await Self.savePNG(image) {
-            HearthLog.info("picture", "drew \(image.width)x\(image.height) in \(Int(Date().timeIntervalSince(started) * 1000)) ms")
-            return Attachment(kind: .picture, file: relative, caption: shown, status: .ready)
-        }
         if let relative = await fallbackFile(for: shown, character: c) {
             return Attachment(kind: .picture, file: relative, caption: shown, status: .ready)
         }
         HearthLog.error("picture", "even the postcard fallback failed")
         return Attachment(kind: .picture, file: nil, caption: shown, status: .failed)
-    }
-
-    private func generate(prompt: String, style: PictureStyle) async -> Result<CGImage, PictureError> {
-        guard let creator = await loadCreator() else { return .failure(.unavailable) }
-        let wanted = Self.playgroundStyle(style)
-        guard let chosen = ([wanted] + Self.onDeviceStyles).first(where: creator.availableStyles.contains) else {
-            return .failure(.unavailable)
-        }
-        for attempt in 1...3 {
-            do {
-                for try await created in creator.images(for: [.text(prompt)], style: chosen, limit: 1) {
-                    return .success(created.cgImage)
-                }
-                return .failure(.failed)
-            } catch {
-                // Image Playground only draws while the app is on screen; give the user a moment to come back.
-                if Self.isBackgroundForbidden(error), attempt < 3 {
-                    try? await Task.sleep(for: .seconds(2))
-                    continue
-                }
-                HearthLog.info("picture", "Image Playground said \(Self.errorName(error))")
-                return .failure(Self.pictureError(for: error))
-            }
-        }
-        return .failure(.failed)
-    }
-
-    @discardableResult
-    private func loadCreator() async -> ImageCreator? {
-        if let creator { return creator }
-        do {
-            let made = try await ImageCreator()
-            creator = made
-            available = Self.onDeviceStyles.contains(where: made.availableStyles.contains)
-            return made
-        } catch {
-            available = false
-            HearthLog.info("picture", "Image Playground unavailable: \(Self.errorName(error))")
-            return nil
-        }
     }
 
     /// Bundled art that matches the caption, copied into media/pictures, else a postcard PNG.
@@ -136,11 +71,6 @@ enum PictureError: LocalizedError {
         return nil
     }
 
-    /// PNG encoding of a 1024 px image takes tens of ms, so it happens off the main actor.
-    @concurrent nonisolated private static func encodePNG(_ image: CGImage) async -> Data? {
-        MediaFiles.pngData(image)
-    }
-
     /// Saves a PNG as media/pictures/<uuid>.png (off the main actor) and returns its relative path.
     @concurrent nonisolated private static func savePNG(_ image: CGImage) async -> String? {
         guard let png = MediaFiles.pngData(image) else { return nil }
@@ -148,7 +78,7 @@ enum PictureError: LocalizedError {
         return (try? HearthPaths.write(png, to: HearthPaths.mediaURL(relative))) != nil ? relative : nil
     }
 
-    /// Runs jobs strictly one after another (Image Playground draws one picture at a time).
+    /// Runs jobs strictly one after another.
     private func oneAtATime<T: Sendable>(_ work: @escaping @MainActor () async -> T) async -> T {
         let previous = queueTail
         let job = Task { @MainActor in
@@ -187,7 +117,7 @@ enum PictureError: LocalizedError {
         return String(s.prefix(200))
     }
 
-    /// Makes a caption safe for Image Playground, which refuses to draw people: removes words for
+    /// Makes a caption safe for a picture prompt (pictures never show people): removes words for
     /// people and the pronouns that stand for them. Returns "" when nothing drawable is left
     /// ("a selfie of a person"), so the caller goes straight to the fallback.
     nonisolated static func sanitize(_ prompt: String) -> String {
@@ -327,50 +257,4 @@ enum PictureError: LocalizedError {
         }
         return table
     }()
-
-    // MARK: Image Playground helpers
-
-    /// The styles drawn on this iPhone. Never `.externalProvider`, which sends the prompt to an
-    /// outside service.
-    nonisolated static let onDeviceStyles: [ImagePlaygroundStyle] = [.animation, .illustration, .sketch]
-
-    nonisolated static func playgroundStyle(_ style: PictureStyle) -> ImagePlaygroundStyle {
-        switch style {
-        case .animation: return .animation
-        case .illustration: return .illustration
-        case .sketch: return .sketch
-        }
-    }
-
-    nonisolated static func isBackgroundForbidden(_ error: Error) -> Bool {
-        (error as? ImageCreator.Error) == .backgroundCreationForbidden
-    }
-
-    nonisolated static func pictureError(for error: Error) -> PictureError {
-        guard let error = error as? ImageCreator.Error else { return .failed }
-        switch error {
-        case .notSupported, .unavailable: return .unavailable
-        case .conceptsRequirePersonIdentity: return .needsAnimalOrPlace
-        case .backgroundCreationForbidden: return .appInBackground
-        default: return .failed
-        }
-    }
-
-    /// A stable name for logs, e.g. "conceptsRequirePersonIdentity".
-    nonisolated static func errorName(_ error: Error) -> String {
-        if error is CancellationError { return "cancelled" }
-        guard let error = error as? ImageCreator.Error else { return String(describing: type(of: error)) }
-        switch error {
-        case .notSupported: return "notSupported"
-        case .unavailable: return "unavailable"
-        case .creationCancelled: return "creationCancelled"
-        case .faceInImageTooSmall: return "faceInImageTooSmall"
-        case .unsupportedLanguage: return "unsupportedLanguage"
-        case .unsupportedInputImage: return "unsupportedInputImage"
-        case .backgroundCreationForbidden: return "backgroundCreationForbidden"
-        case .creationFailed: return "creationFailed"
-        case .conceptsRequirePersonIdentity: return "conceptsRequirePersonIdentity"
-        @unknown default: return String(describing: error)
-        }
-    }
 }

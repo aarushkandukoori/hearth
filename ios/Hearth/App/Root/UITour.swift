@@ -68,7 +68,7 @@ enum UITour {
                 HearthLog.emit("HEARTHTOUR fail no-chat-controller")
             }
 
-            // Switch to a second character, then come back: the first chat's KV cache comes back from flash.
+            // Switch to a second character, then come back (Pie maps the first chat back in when it still holds it).
             if let other = second {
                 let otherConversation = app.chats.latestDirect(with: other.id) ?? app.chats.startDirect(with: other, persona: app.settings.persona)
                 router.homePath = [.chat(conversationID: otherConversation.id)]

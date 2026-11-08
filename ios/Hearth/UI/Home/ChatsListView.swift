@@ -244,7 +244,7 @@ struct ChatsListView: View {
         return "Delete this chat?"
     }
 
-    /// Deletes the chat, its media and its parked "instant resume" cache.
+    /// Deletes the chat and its media (AppModel.deleteConversation).
     private func delete(_ conversation: Conversation) {
         withAnimation(.smooth) {
             app.deleteConversation(conversation.id)

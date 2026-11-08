@@ -39,7 +39,6 @@ struct DeleteEverythingSheet: View {
                         GoneItem(text: "Characters you made or brought in")
                         GoneItem(text: "What characters remember about you")
                         GoneItem(text: "Your name, settings and App Lock")
-                        GoneItem(text: "The instant resume cache")
                     }
 
                     if modelBytes > 0 {

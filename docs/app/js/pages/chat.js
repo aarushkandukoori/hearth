@@ -313,14 +313,16 @@ export async function renderChat(ctx) {
     if (stick) scrollToEnd();
   }
 
-  let streamState = { text: '', voice: false };
+  let streamState = { text: '', voice: false, looking: false };
   function updateStream(full) {
     if (full != null) streamState.text = full;
     const row = list.querySelector(`[data-id="${CSS.escape(streamingID || '')}"]`);
     const live = row?.__live;
     if (!live) return;
     const stick = nearBottom();
-    if (streamState.voice) {
+    if (streamState.looking) {
+      live.replaceChildren(h('span', { class: 'recording' }, icon('image', { size: 16 }), `${c.name} is looking at your photo`, typingDots('Looking')));
+    } else if (streamState.voice) {
       live.replaceChildren(h('span', { class: 'recording' }, icon('wave', { size: 16 }), `${c.name} is recording a voice note`, typingDots('Recording')));
     } else {
       const preview = streamingPreview(streamState.text, { name: c.name });
@@ -394,7 +396,7 @@ export async function renderChat(ctx) {
     sendBtn.disabled = !generating && !input.value.trim() && !pendingPhoto;
   }
 
-  /** Memory facts and town news, read once per visit (SPEC §7) so the model can reuse what it already read. */
+  /** Memory facts and town news, read once per visit (SPEC §7) so the prompt starts the same way each turn. */
   async function contextForPrompt() {
     if (!promptContext) promptContext = await Promise.all([factsFor(c.id, { gossip: settings().townGossip }), recentEvents()]);
     return promptContext;
@@ -447,7 +449,7 @@ export async function renderChat(ctx) {
     const asVoice = !flaggedThisVisit && photo !== 'asked' && s.voiceNotesEnabled && voice.hasLocalVoice()
       && upto > 1 && Math.random() < (c.media?.voiceNoteChance ?? 0);
     streamingID = m.id;
-    streamState = { text: '', voice: asVoice };
+    streamState = { text: '', voice: asVoice, looking: false };
     setBusy(true);
     paint();
     scrollToEnd(true);
@@ -455,6 +457,8 @@ export async function renderChat(ctx) {
     let result = { text: '', stats: { engine: 'demo', stoppedBy: 'error' } };
     if (caring) {
       await sleep(500); // a moment of "typing" first
+    } else if (await seePhoto(lastUser) === 'stopped') {
+      result = { text: '', stats: { engine: 'pie', stoppedBy: 'cancelled' } };
     } else {
       try {
         const [facts, events] = await contextForPrompt();
@@ -516,6 +520,27 @@ export async function renderChat(ctx) {
     }
     if (!matchMedia('(pointer: coarse)').matches) input.focus({ preventScroll: true });
     maybeSummarize();
+  }
+
+  /**
+   * A photo the person just sent is described once by the model's vision pass (in this tab), and the
+   * character reads that description. Returns 'stopped' when the person stopped it.
+   */
+  async function seePhoto(m) {
+    const att = m ? extraOf(m).attachment : null;
+    if (att?.kind !== 'photo' || !att.dataURL || att.description || engine.status !== 'ready') return null;
+    streamState.looking = true;
+    updateStream(null);
+    const description = await engine.describePhoto(att.dataURL);
+    streamState.looking = false;
+    updateStream(null);
+    if (description === null) return 'stopped';
+    if (description && !deleted) {
+      setExtra(m, { attachment: { ...att, description } });
+      await persist({ touch: false });
+      paint({ keepScroll: true });
+    }
+    return null;
   }
 
   function regenerate(m) {
@@ -638,9 +663,12 @@ export async function renderChat(ctx) {
 
   function paintPreview() {
     if (!pendingPhoto) { previewSlot.replaceChildren(); return; }
+    // With the model loaded, its vision pass describes the photo; demo replies only have the person's words.
+    const sees = engine.status === 'ready';
     const caption = h('input', {
-      class: 'input attach-caption', type: 'text', maxlength: '160', placeholder: `Describe it for ${c.name} (optional)`,
-      'aria-label': `Describe the photo for ${c.name}`, value: pendingPhoto.caption,
+      class: 'input attach-caption', type: 'text', maxlength: '160',
+      placeholder: sees ? 'Add a caption (optional)' : `Describe it for ${c.name} (optional)`,
+      'aria-label': sees ? `Caption for ${c.name}` : `Describe the photo for ${c.name}`, value: pendingPhoto.caption,
     });
     caption.addEventListener('input', () => { if (pendingPhoto) pendingPhoto.caption = caption.value; });
     caption.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); send(); } });
@@ -648,7 +676,9 @@ export async function renderChat(ctx) {
       h('img', { src: pendingPhoto.dataURL, alt: 'Photo to send' }),
       h('div', { class: 'attach-meta' },
         caption,
-        h('p', { class: 'field-hint' }, icon('lock', { size: 13 }), `${c.name} can't see pictures in the browser, so a few words help. The photo stays on this device.`)),
+        h('p', { class: 'field-hint' }, icon('lock', { size: 13 }), sees
+          ? `The model in this tab describes it for ${c.name}. The photo stays on this device.`
+          : `With demo replies ${c.name} can't see pictures, so a few words help. The photo stays on this device.`)),
       h('button', { class: 'icon-btn sm', type: 'button', 'aria-label': 'Remove photo', onClick: () => { pendingPhoto = null; paintPreview(); syncSend(); } }, icon('x'))));
   }
 

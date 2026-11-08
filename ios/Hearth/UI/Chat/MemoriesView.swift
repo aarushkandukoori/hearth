@@ -1,6 +1,6 @@
 // What a character remembers about the user: their own memories, things everyone knows, and (with town
-// gossip on) what other residents learned. Swipe to forget (which also clears the model's saved memory of
-// the chats that knew it), or add something by hand. All on this iPhone.
+// gossip on) what other residents learned. Swipe to forget (it leaves every prompt from then on), or add
+// something by hand. All on this iPhone.
 
 import SwiftUI
 
@@ -140,8 +140,9 @@ struct MemoriesView: View {
         forgetSavedChats(knowing: [fact])
     }
 
-    /// A forgotten memory is still written in the model's saved memory (the parked KV cache) of every chat
-    /// whose prompt had it. Drop those caches so it's really gone; those chats are read afresh next time.
+    /// A forgotten memory leaves every prompt from now on. Pie reuses KV only while a prompt starts the same
+    /// way, so in the chats whose prompts had it, everything from that point on is read afresh next time, and
+    /// the old KV that held it (in memory only) is never used again. The engine is told to forget them too.
     private func forgetSavedChats(knowing facts: [MemoryFact]) {
         guard !facts.isEmpty else { return }
         // Known to everyone, or shareable (gossip may have put it in other residents' prompts).

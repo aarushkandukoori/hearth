@@ -77,9 +77,9 @@ struct SettingsView: View {
         return app.settings.autoPlayVoiceNotes ? "Voice notes on, auto-play on" : "Voice notes on"
     }
 
+    /// Pictures come from the town's own art or are postcards (PictureMaker); there is no style to pick.
     private var picturesDetail: String {
-        guard app.settings.picturesEnabled else { return "Off" }
-        return "On, \(app.settings.pictureStyle.rawValue.capitalized) style"
+        app.settings.picturesEnabled ? "On, town art and postcards" : "Off"
     }
 }
 

@@ -1,80 +1,85 @@
-// The models Hearth can run on the iPhone, where each one is downloaded from, and how to find an
-// installed copy (downloaded into Application Support, or pushed into Documents over USB).
+// The models Hearth can run on the iPhone, all through Pie: Pie artifacts (`.metal.zt`, made by
+// `pie model import`), where each one is downloaded from, and how to find an installed copy (downloaded into
+// Application Support, or pushed into Documents over USB).
 
 import Foundation
 
 struct ModelSpec: Identifiable, Codable, Hashable, Sendable {
-    /// Engine id, e.g. "llama-3.2-3b". Also names the model's folder of parked KV caches.
+    /// Engine id, e.g. "qwen3.5-2b".
     var id: String
-    /// "Hearth Standard (Llama 3.2 3B)"
+    /// "Hearth Standard (Qwen3.5 2B)"
     var displayName: String
     /// "Standard", for small labels.
     var shortName: String
-    /// "Llama 3.2" or "Qwen3"
+    /// "Qwen3.5"
     var family: String
+    /// The Pie deployment inside the artifact, e.g. "qwen35-d2b-u4g64-kv-bf16".
+    var deployment: String
     var fileName: String
     var url: URL
-    /// Exact file size; used to spot partial copies without hashing 2 GB.
+    /// Exact file size; used to spot partial copies without hashing gigabytes.
     var bytes: Int64
     /// Lowercase hex SHA-256 of the file, checked after every download.
     var sha256: String
-    /// Context window Hearth runs the model with (n_ctx).
+    /// Context window Hearth runs the model with (Pie's max_model_len).
     var contextLength: Int
     var recommended: Bool
     /// Rough device RAM this model needs to run comfortably.
     var minimumMemoryGB: Double
+    /// True when the model has a vision tower, so Pie can describe photos the person sends.
+    var vision: Bool
     var license: String
     /// One plain sentence for the model picker.
     var blurb: String
+
+    /// "Qwen3.5 2B", taken from the display name.
+    var modelName: String {
+        guard let open = displayName.firstIndex(of: "("), let close = displayName.lastIndex(of: ")"), open < close else {
+            return displayName
+        }
+        return String(displayName[displayName.index(after: open)..<close])
+    }
 }
 
 enum ModelCatalog {
-    static let all: [ModelSpec] = [standard, lite, plus]
+    static let all: [ModelSpec] = [standard, lite]
+
+    /// Where the Pie artifacts are published (GitHub release assets of the Hearth repo).
+    static let releaseBase = "https://github.com/aarushkandukoori/hearth/releases/download/pie-models-1/"
 
     static let standard = ModelSpec(
-        id: "llama-3.2-3b",
-        displayName: "Hearth Standard (Llama 3.2 3B)",
+        id: "qwen3.5-2b",
+        displayName: "Hearth Standard (Qwen3.5 2B)",
         shortName: "Standard",
-        family: "Llama 3.2",
-        fileName: "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
-        url: link("https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf"),
-        bytes: 2_019_377_696,
-        sha256: "6c1a2b41161032677be168d354123594c0e6e67d2b9227c84f296ad037c728ff",
+        family: "Qwen3.5",
+        deployment: "qwen35-d2b-u4g64-kv-bf16",
+        fileName: "qwen3.5-2b.metal.zt",
+        url: link(releaseBase + "qwen3.5-2b.metal.zt"),
+        bytes: 1_074_698_212,
+        sha256: "116d5547ad1f9aaa85886ead8ee894e2f1b08a2b8de7c09ea556d5faf4b378c9",
         contextLength: 4096,
         recommended: true,
         minimumMemoryGB: 6,
-        license: "Llama 3.2 Community License",
-        blurb: "The everyday choice. Warm, steady conversation on most recent iPhones. About 2 GB.")
+        vision: false,
+        license: "Apache 2.0",
+        blurb: "The everyday choice. Warm, steady conversation, run by Pie on this iPhone's GPU. About 1.1 GB.")
 
     static let lite = ModelSpec(
-        id: "llama-3.2-1b",
-        displayName: "Hearth Lite (Llama 3.2 1B)",
+        id: "qwen3.5-0.8b",
+        displayName: "Hearth Lite (Qwen3.5 0.8B)",
         shortName: "Lite",
-        family: "Llama 3.2",
-        fileName: "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
-        url: link("https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf"),
-        bytes: 807_694_464,
-        sha256: "6f85a640a97cf2bf5b8e764087b1e83da0fdb51d7c9fab7d0fece9385611df83",
-        contextLength: 8192,
-        recommended: false,
-        minimumMemoryGB: 4,
-        license: "Llama 3.2 Community License",
-        blurb: "Smaller and quicker, with simpler replies. Good for older iPhones or when space is tight. About 800 MB.")
-
-    static let plus = ModelSpec(
-        id: "qwen3-4b-2507",
-        displayName: "Hearth Plus (Qwen3 4B Instruct 2507)",
-        shortName: "Plus",
-        family: "Qwen3",
-        fileName: "Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
-        url: link("https://huggingface.co/unsloth/Qwen3-4B-Instruct-2507-GGUF/resolve/main/Qwen3-4B-Instruct-2507-Q4_K_M.gguf"),
-        bytes: 2_497_281_120,
-        sha256: "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597",
+        family: "Qwen3.5",
+        deployment: "qwen35-d0.8b-vision-u4g64-kv-bf16",
+        fileName: "qwen3.5-0.8b-vision.metal.zt",
+        url: link(releaseBase + "qwen3.5-0.8b-vision.metal.zt"),
+        bytes: 648_146_919,
+        sha256: "1ac0483e8956940c968a2ed30b35e8a70e961b13f1494a8ab7fc2097957933af",
         contextLength: 4096,
         recommended: false,
-        minimumMemoryGB: 8,
+        minimumMemoryGB: 4,
+        vision: true,
         license: "Apache 2.0",
-        blurb: "The most thoughtful replies, for iPhones with 8 GB of memory or more. About 2.5 GB.")
+        blurb: "Smaller and quicker, with simpler replies, and it can look at photos you send. About 650 MB.")
 
     static var recommended: ModelSpec { all.first { $0.recommended } ?? standard }
 
@@ -106,7 +111,7 @@ enum ModelCatalog {
     }
 
     /// The `-HearthModel <fileName>` launch argument, resolved to a file on disk. A catalog file name maps
-    /// to its catalog model; any other GGUF becomes a "custom-..." model (handy for testing other models).
+    /// to its catalog model; any other Pie artifact becomes a "custom-..." model (handy for testing).
     static func launchOverride() -> (spec: ModelSpec, url: URL)? {
         guard let name = LaunchOptions.shared.modelFile, !name.isEmpty else { return nil }
         if let spec = all.first(where: { $0.fileName == name }) {
@@ -131,6 +136,7 @@ enum ModelCatalog {
             displayName: "Custom model (\(stem))",
             shortName: "Custom",
             family: "Custom",
+            deployment: "custom",
             fileName: fileName,
             url: url,
             bytes: bytes,
@@ -138,6 +144,7 @@ enum ModelCatalog {
             contextLength: 4096,
             recommended: false,
             minimumMemoryGB: 0,
+            vision: false,
             license: "See the model's own license",
             blurb: "A model file loaded with a developer launch option.")
     }

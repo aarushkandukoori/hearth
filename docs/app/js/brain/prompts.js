@@ -38,12 +38,22 @@ const turnsTokens = (turns) => turns.reduce((n, t) => n + estimateTokens(t.conte
 const textOf = (m) => (m?.variants?.[m.selected ?? 0] ?? m?.variants?.[0] ?? m?.text ?? '');
 const attachmentOf = (m) => m?.extras?.[m.selected ?? 0]?.attachment || m?.attachment || null;
 
-/** Text of one message as the model should see it (photos and pictures as bracket lines). */
+/** Brackets inside a bracket line would end it early. */
+const unbracket = (s) => String(s || '').replace(/\[/g, '(').replace(/\]/g, ')').replace(/\s+/g, ' ').trim();
+
+/**
+ * Text of one message as the model should see it (photos and pictures as bracket lines). A photo's
+ * `description` is what the model's vision pass saw in it (engine.describePhoto); `caption` is the person's own.
+ */
 export function messageForPrompt(m, { userName }) {
   const text = textOf(m).trim();
   const att = attachmentOf(m);
   if (m.role === 'user' && att?.kind === 'photo') {
-    const line = att.caption ? `[${userName} sent a photo: ${att.caption}]` : `[${userName} sent a photo]`;
+    const caption = unbracket(att.caption).replace(/[.\s]+$/, '');
+    const seen = unbracket(att.description);
+    let line = `[${userName} sent a photo]`;
+    if (caption && seen) line = `[${userName} sent a photo: ${caption}. The photo shows: ${seen}]`;
+    else if (caption || seen) line = `[${userName} sent a photo: ${caption || seen}]`;
     return text ? `${line}\n${text}` : line;
   }
   if (m.role === 'character' && att?.kind === 'picture') {
@@ -78,7 +88,7 @@ function photoNote(name, userName, photo) {
 
 /**
  * Adds notes to the newest user turn, or as a new user turn when the chat doesn't end with one
- * (WebLLM only accepts a system message at the very start).
+ * (the system message stays first, and the same every turn).
  */
 export function withNotes(turns, notes) {
   if (!notes.length) return turns;
@@ -202,7 +212,8 @@ export function composeDirect({
   // Built-in residents (from the world file) stay friends; characters people make are theirs to write.
   if (c.isBuiltIn) rules.push(friendsOnlyRule(userName));
   // Only rules that never change between turns go in the system prompt; a picture request or a safety
-  // flag rides on the newest user message (withNotes), so the model can reuse its cache for the rest.
+  // flag rides on the newest user message (withNotes), so every turn's prompt starts the same way, and Pie
+  // can reuse that shared start when it still holds it (on the iPhone, and in the browser until a reload).
   rules.push(safetyRule(userName, false)); // always last
   lines.push('', 'Rules:', ...rules);
 

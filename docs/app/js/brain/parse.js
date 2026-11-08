@@ -126,3 +126,23 @@ export function parseFacts(text, { max = 3 } = {}) {
   }
   return out;
 }
+
+/**
+ * A photo description from the model's vision pass, cut to whole sentences (two at most). The pass reads
+ * greedily, and a small model can fall into a loop ("boat-boat-boat") or run on past a stray "</think>": the
+ * text stops before either, and a sentence the token limit cut off ends at a comma.
+ */
+export function cleanCaption(raw) {
+  // Anything after a stray template marker (a small model can write "</think>") is not the description.
+  let t = String(raw || '').split(/<\/?think>|<\|/)[0].replace(/\s+/g, ' ').trim();
+  const loop = t.match(/\b([\p{L}\p{N}']+)(?:[\s,-]+\1\b){2,}/iu);
+  if (loop) t = t.slice(0, loop.index);
+  const sentences = t.match(/[^.!?]+[.!?]+(?=\s|$)/g);
+  if (sentences) return sentences.slice(0, 2).join(' ').replace(/\s+/g, ' ').trim();
+  // Cut the unfinished part off at a comma, best one that starts a new clause (", all ...", ", with ...").
+  const clause = [...t.matchAll(/,\s+(?:all|with|including|while|which|where|as|and|but|its|their|a|an|the)\b/gi)].pop();
+  const comma = clause && clause.index > 20 ? clause.index : t.lastIndexOf(',');
+  if (comma > 20) t = t.slice(0, comma);
+  t = t.replace(/[\s,;:'"-]+$/, '').trim();
+  return t ? `${t}.` : '';
+}

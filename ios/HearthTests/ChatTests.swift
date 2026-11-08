@@ -147,18 +147,23 @@ final class ChatTests: XCTestCase {
     // MARK: Labels
 
     func testStatsLine() {
-        var stats = GenerationStats(engine: "llama-3.2-3b", promptTokens: 900, reusedTokens: 812, prefilledTokens: 88,
-                                    generatedTokens: 40, timeToFirstToken: 0.42, decodeTokensPerSecond: 21.3,
-                                    restoredFromDisk: true, restoreMilliseconds: 140.2)
+        var stats = GenerationStats(engine: "qwen3.5-2b", promptTokens: 900, reusedTokens: 812, prefilledTokens: 88,
+                                    generatedTokens: 40, timeToFirstToken: 0.42, decodeTokensPerSecond: 21.3)
         XCTAssertEqual(ChatPipeline.statsLine(stats),
-                       "on-device · 21 tok/s · first token 420 ms · reused 812 · resumed from flash in 140 ms")
+                       "Pie, on this iPhone · 21 tok/s · first token 420 ms · reused 812")
         stats.timeToFirstToken = 2.34
         XCTAssertTrue(ChatPipeline.statsLine(stats).contains("first token 2.3 s"))
         stats.stoppedBy = "cancelled"
         XCTAssertTrue(ChatPipeline.statsLine(stats).hasSuffix(" · stopped"))
         // Canned demo lines never claim a model wrote them on the device.
         XCTAssertEqual(ChatPipeline.statsLine(GenerationStats(engine: "mock")), "demo reply, no AI")
-        XCTAssertEqual(ChatPipeline.statsLine(GenerationStats(engine: "apple")), "on-device")
+        XCTAssertEqual(ChatPipeline.statsLine(GenerationStats(engine: "qwen3.5-0.8b")), "Pie, on this iPhone")
+        // Replies saved before the move to Pie never credit it ("custom-..." ids were also llama-era GGUF files).
+        for old in ["llama-3.2-3b", "llama-3.2-1b", "qwen3-4b-2507", "apple", "custom-test-model"] {
+            XCTAssertEqual(ChatPipeline.statsLine(GenerationStats(engine: old)), "on-device", old)
+        }
+        let parked = GenerationStats(engine: "llama-3.2-3b", reusedTokens: 1200, restoredFromDisk: true, restoreMilliseconds: 52)
+        XCTAssertEqual(ChatPipeline.statsLine(parked), "on-device · reused 1200 · resumed from flash in 52 ms")
     }
 
     func testTimeGroupsStartAfterALongPause() {

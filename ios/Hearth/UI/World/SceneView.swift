@@ -38,7 +38,7 @@ struct SceneView: View {
         controller = SceneController.live(for: locationID) ?? SceneController(locationID: locationID, app: app)
     }
 
-    /// Leaving for good (not just opening a profile on top or switching tabs): stop and park.
+    /// Leaving for good (not just opening a profile on top or switching tabs): stop the scene's replies.
     private func closeIfLeft() {
         guard let controller else { return }
         let route = AppRoute.scene(locationID: locationID)

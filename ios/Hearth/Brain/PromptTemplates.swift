@@ -65,9 +65,10 @@ enum PromptTemplates {
     /// For a heavy topic or a negated mention ("I would never...", "a paper on suicide prevention"): a gentle
     /// answer, without the crisis instructions, which would sound alarmed and preachy here.
     static let noteConcern = "(Note for {name}: {userName} touched on something heavy. Answer gently and warmly, in your own voice.)"
-    /// The fixed start of every reply to a crisis-level message (GenerationRequest.replyOpener). Without
-    /// it, Llama 3.2 3B answered 3 to 6 of 9 crisis messages with a canned "I cannot continue this
-    /// conversation"; with it, 0 of 24. The model writes the rest in the character's voice.
+    /// The fixed start of every reply to a crisis-level message (GenerationRequest.replyOpener), forced by
+    /// Hearth's Pie inferlet before the model writes. Small models sometimes answer crisis messages with a
+    /// canned "I cannot continue this conversation"; with the opener the reply always starts with care and
+    /// 988, and the model writes the rest in the character's voice.
     static let crisisOpener = "*sets everything down and sits close* {userName}, I'm really glad you told me. You matter, and you deserve support from a real person right now: in the US you can call or text 988 any time."
     static let crisisOpenerScene = "*sets everything down and sits close* {userName}, I'm really glad you told us. You matter, and you deserve support from a real person right now: in the US you can call or text 988 any time."
     /// Appended to the system prompt when the character has example dialogue.

@@ -124,10 +124,11 @@ enum PrivacyVaultError: LocalizedError, Equatable {
     // MARK: Backups and deleting
 
     /// Keeps the whole Hearth folder out of iCloud and computer backups (or lets it back in). The AI model
-    /// and the resume cache stay out either way: they're large and can be made again.
+    /// stays out either way: it's large and can be downloaded again. (Pie's own files live in Caches, which
+    /// is never backed up.)
     func applyBackupExclusion(_ excluded: Bool) {
         HearthPaths.setExcludedFromBackup(excluded, at: root)
-        for name in ["models", "kv"] {
+        for name in ["models"] {
             let url = root.appendingPathComponent(name, isDirectory: true)
             if FileManager.default.fileExists(atPath: url.path) { HearthPaths.setExcludedFromBackup(true, at: url) }
         }
@@ -174,9 +175,16 @@ enum PrivacyVaultError: LocalizedError, Equatable {
         for folder in [fileManager.temporaryDirectory] + fileManager.urls(for: .cachesDirectory, in: .userDomainMask) {
             extras += (try? fileManager.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
         }
+        // Pie's home stays, because the running server needs its compiled copy of Hearth's inferlet for every
+        // reply. But its KV disk tier (cache/kv, where Pie may spill pages of chats under memory pressure) is
+        // conversation-derived, so its contents go. Pie computes anything it then can't find again.
+        let pieHome = HearthPaths.pieHome.standardizedFileURL.path
+        extras.removeAll { $0.standardizedFileURL.path == pieHome }
+        let kvTier = HearthPaths.pieHome.appendingPathComponent("cache/kv", isDirectory: true)
+        extras += (try? fileManager.contentsOfDirectory(at: kvTier, includingPropertiesForKeys: nil)) ?? []
         for url in (try? fileManager.contentsOfDirectory(at: HearthPaths.documents, includingPropertiesForKeys: nil)) ?? [] {
             let name = url.lastPathComponent.lowercased()
-            if name == "hearth-console.log" || (includeModels && name.hasSuffix(".gguf")) { extras.append(url) }
+            if name == "hearth-console.log" || (includeModels && name.hasSuffix(".zt")) { extras.append(url) }
         }
         for url in extras { try? fileManager.removeItem(at: url) }
         return failures
@@ -264,7 +272,6 @@ enum PrivacyVaultError: LocalizedError, Equatable {
             ("Your characters", "characters"),
             ("Photos, pictures and voice notes", "media"),
             ("Memories and settings", "state"),
-            ("Instant resume cache", "kv"),
             ("AI models", "models"),
         ]
         return parts.map { part in

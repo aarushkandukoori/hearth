@@ -70,7 +70,7 @@ function modelSection() {
   const paintStatus = (snap = engine.snapshot()) => {
     let dot = 'demo';
     let text = 'Demo replies. The real model is not loaded.';
-    if (snap.status === 'ready') { dot = 'ready'; text = `Running ${engine.modelInfo(engine.inUseModelId).name} on this device.`; }
+    if (snap.status === 'ready') { dot = 'ready'; text = `Running ${engine.modelInfo(engine.inUseModelId).name} on this device, with Pie.`; }
     else if (snap.status === 'loading') { dot = 'loading'; text = `Loading, ${Math.round((snap.progress?.fraction || 0) * 100)}%`; }
     else if (snap.status === 'error') { dot = 'error'; text = snap.error || 'The model could not start.'; }
     if (snap.webgpu === false) text = `Demo replies. ${noWebGPUText()}`;
@@ -147,7 +147,7 @@ function modelSection() {
   paintChoices();
   paintStorage();
   const el = section('model', 'Model', 'chip',
-    h('p', { class: 'set-intro' }, 'Replies are written by a small language model that runs inside this browser, on your graphics chip. It is downloaded once (model files from Hugging Face, the runtime from GitHub). Your messages are never sent anywhere.'),
+    h('p', { class: 'set-intro' }, 'Replies, and descriptions of photos you send, come from Qwen3.5 0.8B, a small language model with vision. Pie runs it inside this tab, on your graphics chip (Chrome or Edge 137 or newer). It is downloaded once (648 MB, from GitHub Pages). Your messages and photos are never sent anywhere.'),
     wrap);
   el.__cleanup = unsub;
   return el;
@@ -292,7 +292,7 @@ function privacySection() {
   return section('privacy', 'What is stored where', 'shield',
     h('ul', { class: 'privacy-list' },
       item('database', 'Chats, memories, characters and photos', 'In this browser on this device (IndexedDB). Photos are shrunk first, which also strips location data.'),
-      item('chip', 'The model', "In this browser's cache for this site, after a one-time download from Hugging Face (model files) and GitHub (runtime)."),
+      item('chip', 'The model', "In this browser's own storage for this site (its private file system), after a one-time 648 MB download from GitHub Pages."),
       item('palette', 'Theme and sidebar', 'In this browser (localStorage).'),
       item('globe', 'Sent to a server', 'Nothing. There are no accounts, no analytics, no ads and no cookies. The only network use is that one model download.'),
       item('volume', 'Voices', 'Only voices installed on this device read messages aloud. Online voices are skipped.'),
@@ -322,10 +322,12 @@ function aboutSection() {
       h('a', { class: 'btn btn-ghost', href: 'safety/' }, 'Safety')),
     h('div', { class: 'credits' },
       h('div', { class: 'set-row-label' }, 'Credits and licenses'),
-      h('p', { class: 'field-hint' }, h('strong', {}, 'Built with Llama. '),
-        'Llama 3.2 is licensed under the Llama 3.2 Community License, Copyright © Meta Platforms, Inc. All Rights Reserved. ',
-        ext('https://www.llama.com/llama3_2/license/', 'License'), ' · ', ext('https://www.llama.com/llama3_2/use-policy', 'Acceptable Use Policy')),
-      h('p', { class: 'field-hint' }, 'Runs on WebLLM (Apache 2.0). ', ext('https://github.com/mlc-ai/web-llm/blob/main/LICENSE', 'License'))));
+      h('p', { class: 'field-hint' }, h('strong', {}, 'Runs on Pie. '),
+        'Pie is an open-source programmable LLM serving system from Yale, licensed under the Apache License 2.0. Hearth uses its browser runtime unchanged. ',
+        ext('https://github.com/pie-project/pie', 'Pie'), ' · ', h('a', { class: 'link', href: 'app/vendor/pie/LICENSE' }, 'License'), ' · ', h('a', { class: 'link', href: 'app/vendor/pie/NOTICE' }, 'Notice')),
+      h('p', { class: 'field-hint' }, h('strong', {}, 'Writes with Qwen3.5 0.8B. '),
+        'Made by the Qwen team and licensed under the Apache License 2.0; converted to 4 bits for Pie. ',
+        ext('https://huggingface.co/Qwen/Qwen3.5-0.8B', 'Model card'))));
 }
 
 export function renderSettings(ctx) {

@@ -1,5 +1,5 @@
 // The top of Create: a live CharacterCardView of the draft (with a soft glow in its color) and the
-// avatar choices beside it: a photo, an emoji with colors, or a picture drawn by Image Playground.
+// avatar choices beside it: a photo, an emoji with colors, or a drawn picture (when drawing is available).
 
 import SwiftUI
 import UIKit

@@ -89,7 +89,7 @@ struct Character: Identifiable, Codable, Hashable, Sendable {
     var creator: String = "@you"
     var isBuiltIn: Bool = false
     var createdAt: Date?
-    /// Image Playground prompt used to make the avatar (no humans).
+    /// The idea used to draw the avatar (no humans).
     var artPrompt: String?
 
     /// Where this character is during a part of the day (falls back to home).
@@ -212,7 +212,7 @@ struct Conversation: Identifiable, Codable, Hashable, Sendable {
     var updatedAt: Date = .now
     var archived: Bool = false
 
-    /// Stable key the engine uses to park/restore this conversation's KV cache.
+    /// Stable key for this conversation in engine requests (GenerationRequest.conversationKey).
     var engineKey: String { "conv-\(id.uuidString)" }
 
     var directCharacterID: String? {
@@ -268,7 +268,7 @@ struct AppSettings: Codable, Hashable, Sendable {
     var persona = UserPersona()
     var onboardingDone = false
     var confirmedAdult = false
-    /// Engine id the user chose: a ModelSpec id, "apple", or "mock".
+    /// Engine id the user chose: a ModelSpec id or "mock".
     var preferredEngineID: String?
     var voiceNotesEnabled = true
     var autoPlayVoiceNotes = false

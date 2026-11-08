@@ -34,7 +34,7 @@ struct CreateAvatar: Equatable {
     var asset: String?
     /// A new picture waiting for Save. It wins over `file` and `asset`.
     var picture: CreatePicture?
-    /// The Image Playground idea behind a drawn picture.
+    /// The idea behind a drawn picture.
     var artPrompt: String?
 
     var hasPicture: Bool { picture != nil || file != nil || asset != nil }

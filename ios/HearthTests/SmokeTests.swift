@@ -12,7 +12,7 @@ final class SmokeTests: XCTestCase {
     func testOnlyDeveloperRunsKeepALogFile() {
         XCTAssertFalse(LaunchOptions(arguments: ["Hearth"]).writesLogFile)
         XCTAssertFalse(LaunchOptions(arguments: ["Hearth", "-HearthSkipOnboarding", "1"]).writesLogFile)
-        for flag in ["-HearthVerbose", "-HearthBenchmark", "-HearthUITour", "-HearthArtGen"] {
+        for flag in ["-HearthVerbose", "-HearthBenchmark", "-HearthUITour"] {
             XCTAssertTrue(LaunchOptions(arguments: ["Hearth", flag, "1"]).writesLogFile, flag)
         }
     }

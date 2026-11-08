@@ -64,9 +64,9 @@ final class WorldNewsTests: XCTestCase {
     }
 
     func testPlanAsksTheModelOnlyWhenItIsFree() {
-        XCTAssertEqual(WorldEventsController.plan(engineState: .ready, isGenerating: false, engineID: "llama-3.2-3b"), .askModel)
-        XCTAssertEqual(WorldEventsController.plan(engineState: .ready, isGenerating: false, engineID: "apple"), .askModel)
-        XCTAssertEqual(WorldEventsController.plan(engineState: .ready, isGenerating: true, engineID: "llama-3.2-3b"), .wait)
+        XCTAssertEqual(WorldEventsController.plan(engineState: .ready, isGenerating: false, engineID: "qwen3.5-2b"), .askModel)
+        XCTAssertEqual(WorldEventsController.plan(engineState: .ready, isGenerating: false, engineID: "qwen3.5-0.8b"), .askModel)
+        XCTAssertEqual(WorldEventsController.plan(engineState: .ready, isGenerating: true, engineID: "qwen3.5-2b"), .wait)
         XCTAssertEqual(WorldEventsController.plan(engineState: .loading("Loading"), isGenerating: false, engineID: nil), .wait)
         XCTAssertEqual(WorldEventsController.plan(engineState: .idle, isGenerating: false, engineID: nil), .wait)
     }

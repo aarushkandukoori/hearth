@@ -1,5 +1,5 @@
 // Onboarding step 5, "Give the town a voice": Hearth Standard or Lite (downloaded once, and the person can
-// keep going while it downloads) or Apple Intelligence when this iPhone has it.
+// keep going while it downloads). Both run on the iPhone through Pie.
 
 import SwiftUI
 
@@ -11,7 +11,7 @@ struct OnboardingVoicePage: View {
         OnboardingPageScroll(art: "loc-observatory", artHeight: 220) {
             VStack(alignment: .leading, spacing: Spacing.xl) {
                 OnboardingTitle(title: "Give the town a voice",
-                                subtitle: "Hearth's characters think with a small AI model that runs right on your iPhone. Download it once, and the town works anywhere, even in Airplane Mode.")
+                                subtitle: "Hearth's characters think with a small AI model that Pie runs right on your iPhone. Download it once, and the town works anywhere, even in Airplane Mode.")
                 VStack(spacing: Spacing.m) {
                     ForEach(OnboardingVoiceOptions.models) { spec in
                         VoiceOptionCard(title: SettingsModelActions.title(spec),
@@ -21,14 +21,6 @@ struct OnboardingVoicePage: View {
                                         status: status(for: spec),
                                         selected: choice == .model(spec.id)) {
                             withAnimation(.snappy) { choice = .model(spec.id) }
-                        }
-                    }
-                    if app.engine.appleAvailable {
-                        VoiceOptionCard(title: "Apple Intelligence",
-                                        subtitle: "Built into this iPhone, nothing to download",
-                                        detail: "Apple's own on-device model. It can be more careful than Hearth's models and may turn down some topics.",
-                                        tag: nil, status: .none, selected: choice == .apple) {
-                            withAnimation(.snappy) { choice = .apple }
                         }
                     }
                 }
@@ -78,7 +70,7 @@ enum OnboardingVoiceOptions {
 
     static func detail(for spec: ModelSpec) -> String {
         if spec.id == ModelCatalog.lite.id {
-            return "Smaller and quicker, with simpler replies. Good for older iPhones or when space is tight."
+            return "Smaller and quicker, with simpler replies, and it can look at photos you send. Good for older iPhones or when space is tight."
         }
         if !SettingsModelActions.fitsThisPhone(spec) {
             return "Warm, steady conversation, but it needs more memory than this iPhone has, so it may be slow or close."
@@ -97,8 +89,6 @@ enum OnboardingVoiceOptions {
         switch choice {
         case nil:
             return short ? "Choose one" : "Choose one to continue"
-        case .apple:
-            return short ? "Continue" : "Use Apple Intelligence"
         case .model(let id):
             guard let spec = ModelCatalog.spec(id: id) else { return "Continue" }
             if SettingsModelActions.isInstalled(spec, app: app) {
@@ -114,10 +104,6 @@ enum OnboardingVoiceOptions {
     /// paused, so two big files don't download at once.
     static func confirm(_ choice: OnboardingEngineChoice, app: AppModel, allowsCellular: Bool = false) -> Bool {
         switch choice {
-        case .apple:
-            SettingsModelActions.pauseOtherDownloads(keeping: nil, app: app)
-            Task { await SettingsModelActions.use("apple", app: app) }
-            return true
         case .model(let id):
             guard let spec = ModelCatalog.spec(id: id) else { return true }
             SettingsModelActions.pauseOtherDownloads(keeping: spec.id, app: app)
@@ -129,17 +115,12 @@ enum OnboardingVoiceOptions {
         }
     }
 
-    /// "Not now": carry on with Apple's model when this iPhone has it. Without it the town waits quietly for
-    /// a model (no canned demo replies).
-    static func skip(app: AppModel) {
-        SettingsModelActions.keepTownTalking(app: app)
-    }
+    /// "Not now": the town waits quietly for a model (no canned demo replies).
+    static func skip(app: AppModel) {}
 
     /// The line under "Not now", so skipping is never a surprise later.
     static func skipNote(app: AppModel) -> String {
-        app.engine.appleAvailable
-            ? "Until then, Apple Intelligence talks for the town."
-            : "Without a model the town can't talk yet. You can download one any time in You > Model."
+        "Without a model the town can't talk yet. You can download one any time in You > Model."
     }
 
     /// True when confirming this choice starts a new download (not a model that's ready or already coming).

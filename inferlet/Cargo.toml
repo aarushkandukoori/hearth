@@ -1,0 +1,26 @@
+[package]
+name = "hearth"
+version = "0.1.0"
+edition = "2024"
+description = "Hearth's inferlet for Pie: character replies and photo captions"
+license = "MIT"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# Pie's guest library, pinned to the Pie main commit the iPhone app links.
+# build.sh points this at a local Pie checkout instead (one for the iPhone,
+# one at server-web 0.6.4 for the browser), so nothing is cloned.
+inferlet = { git = "https://github.com/pie-project/pie", rev = "6168f025d" }
+serde = { version = "1.0", features = ["derive"] }
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+
+# A standalone package, not part of any workspace above it.
+[workspace]

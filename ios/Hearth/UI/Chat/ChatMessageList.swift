@@ -399,7 +399,7 @@ private struct ChatCharacterMessage: View {
         if let attachment = message.attachment {
             switch (attachment.kind, attachment.status) {
             case (.picture, .pending):
-                ChatDrawingPlaceholder()
+                ChatPicturePlaceholder()
             case (.picture, .ready):
                 if let file = attachment.file {
                     ChatPictureBubble(file: file, caption: attachment.caption) {

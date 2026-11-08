@@ -1,0 +1,5 @@
+[toolchain]
+# Inferlets are WASI 0.3 components, and wasm32-wasip3 is nightly's (the
+# same pin as Pie's own examples).
+channel = "nightly-2026-10-18"
+targets = ["wasm32-wasip3"]

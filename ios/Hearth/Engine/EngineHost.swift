@@ -1,5 +1,5 @@
-// EngineHost: the one place the app talks to a language engine. It picks the engine (a Hearth model,
-// Apple's on-device model, or demo replies), loads it, runs one generation at a time, and exposes state.
+// EngineHost: the one place the app talks to a language engine. It picks the engine (a Hearth model run by
+// Pie, or demo replies), loads it, runs one generation at a time, and exposes state.
 
 import Foundation
 import Observation
@@ -9,7 +9,7 @@ import Observation
         case idle
         /// No model on the phone yet: show the download screen.
         case needsModel
-        /// A label to show while weights load, e.g. "Loading Hearth Standard (Llama 3.2 3B)".
+        /// A label to show while weights load, e.g. "Loading Hearth Standard (Qwen3.5 2B)".
         case loading(String)
         case ready
         /// A message for the person (already friendly).
@@ -21,8 +21,10 @@ import Observation
     private(set) var lastStats: GenerationStats?
     /// True from the moment a request is queued until the last queued request finishes.
     private(set) var isGenerating = false
+    /// Set when the person picked (or finished downloading) a model other than the one Pie booted with:
+    /// Pie loads one model per launch, so the current one keeps talking and the new one takes over next launch.
+    private(set) var pendingSwitch: ModelSpec?
     let downloader = ModelDownloader()
-    private(set) var appleAvailable = AppleEngine.isAvailable
     /// Models whose files are on this phone (catalog models, plus a `-HearthModel` file).
     private(set) var installedModels: [ModelSpec] = ModelCatalog.installedSpecs()
 
@@ -31,7 +33,7 @@ import Observation
     @ObservationIgnored private var tail: Task<Void, Never>?
     @ObservationIgnored private var queuedRequests = 0
     @ObservationIgnored private var cancelEpoch = 0
-    /// Conversation whose KV cache the engine holds, so a switch can park it first.
+    /// The conversation of the last reply (callers tell the engine when it goes idle).
     @ObservationIgnored private var lastConversationKey: String?
     @ObservationIgnored private var preferredEngineID: String?
     /// Reads the person's current engine choice from settings (set by AppModel), so a finished download
@@ -48,14 +50,13 @@ import Observation
     // MARK: - Choosing and loading
 
     /// Picks and loads an engine. Order: `-HearthEngine` override, `-HearthModel` file, the person's
-    /// preference, an installed Hearth model (never on the Simulator), Apple's model, else `.needsModel`.
+    /// preference, an installed Hearth model (never on the Simulator), else `.needsModel`.
     func start(preferredEngineID: String?) async {
         self.preferredEngineID = preferredEngineID
-        appleAvailable = AppleEngine.isAvailable
         installedModels = ModelCatalog.installedSpecs()
         let choice = choose(preferred: preferredEngineID)
 
-        if case .llama(let spec, _) = choice, let crashed = UserDefaults.standard.string(forKey: Self.loadingMarkerKey) {
+        if case .pie(let spec, _) = choice, let crashed = UserDefaults.standard.string(forKey: Self.loadingMarkerKey) {
             UserDefaults.standard.removeObject(forKey: Self.loadingMarkerKey)
             if crashed == spec.id {
                 HearthLog.error("engine", "\(spec.id) did not finish loading last time; waiting for the person to choose")
@@ -70,26 +71,21 @@ import Observation
         await perform { await self.activate(choice) }
     }
 
-    /// Switches to a ModelSpec id, "apple" or "mock". Unknown or unavailable ids leave the current engine alone.
+    /// Switches to a ModelSpec id or "mock". Unknown or unavailable ids leave the current engine alone.
+    /// Pie boots once per app launch with one model, so switching between two models takes a relaunch:
+    /// the choice is saved and the engine says so.
     func switchTo(engineID: String) async {
-        appleAvailable = AppleEngine.isAvailable
         installedModels = ModelCatalog.installedSpecs()
         let choice: Choice
         switch engineID {
         case "mock":
             choice = .mock
-        case "apple":
-            guard appleAvailable else {
-                HearthLog.error("engine", "switch to apple ignored: not available")
-                return
-            }
-            choice = .apple
         default:
-            guard let llama = llamaChoice(id: engineID) else {
+            guard let pie = pieChoice(id: engineID) else {
                 HearthLog.error("engine", "switch to \(engineID) ignored: not installed or can't run here")
                 return
             }
-            choice = llama
+            choice = pie
         }
         preferredEngineID = engineID
         if active?.id == engineID, state == .ready { return }
@@ -98,15 +94,13 @@ import Observation
     }
 
     private enum Choice {
-        case llama(ModelSpec, URL)
-        case apple
+        case pie(ModelSpec, URL)
         case mock
         case needsModel
 
         var engineID: String? {
             switch self {
-            case .llama(let spec, _): return spec.id
-            case .apple: return "apple"
+            case .pie(let spec, _): return spec.id
             case .mock: return "mock"
             case .needsModel: return nil
             }
@@ -116,83 +110,88 @@ import Observation
     private func choose(preferred: String?) -> Choice {
         switch LaunchOptions.shared.engine?.lowercased() {
         case "mock"?: return .mock
-        case "apple"? where appleAvailable: return .apple
-        case "llama"?: return firstLlama(preferred: preferred) ?? .needsModel
+        case "pie"?: return firstPie(preferred: preferred) ?? .needsModel
         default: break
         }
         if let override = launchModelChoice() { return override }
         if let preferred {
             if preferred == "mock" { return .mock }
-            if preferred == "apple", appleAvailable { return .apple }
-            if let choice = llamaChoice(id: preferred) { return choice }
+            if let choice = pieChoice(id: preferred) { return choice }
         }
-        if let choice = firstLlama(preferred: nil) { return choice }
-        if appleAvailable { return .apple }
+        if let choice = firstPie(preferred: nil) { return choice }
         return .needsModel
     }
 
-    /// An installed Hearth model this build can run. Simulator builds have no llama.cpp, so never there.
-    private func llamaChoice(id: String) -> Choice? {
-        #if canImport(llama)
-        guard let spec = ModelCatalog.spec(id: id), let url = ModelCatalog.installedURL(for: spec) else { return nil }
-        return .llama(spec, url)
+    /// Pie's Metal engine runs on a real iPhone; the Simulator links a stub, so models never load there.
+    static var pieCanRun: Bool {
+        #if targetEnvironment(simulator)
+        return false
         #else
-        return nil
+        return true
         #endif
+    }
+
+    /// An installed Hearth model this build can run.
+    private func pieChoice(id: String) -> Choice? {
+        guard Self.pieCanRun, let spec = ModelCatalog.spec(id: id), let url = ModelCatalog.installedURL(for: spec) else { return nil }
+        return .pie(spec, url)
     }
 
     private func launchModelChoice() -> Choice? {
-        #if canImport(llama)
-        guard let override = ModelCatalog.launchOverride() else { return nil }
-        return .llama(override.spec, override.url)
-        #else
-        return nil
-        #endif
+        guard Self.pieCanRun, let override = ModelCatalog.launchOverride() else { return nil }
+        return .pie(override.spec, override.url)
     }
 
     /// The `-HearthModel` file, else the preferred model, else the recommended installed one, else any installed.
-    private func firstLlama(preferred: String?) -> Choice? {
+    private func firstPie(preferred: String?) -> Choice? {
         if let override = launchModelChoice() { return override }
-        if let preferred, let choice = llamaChoice(id: preferred) { return choice }
+        if let preferred, let choice = pieChoice(id: preferred) { return choice }
         let installed = ModelCatalog.all.filter { ModelCatalog.installedURL(for: $0) != nil }
         guard let pick = installed.first(where: \.recommended) ?? installed.first else { return nil }
-        return llamaChoice(id: pick.id)
+        return pieChoice(id: pick.id)
     }
 
     private func activate(_ choice: Choice) async {
         if let id = choice.engineID, active?.id == id, state == .ready { return } // already running it
+        if case .pie(let spec, _) = choice, let booted = await PieRuntime.shared.bootedModelID, booted != spec.id {
+            // Pie already holds another model in this launch and can't load a second one. Keep the one that
+            // works (the choice is saved, so it takes over next launch) instead of leaving the town silent.
+            pendingSwitch = spec
+            HearthLog.info("engine", "\(spec.id) takes over at the next launch (Pie is running \(booted))")
+            if engine == nil {
+                // Nothing is answering (for example the model in use was just deleted): reattach to the model
+                // Pie still holds in memory. Its file isn't read again once Pie has booted.
+                if let running = ModelCatalog.spec(id: booted) ?? ModelCatalog.launchOverride()?.spec {
+                    let pie = PieEngine(spec: running, modelURL: ModelCatalog.installedURL(for: running) ?? URL(fileURLWithPath: "/"))
+                    if (try? await pie.prepare()) != nil {
+                        install(pie)
+                        return
+                    }
+                }
+                state = .failed("Close and reopen Hearth to start \(spec.displayName). Pie loads one model each time Hearth starts.")
+            }
+            return
+        }
+        if case .pie(let spec, _) = choice, pendingSwitch?.id == spec.id { pendingSwitch = nil }
         await deactivate(park: true)
         switch choice {
         case .needsModel:
             state = .needsModel
         case .mock:
             install(MockEngine())
-        case .apple:
-            let apple = AppleEngine()
-            do {
-                try await apple.prepare()
-                install(apple)
-            } catch {
-                state = .failed(error.localizedDescription)
-            }
-        case .llama(let spec, let url):
-            #if canImport(llama)
+        case .pie(let spec, let url):
             state = .loading("Loading \(spec.displayName)")
             UserDefaults.standard.set(spec.id, forKey: Self.loadingMarkerKey)
-            let llama = LlamaEngine(spec: spec, modelURL: url)
+            let pie = PieEngine(spec: spec, modelURL: url)
             do {
-                try await llama.prepare()
+                try await pie.prepare()
                 UserDefaults.standard.removeObject(forKey: Self.loadingMarkerKey)
-                install(llama)
+                install(pie)
             } catch {
                 UserDefaults.standard.removeObject(forKey: Self.loadingMarkerKey)
                 HearthLog.error("engine", "\(spec.id) failed to load")
                 state = .failed(error.localizedDescription)
             }
-            #else
-            _ = (spec, url)
-            state = .needsModel
-            #endif
         }
     }
 
@@ -216,14 +215,14 @@ import Observation
 
     private func modelInstalled(_ spec: ModelSpec) {
         installedModels = ModelCatalog.installedSpecs()
-        // A model the person just downloaded replaces the download screen or the demo replies, and it also
-        // replaces Apple's model when it's the one they picked. It queues behind any reply in progress and any
-        // waiting (no cancel, unlike switchTo), so a finished download never cuts a reply off.
+        // A model the person just downloaded replaces the download screen or the demo replies, or the model
+        // in use when it's the one they picked. It queues behind any reply in progress and any waiting (no
+        // cancel, unlike switchTo), so a finished download never cuts a reply off.
         let preferred = preferredEngineIDProvider?() ?? preferredEngineID
         guard LaunchOptions.shared.engine == nil,
               state == .needsModel || active?.id == "mock" || preferred == spec.id,
               active?.id != spec.id,
-              let choice = llamaChoice(id: spec.id) else { return }
+              let choice = pieChoice(id: spec.id) else { return }
         preferredEngineID = spec.id
         Task { await self.perform { await self.activate(choice) } }
     }
@@ -294,52 +293,47 @@ import Observation
         }
     }
 
-    // MARK: - Parked conversations and models
+    // MARK: - Conversations and models
 
-    /// Saves this conversation's KV cache to flash now (call when the app goes to the background).
-    func park(conversationKey: String) async {
-        await engine?.park(conversationKey: conversationKey)
-    }
-
-    /// Parks whatever conversation the engine currently holds (call when the app goes to the background).
+    /// Going to the background: Pie keeps and evicts KV on its own, so there is nothing to save, but this
+    /// waits until the reply that was just stopped has finished and been stored, so the caller's flush that
+    /// follows includes it.
     func parkCurrent() async {
-        guard let key = lastConversationKey else { return }
-        await park(conversationKey: key)
+        await perform {}
     }
 
-    /// Forgets one conversation's cache in memory and on flash (call when a chat is deleted).
+    /// Same as above, for one conversation (switching chats): nothing to do with Pie.
+    func park(conversationKey: String) async {}
+
+    /// A chat was deleted: forget it here. Pie's cached pages for it are just unused pages to Pie and age out.
     func forget(conversationKey: String) async {
-        #if canImport(llama)
-        if let llama = engine as? LlamaEngine { await llama.forget(conversationKey: conversationKey) }
-        #endif
-        KVStateCache.removeEverywhere(key: conversationKey)
         if lastConversationKey == conversationKey { lastConversationKey = nil }
     }
 
-    /// Deletes a downloaded model and its parked caches, then falls back to another engine.
+    /// Deletes a downloaded model, then falls back to another engine. Pie can't unload the model it booted
+    /// with, so deleting the one in use takes effect fully at the next launch.
     func deleteModel(_ spec: ModelSpec) async {
         if active?.id == spec.id {
             cancel()
             await perform { await self.deactivate(park: false) }
         }
         downloader.delete(spec)
-        KVStateCache(modelID: spec.id).purge()
         installedModels = ModelCatalog.installedSpecs()
         if engine == nil {
             await start(preferredEngineID: preferredEngineID == spec.id ? nil : preferredEngineID)
         }
     }
 
-    /// Bytes of parked KV caches on flash, across all models.
-    func parkedBytes() -> Int64 { KVStateCache.totalBytes() }
+    // MARK: - Photos
 
-    /// Deletes every parked KV cache (conversations stay; they are just re-read next time).
-    func purgeParked() async {
-        // Every model's folder first, then the loaded model's own purge, which makes its folder again so it can
-        // keep parking. (The other order deleted that folder last and parking failed until a relaunch.)
-        KVStateCache.purgeAll()
-        await engine?.purgeParkedState()
-        lastConversationKey = nil
+    /// One or two sentences about a photo the person sent, from the loaded model's own vision (Pie's caption
+    /// mode). Nil when the model has no vision (Hearth Standard), when no model is ready, or when it fails:
+    /// the caller then keeps the on-device Vision labels. Runs in the same queue as replies.
+    func describePhoto(_ jpeg: Data) async -> String? {
+        guard let pie = engine as? PieEngine, pie.spec.vision, state == .ready else { return nil }
+        var caption: String?
+        await perform { caption = await pie.describePhoto(jpeg) }
+        return caption
     }
 
     // MARK: - Serial queue on the main actor

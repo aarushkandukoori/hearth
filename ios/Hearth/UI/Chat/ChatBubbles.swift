@@ -1,5 +1,5 @@
 // Media inside chat messages: voice notes (play, waveform, transcript), pictures characters send,
-// photos the user sends, the "Drawing…" placeholder, and a full-screen viewer with Share and Save.
+// photos the user sends, the "Picking a picture…" placeholder, and a full-screen viewer with Share and Save.
 
 import Photos
 import SwiftUI
@@ -95,7 +95,7 @@ private struct ChatVoiceWave: View {
     }
 }
 
-/// A picture a character sent (Image Playground, bundled art or a postcard). Tap to see it big.
+/// A picture a character sent (bundled town art or a postcard). Tap to see it big.
 struct ChatPictureBubble: View {
     let file: String
     let caption: String?
@@ -152,8 +152,8 @@ struct ChatPhotoBubble: View {
     }
 }
 
-/// Shown while a picture is being drawn on this iPhone.
-struct ChatDrawingPlaceholder: View {
+/// Shown for the moment it takes to pick a character's picture (town art or a postcard, see PictureMaker).
+struct ChatPicturePlaceholder: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -177,17 +177,17 @@ struct ChatDrawingPlaceholder: View {
             }
             .overlay {
                 VStack(spacing: Spacing.s) {
-                    Image(systemName: "paintbrush.pointed.fill")
+                    Image(systemName: "photo.on.rectangle.angled.fill")
                         .font(.title2)
                         .foregroundStyle(.hearthGold)
-                    Text("Drawing…")
+                    Text("Picking a picture…")
                         .font(HearthFont.callout.weight(.semibold))
                         .foregroundStyle(.hearthText2)
                 }
             }
             .overlay(shape.strokeBorder(Color.hearthLine.opacity(0.6), lineWidth: 1))
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Drawing a picture")
+            .accessibilityLabel("Picking a picture")
     }
 }
 

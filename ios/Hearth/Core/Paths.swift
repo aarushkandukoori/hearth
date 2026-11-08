@@ -18,9 +18,13 @@ enum HearthPaths {
     static var models: URL { ensure(root.appendingPathComponent("models", isDirectory: true)) }
     static var state: URL { ensure(root.appendingPathComponent("state", isDirectory: true)) }
 
-    /// Parked KV caches. Kept under Application Support (not Caches) so iOS doesn't purge them mid-chat,
-    /// but they are disposable and excluded from backup.
-    static var kvCache: URL { ensure(root.appendingPathComponent("kv", isDirectory: true)) }
+    /// Pie's runtime home: Hearth's inferlet as Pie installed it, its compile cache, model recipe files, and
+    /// a KV disk tier (cache/kv) Pie may spill pages to under memory pressure (Delete everything empties
+    /// that). Disposable, so it lives in Caches: never backed up, and Pie rebuilds what it needs.
+    static var pieHome: URL {
+        let caches = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+        return ensure(caches.appendingPathComponent("pie", isDirectory: true))
+    }
 
     /// Documents is used only for developer artifacts (benchmarks, tour screenshots, art, the developer-run
     /// log) and for model files pushed over USB.

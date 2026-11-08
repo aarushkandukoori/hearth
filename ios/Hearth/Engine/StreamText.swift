@@ -1,5 +1,5 @@
-// Streaming text helpers shared by every engine: rebuild UTF-8 characters that arrive split across
-// tokens, hold back text that might be the start of a stop string, and drop an echoed "Name:" label.
+// Streaming text helpers for engines: rebuild UTF-8 characters that arrive split across tokens, hold
+// back text that might be the start of a stop string, and drop an echoed "Name:" label.
 
 import Foundation
 
@@ -111,7 +111,7 @@ struct StopFilter {
 }
 
 /// Drops a leading speaker label such as "Theo:" that a model may echo at the start of its reply.
-/// Used by engines that cannot force the label into the prompt (Apple's model).
+/// For an engine that can't force the label into the prompt; Hearth's Pie inferlet does force it.
 struct LeadingLabelStripper {
     private let label: String?
     private var buffer = ""

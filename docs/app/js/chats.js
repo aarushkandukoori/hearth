@@ -6,7 +6,8 @@
 // message      = { id, role: 'user'|'character'|'narrator', speakerID, createdAt,
 //                  variants: [text...], selected, extras: [{ attachment?, rating?, stats? } per variant],
 //                  pinned }
-// attachment   = { kind: 'photo'|'picture'|'voice', dataURL?, src?, caption?, duration?, waveform?, postcard? }
+// attachment   = { kind: 'photo'|'picture'|'voice', dataURL?, src?, caption?, description?, duration?, waveform?, postcard? }
+//                (description: what the model's vision pass saw in a photo the user sent)
 
 import * as store from './store.js';
 import { uid, fillNames } from './util.js';

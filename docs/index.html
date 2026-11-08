@@ -8,8 +8,8 @@
   <meta name="color-scheme" content="dark light">
   <meta name="theme-color" content="#141110">
   <meta name="referrer" content="no-referrer">
-  <!-- Privacy you can check: this page, and the worker that runs the model, may only talk to itself, plus the one-time model download hosts. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' data: blob:; connect-src 'self' https://huggingface.co https://*.huggingface.co https://*.hf.co https://raw.githubusercontent.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'; frame-src 'none'">
+  <!-- Privacy you can check: this page may only talk to this site, which also serves the one-time model download. Pie runs in a worker from this site, which app/sw.js holds to the same limit on GitHub Pages; wasm-unsafe-eval lets Pie compile its WebAssembly. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'; frame-src 'none'">
   <link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="assets/brand/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">

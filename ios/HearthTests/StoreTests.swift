@@ -1,5 +1,6 @@
 // Tests for the Store: saving and loading, damaged and locked files, debounced saves, greetings, scenes,
-// search, avatars, Character Card import and export, encrypted backups and "Delete everything".
+// search, avatars, Character Card import and export, encrypted backups, "Delete everything" and the one-time
+// cleanup of the llama.cpp version's leftovers.
 
 import CoreGraphics
 import Foundation
@@ -794,7 +795,7 @@ final class StoreTests: XCTestCase {
         // Unsaved changes still waiting must not be written back after the wipe.
         chats.append(Message(role: .user, text: "unsaved"), to: chat.id)
         settings.settings.persona.about = "pending"
-        for path in ["kv/model/abc.kvstate", "models/model.gguf", "media/photos/p.jpg"] {
+        for path in ["models/model.metal.zt", "media/photos/p.jpg"] {
             let url = root.appendingPathComponent(path)
             try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
             try Data([1, 2, 3]).write(to: url)
@@ -804,16 +805,16 @@ final class StoreTests: XCTestCase {
         XCTAssertEqual(vault.networkDownloadedBytes, 123)
         XCTAssertEqual(vault.networkUploadedBytes, 0)
         let breakdown = vault.storageBreakdown()
-        XCTAssertEqual(breakdown.count, 6)
+        XCTAssertEqual(breakdown.count, 5)
         XCTAssertGreaterThan(breakdown.first { $0.label == "Chats" }?.bytes ?? 0, 0)
         vault.applyBackupExclusion(false) // this person had backups on
 
         try await vault.wipeEverything(includeModels: false)
         XCTAssertTrue(try isExcludedFromBackup(root), "the settings start over, and so does the backup choice")
-        for name in ["chats", "characters", "media", "state", "kv"] {
+        for name in ["chats", "characters", "media", "state"] {
             XCTAssertFalse(exists(root.appendingPathComponent(name)), "\(name) is gone")
         }
-        XCTAssertTrue(exists(root.appendingPathComponent("models/model.gguf")), "models stay unless asked")
+        XCTAssertTrue(exists(root.appendingPathComponent("models/model.metal.zt")), "models stay unless asked")
         XCTAssertTrue(chats.conversations.isEmpty)
         XCTAssertTrue(library.userCharacters.isEmpty)
         XCTAssertEqual(library.world.characters.count, 4, "the built-in town stays")
@@ -837,7 +838,7 @@ final class StoreTests: XCTestCase {
 
     func testBackupExclusionCoversTheWholeFolder() throws {
         let root = try makeFolder()
-        for name in ["kv", "models", "chats"] {
+        for name in ["models", "chats"] {
             try FileManager.default.createDirectory(at: root.appendingPathComponent(name), withIntermediateDirectories: true)
         }
         let vault = PrivacyVault(root: root, defaults: try makeDefaults())
@@ -845,8 +846,59 @@ final class StoreTests: XCTestCase {
         XCTAssertTrue(try isExcludedFromBackup(root))
         vault.applyBackupExclusion(false)
         XCTAssertFalse(try isExcludedFromBackup(root))
-        XCTAssertTrue(try isExcludedFromBackup(root.appendingPathComponent("kv")), "the resume cache never goes into backups")
         XCTAssertTrue(try isExcludedFromBackup(root.appendingPathComponent("models")), "neither does the model")
+    }
+
+    // MARK: - Leftovers from the llama.cpp version
+
+    func testLegacyCleanupRemovesOldKVCachesAndModelsOnce() throws {
+        let root = try makeFolder()
+        let models = root.appendingPathComponent("models", isDirectory: true)
+        let documents = try makeFolder()
+        let defaults = try makeDefaults()
+        func put(_ url: URL) throws {
+            try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try Data([1, 2, 3]).write(to: url)
+        }
+        let old = [root.appendingPathComponent("kv/llama-3.2-3b/0a1b.kvstate"),
+                   root.appendingPathComponent("kv/llama-3.2-3b/0a1b.json"),
+                   models.appendingPathComponent("Llama-3.2-3B-Instruct-Q4_K_M.gguf"),
+                   models.appendingPathComponent("Qwen3-4B-Instruct-2507-Q4_K_M.gguf.download"),
+                   documents.appendingPathComponent("Llama-3.2-1B-Instruct-Q4_K_M.GGUF")]
+        let kept = [models.appendingPathComponent("qwen3.5-2b.metal.zt"),
+                    models.appendingPathComponent("qwen3.5-0.8b-vision.metal.zt.download"),
+                    documents.appendingPathComponent("qwen3.5-2b.metal.zt"),
+                    documents.appendingPathComponent("hearth-console.log"),
+                    root.appendingPathComponent("chats/one.json"),
+                    root.appendingPathComponent("state/settings.json")]
+        for url in old + kept { try put(url) }
+
+        // A file that can't be removed yet (a read-only folder here) leaves the job for the next launch.
+        let stuck = try makeFolder()
+        let emptyRoot = try makeFolder()
+        let emptyDocuments = try makeFolder()
+        try put(stuck.appendingPathComponent("old.gguf"))
+        try FileManager.default.setAttributes([.posixPermissions: 0o555], ofItemAtPath: stuck.path)
+        addTeardownBlock { try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: stuck.path) }
+        let first = try XCTUnwrap(LegacyCleanup.runOnce(root: emptyRoot, models: stuck, documents: emptyDocuments, defaults: defaults))
+        XCTAssertEqual(first.failures, 1)
+        XCTAssertFalse(defaults.bool(forKey: LegacyCleanup.doneKey), "not done until everything is gone")
+
+        let result = try XCTUnwrap(LegacyCleanup.runOnce(root: root, models: models, documents: documents, defaults: defaults))
+        XCTAssertTrue(result.removedKVCaches)
+        XCTAssertEqual(result.removedModelFiles, 3)
+        XCTAssertEqual(result.failures, 0)
+        XCTAssertGreaterThan(result.bytes, 0)
+        XCTAssertFalse(exists(root.appendingPathComponent("kv")), "the parked KV caches (chat content) are gone")
+        for url in old { XCTAssertFalse(exists(url), "\(url.lastPathComponent) is gone") }
+        for url in kept { XCTAssertTrue(exists(url), "\(url.lastPathComponent) stays") }
+        XCTAssertTrue(defaults.bool(forKey: LegacyCleanup.doneKey))
+
+        // Done once: a .gguf that turns up later stays.
+        let later = documents.appendingPathComponent("later.gguf")
+        try put(later)
+        XCTAssertNil(LegacyCleanup.runOnce(root: root, models: models, documents: documents, defaults: defaults))
+        XCTAssertTrue(exists(later))
     }
 
     // MARK: - Small helpers

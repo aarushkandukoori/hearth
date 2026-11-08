@@ -17,10 +17,9 @@ struct OnboardingDraft {
     var trimmedAbout: String { about.trimmingCharacters(in: .whitespacesAndNewlines) }
 }
 
-/// The voice step's options: a catalog model (by id) or Apple's built-in model.
+/// The voice step's choice: a catalog model (by id), which Pie runs once it is downloaded.
 enum OnboardingEngineChoice: Hashable {
     case model(String)
-    case apple
 }
 
 /// Bundled town art that fills whatever frame it gets (decoded off the main thread, faded in).

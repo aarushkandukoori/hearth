@@ -1,5 +1,5 @@
 // "Load the real model" dialog: honest consent copy, download/load progress, and friendly errors.
-// The download is the only network use in Hearth: model files from Hugging Face, the runtime from GitHub.
+// The download is the only network use in Hearth: the model file (648 MB), from the same GitHub Pages site.
 
 import { h, modal, toast } from './components.js';
 import { icon } from './icons.js';
@@ -7,9 +7,9 @@ import { engine } from '../engine/engine.js';
 import { updateSettings, settings } from '../data.js';
 import { formatBytes } from '../util.js';
 
-/** Plain explanation shown when WebGPU is missing. */
+/** Plain explanation shown when the browser can't run the model. */
 export function noWebGPUText() {
-  return "This browser can't run the model yet, because it needs WebGPU. Try a recent Chrome or Edge on a computer, or Safari on a Mac or iPhone with the latest system. On iPhone, the Hearth app runs it natively.";
+  return "This browser can't run the model yet. Pie, the engine that runs it in the tab, needs WebGPU and WebAssembly JSPI, which Chrome and Edge have from version 137 on a computer. On iPhone, the Hearth app runs it natively.";
 }
 
 async function storageLine() {
@@ -29,11 +29,12 @@ async function storageLine() {
  */
 export async function openModelDialog({ modelId = settings().modelId || engine.modelId } = {}) {
   const info = engine.modelInfo(modelId);
+  modelId = info.id;
   const gpu = await engine.isWebGPUAvailable();
 
   if (!gpu) {
     modal({
-      title: 'The real model needs WebGPU',
+      title: 'The real model needs a newer browser',
       body: h('div', { class: 'stack' },
         h('p', { class: 'text-2' }, noWebGPUText()),
         h('p', { class: 'text-2' }, 'You can keep chatting with demo replies. They are simple canned lines, clearly marked.')),
@@ -42,6 +43,7 @@ export async function openModelDialog({ modelId = settings().modelId || engine.m
     return false;
   }
 
+  const cached = await engine.isCached(modelId);
   return new Promise((resolve) => {
     let started = false; // a download/load is running (from here or from startup)
     let busy = false;    // this dialog's button is waiting on it
@@ -54,19 +56,23 @@ export async function openModelDialog({ modelId = settings().modelId || engine.m
     const space = h('p', { class: 'field-hint' });
     storageLine().then((t) => { if (t) space.textContent = t; });
 
+    const ext = (href, text) => h('a', { class: 'link', href, target: '_blank', rel: 'noopener noreferrer' }, text);
     const body = h('div', { class: 'stack model-dialog' },
       h('div', { class: 'model-hero' },
         h('span', { class: 'model-hero-icon' }, icon('chip', { size: 26 })),
-        h('div', {}, h('strong', {}, `${info.name} (${info.detail})`), h('span', { class: 'muted' }, `${info.sizeLabel}, downloaded once`))),
-      h('p', { class: 'text-2' }, `${info.name} runs right here in your browser, on your own graphics chip. The first time, your browser downloads ${info.sizeLabel}: the model files from Hugging Face and the model runtime from GitHub.`),
+        h('div', {}, h('strong', {}, `${info.name} ${info.detail.split(',')[0]}`),
+          h('span', { class: 'muted' }, `Run by Pie in this tab · ${info.sizeLabel}, ${cached ? 'already downloaded' : 'downloaded once'}`))),
+      h('p', { class: 'text-2' }, cached
+        ? `${info.name} is already in this browser. Loading it puts it on your graphics chip, right here in this tab.`
+        : `${info.name} runs right here in this tab, on your own graphics chip. The first time, your browser downloads it (${info.sizeLabel}) from GitHub Pages, where Hearth lives, and keeps it.`),
       h('ul', { class: 'promise-list' },
-        h('li', {}, icon('lock', { size: 16 }), 'Your chats never leave this browser. Nothing you type is sent anywhere.'),
-        h('li', {}, icon('download', { size: 16 }), "After this one download, it loads from this browser's cache instead of downloading again."),
+        h('li', {}, icon('lock', { size: 16 }), 'Your chats and photos never leave this browser. Nothing you type or send is uploaded.'),
+        h('li', {}, icon('download', { size: 16 }), "After this one download, it loads from this browser's storage instead of downloading again."),
         h('li', {}, icon('trash', { size: 16 }), 'You can delete the download any time in Settings.')),
       space,
-      h('p', { class: 'field-hint' }, 'Built with Llama. Llama 3.2 is licensed under the ',
-        h('a', { class: 'link', href: 'https://www.llama.com/llama3_2/license/', target: '_blank', rel: 'noopener noreferrer' }, 'Llama 3.2 Community License'),
-        ', Copyright © Meta Platforms, Inc. All Rights Reserved.'),
+      h('p', { class: 'field-hint' }, 'Needs Chrome or Edge 137 or newer (WebGPU and WebAssembly JSPI). ',
+        'Qwen3.5 0.8B is made by the Qwen team (', ext('https://huggingface.co/Qwen/Qwen3.5-0.8B', 'Apache 2.0'), '). ',
+        'Pie, the engine that runs it, is open source from Yale (', ext('https://github.com/pie-project/pie', 'Apache 2.0'), ').'),
       progressBox, errorBox);
 
     const paint = (s) => {
@@ -77,7 +83,7 @@ export async function openModelDialog({ modelId = settings().modelId || engine.m
         bar.setAttribute('aria-valuenow', String(pct));
         status.textContent = s.progress.phase === 'download'
           ? `Downloading, ${pct}%${s.progress.mb ? ` (${Math.round(s.progress.mb)} MB so far)` : ''}`
-          : s.progress.phase === 'load' ? `Loading from this device, ${pct}%` : `Getting the model ready, ${pct}%`;
+          : s.progress.phase === 'load' ? `Loading onto the graphics chip, ${pct}%` : `Getting the model ready, ${pct}%`;
       }
     };
 
@@ -88,7 +94,7 @@ export async function openModelDialog({ modelId = settings().modelId || engine.m
       actions: [
         { label: 'Not now', variant: 'ghost' },
         {
-          label: 'Download and load', variant: 'primary', autofocus: true, id: 'model-go',
+          label: cached ? 'Load' : 'Download and load', variant: 'primary', autofocus: true, id: 'model-go',
           onClick: async (dlg) => {
             if (busy) return false;
             busy = true;

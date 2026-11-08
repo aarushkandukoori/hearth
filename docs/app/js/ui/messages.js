@@ -27,11 +27,16 @@ export function pictureCard(att) {
   return card;
 }
 
-/** A photo the user sent (stored as a downscaled data URL). */
+/** A photo the user sent (stored as a downscaled data URL), with what the model saw in it, if it looked. */
 export function photoThumb(att) {
   const fig = h('figure', { class: 'photo-thumb' });
-  if (att.dataURL) fig.append(h('img', { src: att.dataURL, alt: att.caption ? `Your photo: ${att.caption}` : 'Your photo', decoding: 'async' }));
-  if (att.caption) fig.append(h('figcaption', {}, att.caption));
+  const about = att.caption || att.description;
+  if (att.dataURL) fig.append(h('img', { src: att.dataURL, alt: about ? `Your photo: ${about}` : 'Your photo', decoding: 'async' }));
+  if (att.caption || att.description) {
+    fig.append(h('figcaption', {},
+      att.caption || null,
+      att.description ? h('span', { class: 'photo-seen' }, `Seen as: ${att.description}`) : null));
+  }
   return fig;
 }
 

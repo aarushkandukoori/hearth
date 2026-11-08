@@ -118,10 +118,11 @@ enum ChatPipeline {
 
     // MARK: Labels
 
-    /// "on-device · 21 tok/s · first token 420 ms · reused 812 · resumed from flash in 140 ms".
-    /// Canned demo replies say so instead of "on-device", since no model wrote them.
+    /// "Pie, on this iPhone · 21 tok/s · first token 420 ms · reused 812". Replies saved before Hearth moved
+    /// to Pie keep their old engine id ("llama-3.2-3b", "apple", ...) and say "on-device" instead; canned
+    /// demo replies say so, since no model wrote them.
     static func statsLine(_ s: GenerationStats) -> String {
-        var parts = [s.engine == "mock" ? "demo reply, no AI" : "on-device"]
+        var parts = [engineLabel(s.engine)]
         if s.decodeTokensPerSecond > 0 { parts.append("\(Int(s.decodeTokensPerSecond.rounded())) tok/s") }
         if s.timeToFirstToken > 0 {
             parts.append(s.timeToFirstToken < 1
@@ -129,9 +130,21 @@ enum ChatPipeline {
                 : String(format: "first token %.1f s", s.timeToFirstToken))
         }
         if s.reusedTokens > 0 { parts.append("reused \(s.reusedTokens)") }
+        // Only replies from the engine before Pie carry this (it saved each chat's KV cache to flash).
+        // Pie keeps KV in memory and never sets it.
         if s.restoredFromDisk, let ms = s.restoreMilliseconds { parts.append("resumed from flash in \(Int(ms.rounded())) ms") }
         if s.stoppedBy == "cancelled" { parts.append("stopped") }
         return parts.joined(separator: " · ")
+    }
+
+    /// Who wrote a reply: Pie for today's models (and a developer's `-HearthModel` "custom-..." model),
+    /// plain "on-device" for an engine id from before the move to Pie.
+    static func engineLabel(_ engineID: String) -> String {
+        if engineID == "mock" { return "demo reply, no AI" }
+        // Only today's catalog ids: "custom-..." also named GGUF files the llama.cpp build loaded, so it can't
+        // tell which engine wrote an old reply. "on-device" is true either way.
+        if ModelCatalog.spec(id: engineID) != nil { return "Pie, on this iPhone" }
+        return "on-device"
     }
 
     /// True when a time label belongs above this message (the first one, or after a long pause).

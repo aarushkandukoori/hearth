@@ -1288,7 +1288,7 @@ kbd, code {
 }
 .slot .avatar { width: 24px; height: 24px; font-size: 13px; }
 .slot.is-live { border-color: var(--accent); color: var(--text); background: var(--accent-soft); }
-.slot.is-parked { border-style: dashed; }
+.slot.is-idle { border-style: dashed; }
 .slot svg { width: 14px; height: 14px; }
 
 .tech-note {

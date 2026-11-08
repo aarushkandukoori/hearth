@@ -69,14 +69,22 @@ import SwiftUI
         guard !booted else { return }
         booted = true
         let options = LaunchOptions.shared
+        // Once, before the engine starts: the llama.cpp version's KV caches (chat content) and .gguf models.
+        _ = await Task.detached(priority: .userInitiated) { LegacyCleanup.runOnce() }.value
         vault.applyBackupExclusion(settings.excludeFromBackup)
         voice.assignDistinctVoices(for: library.allCharacters)
         if events.events.isEmpty { seedStarterEvents() }
         if options.seedDemo { DemoSeeder.seed(self) }
         await engine.start(preferredEngineID: settings.preferredEngineID)
         HearthLog.info("app", "booted engine=\(engine.active?.id ?? "none") characters=\(library.allCharacters.count)")
-        if options.artGen { await ArtGen.run() }
         if options.benchmark { await HearthBenchmark.run(host: engine) }
+        if UserDefaults.standard.bool(forKey: "HearthPhotoProbe"), let url = HearthPaths.bundledArt("loc-harbor"),
+           let jpeg = try? Data(contentsOf: url) {
+            // Developer check (-HearthPhotoProbe 1): describe a bundled picture with the model's own vision.
+            let started = Date()
+            let caption = await engine.describePhoto(jpeg)
+            HearthLog.emit("HEARTHPHOTO \(Int(Date().timeIntervalSince(started) * 1000)) ms: \(caption ?? "(no caption)")")
+        }
         // The UI tour (App/Root/UITour.swift) is started by RootView after boot.
     }
 
@@ -109,10 +117,11 @@ import SwiftUI
         vault.applyBackupExclusion(settings.excludeFromBackup)
     }
 
-    /// Saves the open conversation's KV cache to flash while iOS gives us a little background time.
+    /// Uses the little background time iOS gives to let a reply that was just stopped finish and be saved. Pie
+    /// keeps KV in memory, so there is no model state to write out (EngineHost.parkCurrent).
     private func parkInBackground() {
         guard backgroundTask == .invalid else { return }
-        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "park-kv") { [weak self] in
+        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "save-chats") { [weak self] in
             self?.endBackgroundTask()
         }
         Task {
@@ -130,7 +139,7 @@ import SwiftUI
 
     // MARK: - Deleting things everywhere they live
 
-    /// Deletes a conversation and its parked KV cache (which holds the conversation's content).
+    /// Deletes a conversation (with its media) and tells the engine to forget it.
     func deleteConversation(_ id: UUID) {
         guard let conversation = chats.conversation(id) else { return }
         let key = conversation.engineKey
@@ -139,7 +148,7 @@ import SwiftUI
     }
 
     /// Deletes a user-made character with its chats, memories and avatar. Group scenes stay for the others in
-    /// them, minus this character's lines and invites, and their parked caches go (they hold those lines).
+    /// them, minus this character's lines and invites, and the engine forgets those scenes.
     func deleteCharacter(_ id: String) throws {
         for conversation in chats.directChats(with: id) { deleteConversation(conversation.id) }
         for scene in chats.removeFromScenes(characterID: id) {
@@ -157,7 +166,6 @@ import SwiftUI
         engine.cancel()
         voice.stop()
         dictation.cancel()
-        await engine.purgeParked()
         try await vault.wipeEverything(includeModels: includeModels)
         HearthImageCache.shared.removeAll()
         settingsStore.update { $0 = AppSettings() }
@@ -187,7 +195,7 @@ import SwiftUI
     /// Synchronous wipe for `-HearthReset 1` (keeps downloaded models).
     static func eraseLocalData() {
         let fm = FileManager.default
-        for dir in [HearthPaths.chats, HearthPaths.characters, HearthPaths.media, HearthPaths.state, HearthPaths.kvCache] {
+        for dir in [HearthPaths.chats, HearthPaths.characters, HearthPaths.media, HearthPaths.state, HearthPaths.pieHome] {
             try? fm.removeItem(at: dir)
         }
         for key in UserDefaults.standard.dictionaryRepresentation().keys where key.hasPrefix("hearth.") && key != "hearth.network.downloadedBytes" {

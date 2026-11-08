@@ -1,4 +1,4 @@
-// The postcard a character sends when Image Playground can't draw: a warm gradient in the
+// The postcard a character sends when no town art fits: a warm gradient in the
 // character's colors, a symbol that fits the caption, and the caption in New York serif.
 
 import SwiftUI

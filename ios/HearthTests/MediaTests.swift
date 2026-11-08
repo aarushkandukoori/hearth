@@ -3,7 +3,6 @@
 
 import AVFoundation
 import ImageIO
-import ImagePlayground
 import Speech
 import UniformTypeIdentifiers
 import XCTest
@@ -268,10 +267,15 @@ final class MediaTests: XCTestCase {
         XCTAssertEqual(PictureMaker.fallbackAsset(for: "a selfie by the window", character: juno, assets: assets), "char-juno")
     }
 
-    func testPicturesNeverUseAnOutsideService() {
-        XCTAssertFalse(PictureMaker.onDeviceStyles.contains(.externalProvider))
-        for style in PictureStyle.allCases {
-            XCTAssertNotEqual(PictureMaker.playgroundStyle(style), .externalProvider)
+    @MainActor
+    func testPicturesUseNoImageModel() async {
+        let maker = PictureMaker()
+        XCTAssertFalse(maker.isAvailable, "no image model: town art and postcards only")
+        do {
+            _ = try await maker.makeAvatar(prompt: "an otter barista", style: .animation)
+            XCTFail("drawing should be unavailable")
+        } catch {
+            XCTAssertEqual(error as? PictureError, .unavailable)
         }
     }
 

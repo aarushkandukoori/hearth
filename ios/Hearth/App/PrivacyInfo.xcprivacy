@@ -4,7 +4,7 @@
   Hearth's privacy manifest. No tracking and no data collected: everything stays on the iPhone.
   Required-reason APIs Hearth uses:
   - UserDefaults (CA92.1): small preferences of its own (download progress, display switches).
-  - Disk space (E174.1): the model download checks for room first, and parked chat caches give way when space runs low.
+  - Disk space (E174.1): the model download checks for room first.
   - File timestamps (C617.1): sizes and other metadata of files in Hearth's own container (storage numbers, model checks).
   XcodeGen copies this file into the app bundle as a resource (run `xcodegen` after adding or moving it).
 -->

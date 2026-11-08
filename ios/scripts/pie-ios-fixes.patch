@@ -1,0 +1,49 @@
+diff --git a/crates/engine-metal/src/rs.rs b/crates/engine-metal/src/rs.rs
+index 1b359bd52..2aff2fefd 100644
+--- a/crates/engine-metal/src/rs.rs
++++ b/crates/engine-metal/src/rs.rs
+@@ -389,7 +389,9 @@ impl Buffers {
+     pub fn commit(&mut self, pages: u32) -> Result<()> {
+         #[cfg(target_vendor = "apple")]
+         if let Some((_, buffer)) = &mut self.store {
+-            let bytes = elastic::pages_up(u64::from(pages) * self.page_bytes);
++            // The slab is reserved at exactly slots x page_bytes, which is rarely a whole number of 2 MiB
++            // pages: rounding up past it made the commit that reaches the last slot fail every time.
++            let bytes = elastic::pages_up(u64::from(pages) * self.page_bytes).min(buffer.len());
+             elastic::grow_all(&mut [elastic::Target { buffer, bytes }])?;
+         }
+         #[cfg(not(target_vendor = "apple"))]
+@@ -402,7 +404,7 @@ impl Buffers {
+     pub fn release(&mut self, pages: u32) -> Result<()> {
+         #[cfg(target_vendor = "apple")]
+         if let Some((_, buffer)) = &mut self.store {
+-            let bytes = elastic::pages_up(u64::from(pages) * self.page_bytes);
++            let bytes = elastic::pages_up(u64::from(pages) * self.page_bytes).min(buffer.len());
+             // SAFETY: the caller's contract, `Engine::release_state`: no
+             // frame reads the pages released.
+             unsafe { elastic::shrink_all(&mut [elastic::Target { buffer, bytes }])? };
+diff --git a/crates/runtime/src/bootstrap.rs b/crates/runtime/src/bootstrap.rs
+index 1f8c7988a..4413a5f0f 100644
+--- a/crates/runtime/src/bootstrap.rs
++++ b/crates/runtime/src/bootstrap.rs
+@@ -748,7 +748,7 @@ fn init_wasmtime(runtime: &RuntimeConfig) -> wasmtime::Engine {
+ /// app no executable memory: inferlets run as Pulley bytecode, with memories
+ /// allocated on demand.
+ #[cfg(all(target_vendor = "apple", not(target_os = "macos")))]
+-fn configure_execution(wasm_config: &mut wasmtime::Config, _runtime: &RuntimeConfig) {
++fn configure_execution(wasm_config: &mut wasmtime::Config, runtime: &RuntimeConfig) {
+     wasm_config
+         .target("pulley64")
+         .expect("pulley64 is compiled in where an app may not JIT");
+@@ -756,6 +756,11 @@ fn configure_execution(wasm_config: &mut wasmtime::Config, _runtime: &RuntimeCon
+     wasm_config.memory_reservation(0);
+     wasm_config.memory_guard_size(0);
+     wasm_config.memory_init_cow(false);
++    // Left at wasmtime's default, every instance reserves 2 GiB of address space to grow into, and on an
++    // iPhone (about 7 GiB of address space, much of it taken by the engine's pools) that contiguous 2 GiB is
++    // often not there: instantiation then fails with "failed to allocate 0x80110000 bytes". An inferlet's
++    // memory is capped at wasm_max_memory_mb anyway.
++    wasm_config.memory_reservation_for_growth((runtime.wasm_max_memory_mb as u64).saturating_mul(1024 * 1024));
+ }
+ 
+ #[cfg(not(any(

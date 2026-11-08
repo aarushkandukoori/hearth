@@ -1,0 +1,61 @@
+Pie (pie-project)
+Copyright 2025 Pie Team
+
+This product includes software developed at the Pie project, licensed under the
+Apache License, Version 2.0 (see LICENSE).
+
+It also includes or is derived from the following third-party work.
+
+--------------------------------------------------------------------------------
+XGrammar
+https://github.com/mlc-ai/xgrammar
+Apache License 2.0
+Copyright (c) 2024 by XGrammar Contributors
+
+  The constrained-decoding engine in `crates/grammar` is a Rust rewrite derived
+  in part from XGrammar; parts of its test suite are ported from XGrammar's.
+
+--------------------------------------------------------------------------------
+FlashInfer
+https://github.com/flashinfer-ai/flashinfer
+Apache License 2.0
+Copyright (c) 2023-2025 by FlashInfer team
+Copyright (c) 2022-2024, NVIDIA CORPORATION. All rights reserved.
+
+  Internalized, not vendored: the attention code under
+  `crates/kernels-cuda/kernels/attn/fa2/` and the peer all-reduce in
+  `crates/kernels-cuda/kernels/collective/p2p.cuh` (which FlashInfer adapts
+  from vLLM, Copyright contributors to the vLLM project) derive from
+  FlashInfer v0.6.15, cut to what Pie uses and renamed into its namespaces;
+  each file keeps its copyright header. crates/kernels-cuda/NOTICE lists the
+  changes.
+
+--------------------------------------------------------------------------------
+MLX
+https://github.com/ml-explore/mlx
+MIT License
+Copyright (c) 2023 Apple Inc.
+
+  Internalized, not vendored: the GEMM tile under
+  `crates/kernels-metal/kernels/prim/gemm_*.h` and the affine matmul and
+  matvec kernels in `crates/kernels-metal/kernels/linear/` derive from MLX,
+  renamed into Pie's namespaces; each file keeps its copyright and permission
+  notice. crates/kernels-metal/NOTICE lists the files and the changes.
+
+--------------------------------------------------------------------------------
+NIXL
+https://github.com/ai-dynamo/nixl
+Apache License 2.0
+SPDX-FileCopyrightText: Copyright (c) 2025-2026 NVIDIA CORPORATION & AFFILIATES.
+All rights reserved.
+
+  `crates/transport/src/backends/nixl/wrapper.h` is NIXL's C API header.
+
+--------------------------------------------------------------------------------
+component-init
+https://github.com/dicej/component-init
+Apache License 2.0 with LLVM exception
+
+  `instrument()` and `apply()` in `crates/runtime/src/inferlet/python/snapshot.rs`
+  are adapted from the `component_init_transform` crate, as that file's header
+  states.

@@ -5,7 +5,7 @@
 #   ios/scripts/device.sh install               install the last build
 #   ios/scripts/device.sh run [launch args...]  launch with console attached (e.g. -HearthBenchmark 1)
 #   ios/scripts/device.sh pull                  copy Documents/{tour,bench.jsonl,hearth-console.log} to ios/build/device/
-#   ios/scripts/device.sh push-model <file>     copy a GGUF into the app's Documents over USB
+#   ios/scripts/device.sh push-model <file>     copy a Pie model (.metal.zt) into the app's Documents over USB
 # DEVICE env var overrides the CoreDevice id.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -34,7 +34,7 @@ case "${1:-}" in
         && echo "pulled $item" || echo "no $item"
     done ;;
   push-model)
-    file="${2:?usage: device.sh push-model <file.gguf>}"
+    file="${2:?usage: device.sh push-model <file.metal.zt>}"
     xcrun devicectl device copy to --device "$DEVICE" --domain-type appDataContainer \
       --domain-identifier "$BUNDLE" --source "$file" --destination "Documents/$(basename "$file")" > /dev/null
     echo "pushed $(basename "$file")" ;;

@@ -175,11 +175,11 @@ import SwiftUI
         app.engine.cancel()
     }
 
-    /// Call when the scene closes: stops replies and saves this scene's model memory to flash, so coming
-    /// back is quick.
+    /// Call when the scene closes: stops replies and tells the engine the scene was left (Pie keeps its
+    /// KV in memory, so nothing is saved, and coming back is still quick).
     func deactivate() async {
         stop()
-        // A scene that was cleared (Start over, Delete everything) must never be written back to flash.
+        // A scene that was cleared (Start over, Delete everything) has nothing left to keep.
         guard app.chats.conversation(conversation.id) != nil else { return }
         await app.engine.park(conversationKey: conversation.engineKey)
     }
@@ -213,7 +213,7 @@ import SwiftUI
         pendingRetry = nil
     }
 
-    /// Clears this scene's conversation (and its saved model memory) and starts fresh.
+    /// Clears this scene's conversation and starts fresh.
     func startOver() {
         guard !isReplying, let location else { return }
         app.deleteConversation(conversation.id)
@@ -230,7 +230,8 @@ import SwiftUI
         app.chats.deleteMessage(id, in: conversation.id)
         sync()
         refreshPresent() // deleting an invite note sends that guest home
-        // The model's saved memory of this scene still holds the deleted words: drop it so they're really gone.
+        // The next prompt leaves the deleted words out. Pie reuses KV only for a prompt that starts the same way,
+        // so their old KV is never read again; telling the engine to forget the scene is all that's left to do.
         let key = conversation.engineKey
         Task { await app.engine.forget(conversationKey: key) }
     }
@@ -341,7 +342,7 @@ import SwiftUI
                      allCharacters: app.library.allCharacters)
     }
 
-    /// Adds a finished line, and starts drawing its picture if it asked for one. Never a picture in answer
+    /// Adds a finished line, and starts picking its picture if it asked for one. Never a picture in answer
     /// to someone who may be hurting, or while the support card is up (the model can copy a "[photo: ...]"
     /// line from the transcript on its own).
     private func add(_ reply: ParsedReply, from speaker: Character, stats: GenerationStats?) {
@@ -353,10 +354,10 @@ import SwiftUI
         if let caption { message.attachment = Attachment(kind: .picture, caption: caption, status: .pending) }
         app.chats.append(message, to: conversation.id)
         sync()
-        if let caption { drawPicture(caption, by: speaker, messageID: message.id) }
+        if let caption { pickPicture(caption, by: speaker, messageID: message.id) }
     }
 
-    private func drawPicture(_ caption: String, by speaker: Character, messageID: UUID) {
+    private func pickPicture(_ caption: String, by speaker: Character, messageID: UUID) {
         let conversationID = conversation.id
         let style = app.settings.pictureStyle
         Task {

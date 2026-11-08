@@ -1,12 +1,11 @@
 // The Model page: what the town is talking with right now (and whether replies have been failing), the
 // models you can download (with progress, pause, use, delete and their licenses; cellular data asks first),
-// Apple Intelligence when this iPhone has it, and what models use on disk and network.
+// all run by Pie on this iPhone, and what models use on disk and network.
 
 import SwiftUI
 
 struct ModelSettingsPage: View {
     @Environment(AppModel.self) private var app
-    @State private var parkedBytes: Int64 = 0
     @State private var freeBytes: Int64?
     @State private var toast: String?
     @State private var deleting: ModelSpec?
@@ -20,15 +19,12 @@ struct ModelSettingsPage: View {
 
                 VStack(alignment: .leading, spacing: Spacing.m) {
                     SectionHeader("Models")
-                    Text("Each one runs entirely on this iPhone. Download once, and the town works anywhere, even in Airplane Mode. Downloads are big, so Wi-Fi is best.")
+                    Text("Each one runs entirely on this iPhone, served by Pie, Yale's open-source engine for programmable language-model serving. Download once, and the town works anywhere, even in Airplane Mode. Downloads are big, so Wi-Fi is best.")
                         .font(HearthFont.callout)
                         .foregroundStyle(.hearthText2)
                     ForEach(ModelCatalog.all) { spec in
                         ModelCatalogCard(spec: spec, onUse: { use(spec.id) }, onDownload: { requestDownload(spec) },
                                          onDelete: { deleting = spec })
-                    }
-                    if app.engine.appleAvailable {
-                        AppleEngineCard { use("apple") }
                     }
                 }
 
@@ -70,15 +66,10 @@ struct ModelSettingsPage: View {
     private var storageCard: some View {
         HearthCard {
             VStack(alignment: .leading, spacing: Spacing.l) {
-                HStack(alignment: .center, spacing: Spacing.s) {
-                    SettingsRowLabel(title: "Instant resume",
-                                     detail: "\(SettingsFormat.bytes(parkedBytes)) of saved chat memory, so switching between friends is quick.",
-                                     symbol: "bolt.fill", tint: .hearthGold)
-                    Spacer(minLength: Spacing.s)
-                    PillButton("Clear", kind: .quiet) { Task { await clearParked() } }
-                        .disabled(parkedBytes == 0)
-                        .accessibilityLabel("Clear instant resume storage")
-                }
+                SettingsRowLabel(title: "Switching models",
+                                 detail: app.engine.pendingSwitch.map { "\(SettingsModelActions.title($0)) takes over the next time you open Hearth. Pie loads one model each time Hearth starts." }
+                                     ?? "Pie loads one model each time Hearth starts, so a new choice takes over the next time you open Hearth.",
+                                 symbol: "arrow.triangle.2.circlepath", tint: .hearthGold)
                 Divider().overlay(Color.hearthLine)
                 SettingsRowLabel(title: "Downloaded so far",
                                  detail: "\(SettingsFormat.bytes(app.vault.networkDownloadedBytes)) over the network, all of it models. Your chats, photos and voice never leave this iPhone.",
@@ -112,7 +103,6 @@ struct ModelSettingsPage: View {
     }
 
     private func refreshNumbers() {
-        parkedBytes = app.engine.parkedBytes()
         freeBytes = ModelDownloader.freeBytes()
     }
 
@@ -120,6 +110,8 @@ struct ModelSettingsPage: View {
         Task {
             if await SettingsModelActions.use(engineID, app: app) {
                 toast = "Now talking with \(SettingsModelActions.engineName(app.engine.active))"
+            } else if let next = app.engine.pendingSwitch, next.id == engineID {
+                toast = "\(SettingsModelActions.title(next)) takes over the next time you open Hearth"
             } else if case .failed(let message) = app.engine.state {
                 toast = message
             } else {
@@ -135,12 +127,6 @@ struct ModelSettingsPage: View {
         }
         refreshNumbers()
         toast = "\(SettingsModelActions.title(spec)) deleted"
-    }
-
-    private func clearParked() async {
-        await app.engine.purgeParked()
-        refreshNumbers()
-        toast = "Cleared. Your chats are all still here."
     }
 }
 
@@ -333,7 +319,7 @@ private struct ModelCatalogCard: View {
         }
     }
 
-    /// The license's name, as links to read it (and the Acceptable Use Policy that comes with Llama).
+    /// The license's name, as a link to read it.
     @ViewBuilder
     private var license: some View {
         let links = SettingsModelActions.licenseLinks(spec.license)
@@ -374,36 +360,3 @@ private struct ModelCatalogCard: View {
     }
 }
 
-/// Apple's own on-device model, shown only when this iPhone has Apple Intelligence.
-private struct AppleEngineCard: View {
-    @Environment(AppModel.self) private var app
-    let onUse: () -> Void
-
-    private var inUse: Bool { app.engine.active?.id == "apple" }
-
-    var body: some View {
-        HearthCard {
-            VStack(alignment: .leading, spacing: Spacing.m) {
-                HStack(alignment: .top, spacing: Spacing.s) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Apple Intelligence")
-                            .modifier(SettingsScaledTitle(21))
-                            .foregroundStyle(.hearthText)
-                        Text("Built into this iPhone")
-                            .font(HearthFont.caption.weight(.semibold))
-                            .foregroundStyle(.hearthText2)
-                    }
-                    Spacer(minLength: Spacing.s)
-                    if inUse { SettingsTag("In use", tint: .hearthSuccess) }
-                }
-                Text("Apple's own on-device model, with nothing to download. It can be more careful than Hearth's models and may turn down some topics.")
-                    .font(HearthFont.callout)
-                    .foregroundStyle(.hearthText2)
-                if !inUse {
-                    PillButton("Use Apple Intelligence", symbol: "apple.intelligence", kind: .secondary, action: onUse)
-                        .minimumScaleFactor(0.5)
-                }
-            }
-        }
-    }
-}

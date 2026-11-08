@@ -206,7 +206,7 @@ struct SceneLine: View {
     }
 }
 
-/// A picture a character shared in the scene (drawn on this iPhone; shows progress while it is made).
+/// A picture a character shared in the scene (town art or a postcard; a placeholder shows while it is picked).
 struct ScenePicture: View {
     let attachment: Attachment
     private let shape = RoundedRectangle(cornerRadius: Radius.bubble, style: .continuous)
@@ -219,7 +219,7 @@ struct ScenePicture: View {
                 .overlay {
                     VStack(spacing: Spacing.s) {
                         ProgressView()
-                        Text("Drawing a picture…")
+                        Text("Picking a picture…")
                             .font(HearthFont.caption)
                             .foregroundStyle(.hearthText2)
                     }

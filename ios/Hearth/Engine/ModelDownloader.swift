@@ -1,6 +1,8 @@
 // ModelDownloader: fetches a model once with a background URLSession (it resumes after drops), checks free
 // space first and the SHA-256 after, then moves it into Application Support/Hearth/models.
-// This is the only network traffic Hearth ever makes.
+// This is the only network traffic Hearth ever makes. Models come from GitHub release assets, which redirect
+// to signed links that expire within minutes, so saved progress can stop working: a resume that fails starts
+// over from the beginning once (see startOverAfterFailedResume).
 
 import CryptoKit
 import Foundation
@@ -19,6 +21,7 @@ import Observation
     /// Privacy audit counter: every byte Hearth has ever downloaded (bytes uploaded are always 0).
     nonisolated static let downloadedBytesKey = "hearth.network.downloadedBytes"
     nonisolated static let activeKey = "hearth.downloads.active"
+    nonisolated static let resumedKey = "hearth.downloads.resumed"
     /// Room to leave free on the phone beyond the model itself.
     nonisolated static let spareBytes: Int64 = 500 * 1_048_576
 
@@ -62,8 +65,6 @@ import Observation
             states[spec.id] = .failed("This download needs about \(Self.format(needed)) of free space. Your iPhone has \(Self.format(free)) free right now.")
             return
         }
-        let session = Self.session(owner: self)
-        let task: URLSessionDownloadTask
         var saved = Self.loadResumeData(spec)
         // Saved progress keeps the network rule its download started with (older saves allowed cellular),
         // so when the person's choice is different the download starts over under the new rule.
@@ -72,15 +73,24 @@ import Observation
             saved = nil
             HearthLog.info("download", "cellular choice changed for \(spec.id); starting over")
         }
+        begin(spec, allowsCellular: allowsCellular, resumeData: saved)
+    }
+
+    /// Creates and runs the download task: from saved progress when there is some, else from the start.
+    private func begin(_ spec: ModelSpec, allowsCellular: Bool, resumeData: Data?) {
+        let session = Self.session(owner: self)
         UserDefaults.standard.set(allowsCellular, forKey: Self.cellularKey(spec))
-        if let resume = saved {
-            task = session.downloadTask(withResumeData: resume)
+        let task: URLSessionDownloadTask
+        if let resumeData {
+            task = session.downloadTask(withResumeData: resumeData)
+            Self.resumedIDs.insert(spec.id)
         } else {
             var request = URLRequest(url: spec.url)
             request.cachePolicy = .reloadIgnoringLocalCacheData
             request.allowsExpensiveNetworkAccess = allowsCellular
             request.allowsConstrainedNetworkAccess = allowsCellular
             task = session.downloadTask(with: request)
+            Self.resumedIDs.remove(spec.id)
         }
         Self.deleteResumeData(spec)
         task.taskDescription = spec.id
@@ -88,8 +98,21 @@ import Observation
         tasks[spec.id] = task
         Self.activeIDs.insert(spec.id)
         states[spec.id] = .downloading(fraction: 0, bytes: 0, total: spec.bytes)
-        HearthLog.info("download", "started \(spec.id)")
+        HearthLog.info("download", resumeData == nil ? "started \(spec.id)" : "resumed \(spec.id) from saved progress")
         task.resume()
+    }
+
+    /// A download resumed from saved progress that never got going (its signed link expired, so the server
+    /// refused it, or the saved data itself no longer works) drops that progress and starts over from the
+    /// beginning, once: the fresh download is not a resume, so its own failure is shown as usual. Returns
+    /// true when it started over.
+    private func startOverAfterFailedResume(_ spec: ModelSpec, why: String) -> Bool {
+        guard Self.resumedIDs.contains(spec.id) else { return false }
+        Self.deleteResumeData(spec)
+        HearthLog.info("download", "resuming \(spec.id) failed (\(why)); starting over")
+        let allowsCellular = UserDefaults.standard.object(forKey: Self.cellularKey(spec)) as? Bool ?? false
+        begin(spec, allowsCellular: allowsCellular, resumeData: nil)
+        return true
     }
 
     /// Stops a download but keeps what arrived, so `start` picks up where it left off.
@@ -107,6 +130,7 @@ import Observation
     func delete(_ spec: ModelSpec) {
         if let task = tasks.removeValue(forKey: spec.id) { task.cancel() }
         Self.activeIDs.remove(spec.id)
+        Self.resumedIDs.remove(spec.id)
         let fm = FileManager.default
         for url in [HearthPaths.models.appendingPathComponent(spec.fileName),
                     HearthPaths.documents.appendingPathComponent(spec.fileName),
@@ -140,25 +164,37 @@ import Observation
         states[id] = .downloading(fraction: total > 0 ? min(1, Double(written) / Double(total)) : 0, bytes: written, total: total)
     }
 
-    fileprivate func downloaded(_ spec: ModelSpec, problem: String?) {
+    /// `status` is the HTTP status of the response the file came from.
+    fileprivate func downloaded(_ spec: ModelSpec, status: Int, problem: String?) {
         tasks[spec.id] = nil
         flushBytes()
         if let problem {
+            // A refused resume (403 once its signed link expired, or 404/410) gets one fresh try.
+            if Self.linkExpiredStatuses.contains(status), startOverAfterFailedResume(spec, why: "HTTP \(status)") { return }
             Self.activeIDs.remove(spec.id)
+            Self.resumedIDs.remove(spec.id)
             states[spec.id] = .failed(problem)
             HearthLog.error("download", "\(spec.id) failed after download")
             return
         }
+        Self.resumedIDs.remove(spec.id)
         verify(spec)
     }
 
-    fileprivate func failed(id: String, resumeData: Data?, cancelled: Bool) {
+    /// `resumeDidNotTake`: see `resumeDidNotTake(status:error:)`.
+    fileprivate func failed(id: String, resumeData: Data?, cancelled: Bool, resumeDidNotTake: Bool, why: String) {
         tasks[id] = nil
         flushBytes()
         guard let spec = ModelCatalog.spec(id: id) else { return }
+        if cancelled {
+            if let resumeData { Self.saveResumeData(resumeData, for: spec) }
+            return // cancel() already set the state
+        }
+        // Saved progress that no longer works is never kept (a new copy of it would fail the same way).
+        if resumeDidNotTake, startOverAfterFailedResume(spec, why: why) { return }
         if let resumeData { Self.saveResumeData(resumeData, for: spec) }
-        if cancelled { return } // cancel() already set the state
         Self.activeIDs.remove(id)
+        Self.resumedIDs.remove(id)
         states[id] = .failed(resumeData == nil
             ? "The download stopped. Please try again."
             : "The connection dropped. Try again to pick up where it left off.")
@@ -255,6 +291,42 @@ import Observation
     nonisolated static var activeIDs: Set<String> {
         get { Set(UserDefaults.standard.stringArray(forKey: activeKey) ?? []) }
         set { UserDefaults.standard.set(Array(newValue).sorted(), forKey: activeKey) }
+    }
+
+    /// Downloads now running from saved progress rather than from the start. Kept in UserDefaults because
+    /// iOS can finish (or fail) a background download while Hearth is closed.
+    nonisolated static var resumedIDs: Set<String> {
+        get { Set(UserDefaults.standard.stringArray(forKey: resumedKey) ?? []) }
+        set { UserDefaults.standard.set(Array(newValue).sorted(), forKey: resumedKey) }
+    }
+
+    /// Errors about reaching the network at all. Saved progress is fine after one of these.
+    nonisolated static let connectionErrorCodes: Set<Int> = [
+        NSURLErrorNotConnectedToInternet, NSURLErrorNetworkConnectionLost, NSURLErrorTimedOut,
+        NSURLErrorCannotFindHost, NSURLErrorCannotConnectToHost, NSURLErrorDNSLookupFailed,
+        NSURLErrorInternationalRoamingOff, NSURLErrorCallIsActive, NSURLErrorDataNotAllowed,
+    ]
+
+    /// For a task resumed from saved progress that ended with `error`: true when the resume itself never
+    /// took (no successful response came back, and the phone could reach the network), so that progress is
+    /// useless; false when it resumed and then dropped, or the network was simply away.
+    /// Statuses that mean the saved link or range is no longer valid (an expired signed GitHub link answers
+    /// 403; a moved or removed file 404/410; a stale range 416). A 429 or 5xx is temporary: keep the progress.
+    nonisolated static let linkExpiredStatuses: Set<Int> = [401, 403, 404, 410, 416]
+
+    /// True only when the evidence points at the saved progress itself: an HTTP status that means the link or
+    /// range expired, or an error about the resume data or its file. Network trouble (no response at all, TLS
+    /// or captive-portal errors, a dropped background session) keeps the saved progress for the next try.
+    nonisolated static func resumeDidNotTake(status: Int, error: NSError) -> Bool {
+        if linkExpiredStatuses.contains(status) { return true }
+        if status != 0 { return false }
+        guard error.domain == NSURLErrorDomain else {
+            return error.domain == NSPOSIXErrorDomain && error.code == Int(ENOENT) // the saved temp file is gone
+        }
+        return [NSURLErrorCannotDecodeRawData, NSURLErrorFileDoesNotExist, NSURLErrorCannotOpenFile,
+                NSURLErrorCannotCreateFile, NSURLErrorCannotWriteToFile, NSURLErrorCannotMoveFile,
+                NSURLErrorCannotRemoveFile, NSURLErrorDownloadDecodingFailedMidStream,
+                NSURLErrorDownloadDecodingFailedToComplete].contains(error.code)
     }
 
     nonisolated static func freeBytes() -> Int64? {
@@ -363,7 +435,7 @@ private final class DownloadDelegate: NSObject, URLSessionDownloadDelegate, @unc
                 problem = "Hearth couldn't save the download. Please try again."
             }
         }
-        Task { @MainActor in self.owner?.downloaded(spec, problem: problem) }
+        Task { @MainActor in self.owner?.downloaded(spec, status: status, problem: problem) }
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
@@ -372,7 +444,12 @@ private final class DownloadDelegate: NSObject, URLSessionDownloadDelegate, @unc
         let nsError = error as NSError
         let resumeData = nsError.userInfo[NSURLSessionDownloadTaskResumeData] as? Data
         let cancelled = nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorCancelled
-        Task { @MainActor in self.owner?.failed(id: id, resumeData: resumeData, cancelled: cancelled) }
+        let status = (task.response as? HTTPURLResponse)?.statusCode ?? 0
+        let didNotTake = ModelDownloader.resumeDidNotTake(status: status, error: nsError)
+        let why = "\(nsError.domain) \(nsError.code), HTTP \(status)"
+        Task { @MainActor in
+            self.owner?.failed(id: id, resumeData: resumeData, cancelled: cancelled, resumeDidNotTake: didNotTake, why: why)
+        }
     }
 
     func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {

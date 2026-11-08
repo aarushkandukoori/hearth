@@ -1,5 +1,0 @@
-@mlc-ai/web-llm 0.2.87 (from `npm pack @mlc-ai/web-llm@0.2.87 --ignore-scripts`, 2026-11-06)
-index.js = the package's lib/index.js (self-contained ESM build).
-Original sha256: 3bff4c55cd2f0200711517341babcebe7a91a8ef85b983420439fcf26835a674
-Only change: the last line "//# sourceMappingURL=index.js.map" was removed (the map is not shipped).
-License: Apache-2.0, see LICENSE.

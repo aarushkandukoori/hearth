@@ -1,5 +1,7 @@
 // Photos: the user's pictures are shrunk in the browser (which also drops location and camera data)
-// and kept only in IndexedDB. Pictures from characters use the best-matching bundled art or a postcard.
+// and kept only in IndexedDB. When the model is loaded, it describes each one in a sentence or two (a
+// smaller copy goes through its vision tower, in this tab), and characters read that description.
+// Pictures from characters use the best-matching bundled art or a postcard.
 
 import { artURL, isMissingArt } from '../ui/components.js';
 
@@ -36,6 +38,41 @@ export async function downscaleImage(file, { maxSide = 1280, quality = 0.84 } = 
   ctx.drawImage(source, 0, 0, w, h);
   if (typeof source.close === 'function') source.close();
   return { dataURL: canvas.toDataURL('image/jpeg', quality), width: w, height: h };
+}
+
+/**
+ * Width and height for the model's vision pass: multiples of 32 px (its 16 px patches, merged 2 by 2) with
+ * at most `maxPatches` patches. Pie's vision tower takes at most 512 patch rows (max_forward_tokens) in one
+ * pass and can't split a picture across passes, so a photo keeps about 440 patches, as on the iPhone
+ * (PieEngine.captionJPEG): 320 x 320 (400 patches) when square, 384 x 288 (432) at 4:3.
+ */
+export function visionSize(width, height, maxPatches = 440) {
+  let scale = Math.min(1, Math.sqrt((maxPatches * 256) / Math.max(1, width * height)));
+  for (;;) {
+    const w = Math.max(32, Math.floor((width * scale) / 32) * 32);
+    const h = Math.max(32, Math.floor((height * scale) / 32) * 32);
+    if ((w / 16) * (h / 16) <= maxPatches || (w === 32 && h === 32)) return { width: w, height: h };
+    scale *= 0.95;
+  }
+}
+
+/**
+ * The photo as the model's vision pass reads it: a small JPEG (see visionSize), as base64 without the
+ * data: prefix. Small keeps the pass quick; it never leaves the browser either way.
+ */
+export async function photoForModel(dataURL, { quality = 0.85 } = {}) {
+  const img = new Image();
+  img.src = dataURL;
+  await img.decode();
+  const size = visionSize(img.naturalWidth, img.naturalHeight);
+  const canvas = document.createElement('canvas');
+  canvas.width = size.width;
+  canvas.height = size.height;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/jpeg', quality).split(',')[1];
 }
 
 const STOP = new Set('the and with from that this there their into onto over under near just some very a an of on in at to for my your our its is it was by little'.split(' '));

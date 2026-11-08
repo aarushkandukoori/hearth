@@ -17,7 +17,7 @@ struct CreateBasicsSection: View {
                             focus: focus, field: .name) { focus.wrappedValue = .species }
                 .id(CreateFocus.name)
             CreateTextField(title: "What are they?",
-                            hint: "Lantern Bay is a town of animal folk. This also helps when drawing their picture.",
+                            hint: "Lantern Bay is a town of animal folk.",
                             placeholder: "e.g. sleepy corgi, barn owl, small dragon", text: $draft.species,
                             focus: focus, field: .species) { focus.wrappedValue = .tagline }
             CreateTextField(title: "Tagline", hint: "A short line people see under their name.",

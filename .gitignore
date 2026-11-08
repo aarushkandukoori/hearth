@@ -7,7 +7,10 @@ ios/DerivedData/
 xcuserdata/
 node_modules/
 /scratch/
-# full-size art originals (regenerate with Image Playground); compressed copies live in art/opt
+# Pie's iPhone library (ios/scripts/build-pie.sh, about 280 MB) and the inferlet's Rust build output
+ios/Vendor/PieSwift/build/
+inferlet/target/
+# full-size art originals (not in git); compressed copies live in art/opt
 art/*.png
 art/artgen.log
 # internal build notes

@@ -1,5 +1,6 @@
-// "Draw it for me": Image Playground draws an avatar on this iPhone from a short idea. It draws animals,
-// objects and places (never people), so the sheet says so, shows progress, and lets you try again.
+// "Draw it for me": draws an avatar on this iPhone from a short idea, through PictureMaker. Hidden while
+// PictureMaker can't draw (today: Pie hosts one model per process on the iPhone, the language model).
+// Pictures show animals, objects and places, never people, so the sheet says so and lets you try again.
 
 import SwiftUI
 
@@ -36,7 +37,7 @@ struct CreateDrawSheet: View {
                 }
                 .pickerStyle(.segmented)
                 .disabled(phase == .drawing)
-                Text("Image Playground draws animals, objects and places. It can't draw people, which is why everyone in Lantern Bay is animal folk. The drawing happens on this iPhone.")
+                Text("Pictures show animals, objects and places, never people, which is why everyone in Lantern Bay is animal folk. The drawing happens on this iPhone.")
                     .font(HearthFont.caption)
                     .foregroundStyle(.hearthText2)
                     .fixedSize(horizontal: false, vertical: true)

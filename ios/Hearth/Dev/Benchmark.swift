@@ -1,5 +1,9 @@
-// Developer benchmark (-HearthBenchmark 1, SPEC §12): cold prefill, time to first token, decode speed, and
-// how fast a parked conversation comes back from flash versus re-reading it. Prints HEARTHBENCH lines.
+// Developer benchmark (-HearthBenchmark 1): Pie on this iPhone. Pass 1 reads five ~1,200-token
+// conversations cold (prefill, time to first token, decode speed). Pass 2 comes back to each one with a new
+// message: when Pie still holds the checkpoint the last turn left, it maps the earlier turns back in and only
+// the new part is read (reusedTokens says how much).
+// The control re-reads the same chat with a unique tag at the very start of the system prompt, so nothing
+// can match and Pie must compute it all. Prints HEARTHBENCH lines (also Documents/bench.jsonl).
 
 import Foundation
 #if os(iOS)
@@ -21,83 +25,59 @@ enum HearthBenchmark {
             return
         }
         let runID = String(UUID().uuidString.prefix(8))
-        let personas = makePersonas()
-        let parked = KVStateCache(modelID: engine.id)
+        let personas = makePersonas(tag: runID)
         emit(["event": "start", "engine": engine.id, "model": engine.modelName, "contextLength": engine.contextLength,
-              "kvPersistence": engine.supportsKVPersistence, "characters": personas.map(\.id)].merging(memory()) { a, _ in a })
+              "characters": personas.map(\.id)].merging(memory()) { a, _ in a })
 
-        // Pass 1: read each conversation cold. Switching to the next one parks the previous one on flash.
+        // Pass 1: read each conversation cold.
         var replies: [String: String] = [:]
         var cold: [GenerationStats] = []
-        var parks: [(ms: Double, bytes: Int64)] = []
-        for (i, persona) in personas.enumerated() {
+        for persona in personas {
             let key = "bench-\(runID)-\(persona.id)"
             let (text, stats) = await generate(host, GenerationRequest(conversationKey: key, turns: persona.turns, maxTokens: 32, sampling: sampling()))
             guard let stats else { continue }
             replies[persona.id] = text
             cold.append(stats)
-            emit(["phase": "cold", "character": persona.id, "promptTokens": stats.promptTokens, "prefilledTokens": stats.prefilledTokens,
-                  "prefillMs": round1(prefillMs(stats)), "ttftMs": round1(stats.timeToFirstToken * 1000),
+            emit(["phase": "cold", "character": persona.id, "promptTokens": stats.promptTokens, "reusedTokens": stats.reusedTokens,
+                  "prefilledTokens": stats.prefilledTokens, "ttftMs": round1(stats.timeToFirstToken * 1000),
                   "prefillTokPerSec": round1(stats.prefillTokensPerSecond), "decodeTokPerSec": round1(stats.decodeTokensPerSecond),
                   "generatedTokens": stats.generatedTokens])
-            if i > 0, let ms = stats.parkMilliseconds {
-                let previous = personas[i - 1]
-                let bytes = parked.entry(for: "bench-\(runID)-\(previous.id)")?.bytes ?? 0
-                parks.append((ms, bytes))
-                emit(["phase": "park", "character": previous.id, "parkMs": round1(ms), "bytes": bytes])
-            }
-        }
-        if let last = personas.last {
-            let key = "bench-\(runID)-\(last.id)"
-            let started = Date()
-            await host.park(conversationKey: key)
-            let ms = Date().timeIntervalSince(started) * 1000
-            if let bytes = parked.entry(for: key)?.bytes {
-                parks.append((ms, bytes))
-                emit(["phase": "park", "character": last.id, "parkMs": round1(ms), "bytes": bytes])
-            }
         }
         emit(["event": "after-cold"].merging(memory()) { a, _ in a })
 
-        // Pass 2: come back to each one with a new message. Restore from flash, then compare with re-reading.
-        var restoredRuns: [GenerationStats] = []
-        var rereadRuns: [GenerationStats] = []
+        // Pass 2: come back to each one (after the other four were read) with a new message.
+        var returned: [GenerationStats] = []
+        var reread: [GenerationStats] = []
         for persona in personas {
             let key = "bench-\(runID)-\(persona.id)"
             let turns = persona.turns + [ChatTurn(role: .assistant, content: replies[persona.id] ?? "*smiles*"),
                                          ChatTurn(role: .user, content: "Sorry, I had to step away for a bit. I'm back now!")]
-            let (_, restored) = await generate(host, GenerationRequest(conversationKey: key, turns: turns, maxTokens: 32, sampling: sampling()))
-            let (_, reread) = await generate(host, GenerationRequest(conversationKey: key + "-cold", turns: turns, maxTokens: 32, sampling: sampling()))
-            guard let restored, let reread else { continue }
-            restoredRuns.append(restored)
-            rereadRuns.append(reread)
-            emit(["phase": "restore", "character": persona.id, "restoredFromDisk": restored.restoredFromDisk,
-                  "restoreMs": round1(restored.restoreMilliseconds ?? 0), "reusedTokens": restored.reusedTokens,
-                  "prefilledTokens": restored.prefilledTokens, "ttftRestoredMs": round1(restored.timeToFirstToken * 1000),
-                  "ttftColdMs": round1(reread.timeToFirstToken * 1000), "coldPrefilledTokens": reread.prefilledTokens])
+            let (_, back) = await generate(host, GenerationRequest(conversationKey: key, turns: turns, maxTokens: 32, sampling: sampling()))
+            var control = turns
+            control[0].content = "[control \(UUID().uuidString.prefix(8))]\n" + control[0].content
+            let (_, again) = await generate(host, GenerationRequest(conversationKey: key + "-control", turns: control, maxTokens: 32, sampling: sampling()))
+            guard let back, let again else { continue }
+            returned.append(back)
+            reread.append(again)
+            emit(["phase": "return", "character": persona.id, "promptTokens": back.promptTokens, "reusedTokens": back.reusedTokens,
+                  "prefilledTokens": back.prefilledTokens, "ttftReturnMs": round1(back.timeToFirstToken * 1000),
+                  "ttftRereadMs": round1(again.timeToFirstToken * 1000), "rereadPrefilledTokens": again.prefilledTokens,
+                  "decodeTokPerSec": round1(back.decodeTokensPerSecond)])
         }
 
-        // Forget the benchmark's conversations (memory and flash) so they don't push out real ones.
-        for persona in personas {
-            await host.forget(conversationKey: "bench-\(runID)-\(persona.id)")
-            await host.forget(conversationKey: "bench-\(runID)-\(persona.id)-cold")
-        }
-
-        let ttftRestored = average(restoredRuns.map { $0.timeToFirstToken * 1000 })
-        let ttftCold = average(rereadRuns.map { $0.timeToFirstToken * 1000 })
+        let ttftBack = average(returned.map { $0.timeToFirstToken * 1000 })
+        let ttftAgain = average(reread.map { $0.timeToFirstToken * 1000 })
         let summary: [String: Any] = [
             "engine": engine.id, "model": engine.modelName, "characters": personas.count,
             "avgPromptTokens": round1(average(cold.map { Double($0.promptTokens) })),
             "avgColdTTFTMs": round1(average(cold.map { $0.timeToFirstToken * 1000 })),
             "avgPrefillTokPerSec": round1(average(cold.map(\.prefillTokensPerSecond))),
-            "avgDecodeTokPerSec": round1(average(cold.map(\.decodeTokensPerSecond))),
-            "avgParkMs": round1(average(parks.map(\.ms))),
-            "avgParkMB": round1(average(parks.map { Double($0.bytes) / 1_048_576 })),
-            "avgRestoreMs": round1(average(restoredRuns.compactMap(\.restoreMilliseconds))),
-            "restoredFromDisk": restoredRuns.filter(\.restoredFromDisk).count,
-            "avgTTFTRestoredMs": round1(ttftRestored),
-            "avgTTFTColdMs": round1(ttftCold),
-            "resumeSpeedup": round1(ttftRestored > 0 ? ttftCold / ttftRestored : 0),
+            "avgDecodeTokPerSec": round1(average((cold + returned).map(\.decodeTokensPerSecond))),
+            "avgReturnReusedTokens": round1(average(returned.map { Double($0.reusedTokens) })),
+            "avgReturnPromptTokens": round1(average(returned.map { Double($0.promptTokens) })),
+            "avgTTFTReturnMs": round1(ttftBack),
+            "avgTTFTRereadMs": round1(ttftAgain),
+            "returnSpeedup": round1(ttftBack > 0 ? ttftAgain / ttftBack : 0),
         ].merging(memory()) { a, _ in a }
         emit(["summary": summary])
     }
@@ -105,12 +85,14 @@ enum HearthBenchmark {
     // MARK: - Prompts
 
     /// Five characters from the bundled world (or built-in stand-ins if it can't be read), each with a
-    /// ~1,200-token prompt: persona plus a synthetic, harmless chat history.
-    static func makePersonas() -> [Persona] {
+    /// ~1,200-token prompt: persona plus a synthetic, harmless chat history. `tag` makes this run's prompts
+    /// new to Pie, so pass 1 really is cold even if the benchmark ran before in this launch.
+    static func makePersonas(tag: String = "") -> [Persona] {
         var cast = bundledCast()
         if cast.count < 5 { cast += fallbackCast.filter { f in !cast.contains { $0.name == f.name } } }
         return cast.prefix(5).map { member in
             let system = """
+            [benchmark \(tag)]
             You are \(member.name), a \(member.species) who lives in Lantern Bay. \(member.tagline)
 
             About you:

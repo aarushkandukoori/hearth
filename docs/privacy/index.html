@@ -93,7 +93,7 @@
             <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><strong>No account.</strong> There's no sign-in, and Hearth never asks for an email address or phone number.</span></li>
             <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><strong>Everything stays on your device.</strong> What you write, and everything the residents write back, is stored only on your iPhone (or, for the web app, in your browser).</span></li>
             <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><strong>Nothing to collect it.</strong> Hearth has no servers, no analytics, no ads, no cookies and no tracking.</span></li>
-            <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><strong>One download.</strong> The iPhone app goes online for one thing: downloading the language model once, from Hugging Face.</span></li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><strong>One download.</strong> The iPhone app goes online for one thing: downloading the language model once, from Hearth's releases on GitHub. The web app downloads its model once, from this site's own address.</span></li>
             <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><strong>Yours to take or erase.</strong> You can export your chats, characters, memories and settings to a backup file, or delete all of it, whenever you like.</span></li>
           </ul>
         </section>
@@ -108,9 +108,9 @@
               <tr><th scope="row">Memories</th><td>Messages you pinned, and small facts a resident noted from your chats, like your dog's name. Facts are only shared with other residents when town gossip is on. You choose it during setup. It starts off, and you can change it any time in You &gt; Privacy Center on iPhone, or in Settings in the web app.</td></tr>
               <tr><th scope="row">"About you" and settings</th><td>The name you'd like to be called, anything you wrote about yourself, and your choices in Settings.</td></tr>
               <tr><th scope="row">Photos you send</th><td>A resized copy of the photo and a short text description made on the phone. The original stays wherever it came from.</td></tr>
-              <tr><th scope="row">Voice notes and pictures</th><td>Audio and image files made on the phone for your chats.</td></tr>
-              <tr><th scope="row">Parked conversations</th><td>Files that let a chat resume quickly when you switch back to it (the model's KV cache). They contain conversation content, so they get the same protection, are left out of backups, and older ones are cleared on their own.</td></tr>
-              <tr><th scope="row">The language model</th><td>About 2 GB for Standard or 0.8 GB for Lite. It contains nothing about you. iOS data protection keeps it encrypted until you first unlock your phone after it restarts. After that it stays readable, so Hearth can keep using it while the phone is locked.</td></tr>
+              <tr><th scope="row">Voice notes and pictures</th><td>Audio files for voice notes, made on the phone, and the pictures residents send (art from the town, or postcards drawn on the phone), saved for your chats.</td></tr>
+              <tr><th scope="row">Pie's cache</th><td>Pie, the engine that runs the model inside Hearth, keeps what the model has read of your recent chats (its KV cache) in the phone's memory, so the next reply can start quickly. When memory runs short, Pie may move some of it to a cache folder in Hearth's own space on the phone, which iOS never backs up. Pie clears old entries on its own, so a message you delete can stay in its cache until then. It's never shown, and it never leaves the phone. Delete everything empties that folder, and what Pie holds in memory is gone when Hearth quits.</td></tr>
+              <tr><th scope="row">The language model</th><td>About 1.1 GB for Standard or about 650 MB for Lite. It contains nothing about you. iOS data protection keeps it encrypted until you first unlock your phone after it restarts. After that it stays readable, so Hearth can keep using it while the phone is locked.</td></tr>
               <tr><th scope="row">Diagnostic notes</th><td>Timings and counts used for troubleshooting, such as how long a reply took. Hearth writes them only to iOS's own system log on the phone and keeps no log file of its own (developer test builds aside). They never include what you or the residents write.</td></tr>
             </tbody>
           </table>
@@ -120,7 +120,8 @@
 
         <section id="network" aria-labelledby="network-title">
           <h2 id="network-title">When the iPhone app goes online</h2>
-          <p><strong>Downloading a model.</strong> When you choose a model, Hearth downloads it from Hugging Face (huggingface.co), a site that hosts open AI models. Like any download, Hugging Face receives the request, which includes your IP address and the name of the file. Nothing you've written is part of it. Before using the file, Hearth checks it against a SHA-256 fingerprint built into the app.</p>
+          <p><strong>Downloading a model.</strong> When you choose a model, Hearth downloads it from Hearth's own releases on GitHub. The request goes to github.com, which hands it on to GitHub's file server (release-assets.githubusercontent.com). Like any download, GitHub receives the request, which includes your IP address and the name of the file. Nothing you've written is part of it. Before using the file, Hearth checks it against a SHA-256 fingerprint built into the app.</p>
+          <p><strong>The engine stays inside.</strong> Pie, the open-source engine that runs the model, works inside the Hearth app and talks to it directly. It doesn't run a server or open a network port.</p>
           <p><strong>That's all.</strong> Hearth has no analytics, crash reporting, ads, accounts or update checks of its own, and it never uploads your data. Once the model is on your phone, you can turn on Airplane Mode and keep using every part of the app. The Privacy center shows how much Hearth has downloaded.</p>
         </section>
 
@@ -131,21 +132,19 @@
             <li><strong>Face ID or passcode lock</strong> is handled by iOS. Hearth only learns whether unlocking worked.</li>
             <li><strong>Speech recognition</strong>, for voice messages and calls, uses Apple's on-device mode. If your iPhone can't recognize speech on the device, Hearth tells you and doesn't send audio anywhere. The microphone is only used while you're recording or on a call.</li>
             <li><strong>Voices</strong> come from the speech voices installed in iOS. If you download extra voices in iOS Settings, iOS gets them from Apple.</li>
-            <li><strong>Photo descriptions</strong> come from Apple's Vision framework.</li>
-            <li><strong>Pictures from residents</strong> are drawn with Apple's Image Playground on iPhones with Apple Intelligence. Otherwise a resident sends a postcard or a picture from the town's own art.</li>
-            <li><strong>Apple's on-device language model</strong> can stand in for the downloaded model on iPhones with Apple Intelligence.</li>
-            <li><strong>Your photo library</strong>: Hearth only asks for permission when you choose to save a picture there.</li>
+            <li><strong>Photo descriptions</strong> come from Apple's Vision framework when you use Hearth Standard. Hearth Lite describes photos with the model's own vision instead, through Pie, also on the phone.</li>
+            <li><strong>Your photo library</strong> is only touched when you choose to save a picture there, and Hearth asks for permission at that moment.</li>
           </ul>
         </section>
 
         <section id="website" aria-labelledby="website-title">
           <h2 id="website-title">This website and the web app</h2>
           <p><strong>Hosting.</strong> This site is hosted on GitHub Pages. When you open a page, GitHub receives an ordinary web request, including your IP address, and may keep server logs as its own privacy statement describes. Hearth doesn't get those logs.</p>
-          <p><strong>Nothing from other sites.</strong> These information pages load no fonts, analytics, ads or embedded videos from anywhere else, and their security policy tells your browser to refuse anything from other sites. The web app reaches other sites only for the model download described below.</p>
+          <p><strong>Nothing from other sites.</strong> These information pages load no fonts, analytics, ads or embedded videos from anywhere else, and their security policy tells your browser to refuse anything from other sites. The web app doesn't reach other sites either. Even its model comes from this site's own address, as described below.</p>
           <p><strong>Your data in the web app.</strong> Your chats, memories, characters and any photos you send are kept in your browser's own storage (IndexedDB) on that device, and are never uploaded. Photos are shrunk first, which also strips location data.</p>
           <p><strong>A shared address.</strong> The web app is served from aarushkandukoori.github.io, an address other project pages share. Browsers keep stored data by address, so those pages could in principle read Hearth's browser data. The iPhone app keeps your data in its own private folder, so it's the most private way to use Hearth.</p>
           <p><strong>Safari can clear it.</strong> Safari may delete a website's stored data after 7 days without a visit. On the web, add Hearth to your Home Screen or Dock, and export a backup now and then. A Home Screen or Dock copy keeps its own data, so use a backup to bring your chats over.</p>
-          <p><strong>Running the model.</strong> To run a model in your browser, the web app uses WebLLM, which downloads the model files from Hugging Face and its WebGPU runtime from GitHub when the model first loads. Your browser keeps them in its cache, so later visits don't download them again. Nothing else is fetched. If your browser can't run WebGPU, the web app offers a clearly labeled demo mode that runs entirely in the page.</p>
+          <p><strong>Running the model.</strong> The web app runs the model with Pie's browser version, which comes with this site, on your computer's graphics chip (WebGPU). The first time, it downloads the model, Qwen3.5 0.8B (about 650 MB), from this site's own address (aarushkandukoori.github.io/hearth-model) in 13 pieces. Your browser keeps it in its private storage for this site, so later visits don't download it again. Photos you send are described by the same model, in the tab. Pie keeps no cache of your chats on disk in the browser. Nothing else is fetched. If your browser can't run Pie (it needs Chrome 137 or newer), the web app offers a clearly labeled demo mode that runs entirely in the page.</p>
           <p><strong>Reading aloud.</strong> The web app only uses voices installed on your device. Online voices are skipped, because they would send the text to a server.</p>
           <p><strong>Preferences.</strong> Small choices, like light or dark mode and whether the sidebar is open, are saved in your browser's local storage. There are no cookies.</p>
         </section>
@@ -156,7 +155,7 @@
           <ul>
             <li><strong>Export</strong> from the Privacy center in the You tab. Hearth writes a <code>.hearth</code> file with your chats, characters, memories and settings, sealed with AES-GCM, using a key made from a passphrase you choose. Photos, pictures, voice notes and character pictures aren't included. Keep the passphrase safe: without it, nobody can open the file, including you.</li>
             <li><strong>Import</strong> that file on another iPhone with the same passphrase.</li>
-            <li><strong>Delete everything</strong>, also in the Privacy center, removes every chat, character you made, memory, picture, voice note and parked conversation. You can choose whether to remove the model too.</li>
+            <li><strong>Delete everything</strong>, also in the Privacy center, removes every chat, character you made, memory, picture and voice note, and empties Pie's cache folder. You can choose whether to remove the model too.</li>
             <li><strong>Deleting the app</strong> removes everything it stored.</li>
           </ul>
           <h3>On the web</h3>
@@ -211,7 +210,7 @@
       <span>Made in Pittsburgh</span>
       <span>Open source, MIT license</span>
       <span>Hearth characters are AI. What they say is made up.</span>
-      <span>Built with Llama. <a href="https://www.llama.com/llama3_2/license/">Llama 3.2 Community License</a> and <a href="https://www.llama.com/llama3_2/use-policy/">Acceptable Use Policy</a></span>
+      <span>Runs on <a href="https://github.com/pie-project/pie">Pie</a> with Qwen3.5 models, both under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a></span>
     </div>
   </div>
 </footer>
