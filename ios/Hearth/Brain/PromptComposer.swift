@@ -266,22 +266,27 @@ enum PromptComposer {
     static func memoryRequest(character: Character, persona: UserPersona, recent: [Message]) -> GenerationRequest {
         typealias T = PromptTemplates
         let user = userName(persona)
-        var lines: [String] = []
+        // Something said by someone who may be in danger never becomes a memory (which could come up again,
+        // or travel through town gossip), and neither does the answer to it. What to skip is decided over the
+        // whole chat first, so a reply to a flagged message just before the window is still left out.
+        var entries: [(who: String, text: String, skip: Bool)] = []
         var skippingReply = false
-        for m in recent.filter({ $0.role != .narrator }).suffix(MemoryKeeper.summarizeEvery) {
+        for m in recent where m.role != .narrator {
             let who = m.role == .user ? user : character.name
             let text = BrainText.oneLine(body(of: m, who: who, user: user, char: character.name))
-            // Something said by someone who may be in danger never becomes a memory (which could come up again,
-            // or travel through town gossip), and neither does the answer to it.
+            var skip = false
             if m.role == .user {
                 skippingReply = SafetyGuard.assess(text) != .none
-                if skippingReply { continue }
+                skip = skippingReply
             } else if skippingReply {
                 skippingReply = false
-                continue
+                skip = true
             }
-            if !text.isEmpty { lines.append(T.fill(T.speakerLine, ["name": who, "text": text])) }
+            entries.append((who, text, skip))
         }
+        let lines = entries.suffix(MemoryKeeper.summarizeEvery)
+            .filter { !$0.skip && !$0.text.isEmpty }
+            .map { T.fill(T.speakerLine, ["name": $0.who, "text": $0.text]) }
         let prompt = T.fill(T.memoryUser, ["userName": user, "name": character.name, "transcript": lines.joined(separator: "\n")])
         var sampling = SamplingParams()
         sampling.temperature = 0.3

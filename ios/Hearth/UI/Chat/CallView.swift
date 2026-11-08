@@ -309,6 +309,18 @@ private struct CallScreen: View {
             ChatController.removeMediaFile(result.attachment?.file) // a call keeps your words, not the recording
             let words = result.transcript.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !words.isEmpty else { return }
+            // Talking over a reply stops it, but the stop can take a moment to land (the model only checks
+            // between batches). Wait for it, so what the person said is never dropped.
+            var waits = 0
+            while controller.isReplying && waits < 40 { // up to 4 seconds
+                controller.stop()
+                try? await Task.sleep(for: .milliseconds(100))
+                waits += 1
+            }
+            guard controller.canSend else {
+                controller.errorText = "That got lost while the reply was still going. Please say it again."
+                return
+            }
             await controller.send(text: words)
         }
     }

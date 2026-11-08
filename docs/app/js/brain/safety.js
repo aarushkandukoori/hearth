@@ -50,6 +50,7 @@ const PATTERNS = [
   [/\bend\s+it\s+all\b/, 'crisis'],
   // "I'm going to end it tonight", "I think about ending it" (but not "end it with him", "end it here"
   // or "end it on a high note").
+  [/\bways\s+to\s+(?:die|kill\s+my\s?self|end\s+(?:it|my\s+life))\b/, 'crisis'],
   [/\b(?:i'?m|i\s+am|i'?ll|i\s+will|going\s+to|gonna|about\s+to|want\s+to|wanna|ready\s+to|plan(?:ning)?\s+(?:to|on)|think(?:ing)?\s+(?:about|of)|i\s+should(?:\s+just)?)\s+end(?:ing)?\s+it\b(?!\s+(?:with|for|between|here|there|early|off|properly|politely|nicely|amicably|on\s+(?:a|an|good|bad|friendly|the|that|this)|at\s+(?:that|this|the|\d)|by\s+(?:the|then|\w+day))\b)/, 'crisis'],
   [/\btak(?:e|ing)\s+my\s+(?:own\s+)?life\b/, 'crisis'],
   [/\b(?:want|wanna|wanted|wanting|wish|going|gonna|ready)\s+(?:to\s+)?die\b/, 'crisis'],
@@ -63,22 +64,32 @@ const PATTERNS = [
   [/\bwish(?:ed)?\s+i(?:\s+had|'d)\s+never\s+been\s+born\b/, 'crisis'],
   [/\bwish(?:ed)?\s+i\s+(?:wasn'?t|weren'?t)\s+(?:alive|here|born)\b/, 'crisis'],
   [/\b(?:want|wanna|wanted|wish)\s+(?:to\s+)?(?:sleep|go\s+to\s+sleep)\s+(?:forever|and\s+never\s+wake\s+up)\b/, 'crisis'],
-  [/\bdon'?t\s+(?:want|wanna)\s+to\s+(?:be\s+alive|live|be\s+here|exist|wake\s+up)\s+any\s?more\b/, 'crisis'],
-  [/\bdon'?t\s+(?:want|wanna)\s+to\s+(?:be\s+alive|exist|wake\s+up)\b/, 'crisis'],
-  [/\bdon'?t\s+(?:want|wanna)\s+to\s+live(?=\s*$|\s*[.!?,]|\s+like\s+this)/, 'crisis'],
+  [/\b(?:don'?t|do\s+not)\s+(?:want|wanna)\s+to\s+(?:be\s+alive|live|be\s+here|exist|wake\s+up)\s+any\s?more\b/, 'crisis'],
+  [/\b(?:don'?t|do\s+not)\s+(?:want|wanna)\s+to\s+(?:be\s+alive|exist)\b/, 'crisis'],
+  // "I don't want to wake up" (but not "wake up early", "wake up at 6").
+  [/\b(?:don'?t|do\s+not)\s+(?:want|wanna)\s+to\s+wake\s+up\b(?!\s+(?:early|earlier|late|at|before|by|for|so|on|in|the|my|your|his|her|him|them|anyone|everyone|you|this|that)\b)/, 'crisis'],
+  [/\b(?:don'?t|do\s+not)\s+(?:want|wanna)\s+to\s+live(?=\s*$|\s*[.!?,]|\s+like\s+this)/, 'crisis'],
   [/\bno\s+longer\s+want\s+to\s+(?:live|be\s+alive|be\s+here|exist)\b/, 'crisis'],
+  [/\b(?:not\s+sure|don'?t\s+know|unsure)\s+(?:if\s+|whether\s+)?i\s+(?:want|wanna)\s+to\s+(?:live|be\s+alive|be\s+here|keep\s+going|go\s+on)(?=\s*$|\s*[.!?,;]|\s+any\s?more|\s+like\s+this)/, 'crisis'],
+  [/\b(?:stop|cease)\s+(?:existing|to\s+exist)\b/, 'crisis'],
+  [/\b(?:sleep|asleep)\s+and\s+(?:not|never)\s+wake\s+up\b/, 'crisis'],
   [/\bdon'?t\s+think\s+i\s+(?:want\s+to|can)\s+(?:live|go\s+on|be\s+alive|keep\s+going)\b/, 'crisis'],
   [/\b(?:hope|wish)\s+i\s+(?:don'?t|never|won'?t)\s+wake\s+up\b/, 'crisis'],
   [/\b(?:hurt(?:ing)?|harm(?:ing|ed)?|cut(?:ting)?|burn(?:ing|ed|t)?|starv(?:e|ed|ing))\s+my\s?self\b/, 'crisis'],
   // "I've been cutting again", "I started cutting again", "I can't stop cutting."
   [/\b(?:i'?ve|i\s+have|i'?m|i\s+am|i)\s+(?:been\s+|started\s+|starting\s+|begun\s+|gone\s+back\s+to\s+|back\s+to\s+)?cutting\s+again\b/, 'crisis'],
   [/\bcan'?t\s+stop\s+cutting(?=\s*$|\s*[.!?,])/, 'crisis'],
-  [/\b(?:hang(?:ing)?|shoot(?:ing)?|drown(?:ing)?)\s+my\s?self\b/, 'crisis'],
+  [/\b(?:hang(?:ing)?|shoot(?:ing)?|drown(?:ing)?|poison(?:ing)?|stab(?:bing)?)\s+my\s?self\b/, 'crisis'],
   [/\bslit(?:ting)?\s+my\s+wrists?\b/, 'crisis'],
   [/\bself[\s-]?(?:harm(?:ing|ed)?|injur(?:y|e|ing))\b/, 'mention'],
   [/\boverdos(?:e|ed|ing)\b/, 'mention'],
   // "I took a bunch of pills", "swallowed all my meds", "gonna take too many pills".
   [/\b(?:took|taken|swallowed|(?:going\s+to|gonna|about\s+to|want\s+to|wanna)\s+(?:take|swallow))\s+(?:a\s+(?:bunch|handful|lot|ton|bottle|box)\s+of|all\s+(?:of\s+)?(?:my|the)|too\s+many|way\s+too\s+many|so\s+many)\s+(?:\w+\s+)?(?:pills|meds|medications?|medicines?|tablets|painkillers)\b/, 'crisis'],
+  // Pills saved up, or asked about in a way that only fits an overdose.
+  [/\b(?:pills|meds|tablets|painkillers)\s+ready\b/, 'crisis'],
+  [/\b(?:stockpil\w*|hoard\w*|sav(?:e|ed|ing))\s+(?:up\s+)?(?:my\s+|all\s+my\s+|the\s+)?(?:pills|meds|medications?|tablets|painkillers)\b/, 'crisis'],
+  [/\b(?:lethal|fatal|deadly)\s+(?:dose|amount|overdose)\b/, 'crisis'],
+  [/\bhow\s+many\s+(?:of\s+(?:my|these|the|those)\s+)?(?:\w+\s+)?(?:pills|meds|tablets|tylenol|advil|aspirin|ibuprofen|painkillers)\s+(?:would|will|does|do)\s+it\s+take\b/, 'crisis'],
   // "suicide", "suicidal", and common misspellings ("sucidal", "suicidial").
   [/\bsu[ie]?[cs]+i?d(?:e|al|ial|el|le)?s?\b/, 'mention'],
   [/\bsewer\s?slide\b/, 'mention'],
@@ -91,21 +102,29 @@ const PATTERNS = [
   [/\bwhat'?s\s+the\s+point\s+(?:of|in)\s+(?:living|life|being\s+alive|going\s+on)\b/, 'crisis'],
   [/\bbetter\s+off\s+(?:dead|without\s+me)\b/, 'crisis'],
   [/\bbetter\s+off\s+if\s+i\s+(?:was|were|wasn'?t|weren'?t)\s+(?:dead|gone|here|around|alive)\b/, 'crisis'],
-  [/\bi\s+(?:just\s+|really\s+)?can'?t\s+go\s+on\b/, 'crisis'],
-  [/\bjump\s+(?:off|from)\s+(?:a|the|this)\s+(?:bridge|building|roof|cliff|balcony)\b/, 'crisis'],
-  [/\b(?:i'?m|i\s+am)\s+(?:in\s+danger(?!\s+of\b)|not\s+safe)\b/, 'crisis'],
+  [/\b(?:happier|easier)\s+(?:if|when|once)\s+(?:i\s+(?:was|were|am)\s+(?:dead|gone)|i'?m\s+(?:dead|gone)|i\s+(?:wasn'?t|weren'?t|was\s+not|were\s+not)\s+(?:here|around|alive)|i\s+(?:died|disappeared))\b/, 'crisis'],
+  [/\b(?:won'?t|will\s+not)\s+be\s+(?:a\s+burden|around|here)\s+(?:much\s+|for\s+much\s+|for\s+)?longer\b/, 'crisis'],
+  // "I can't go on" (but not "I can't go on the trip").
+  [/\bi\s+(?:just\s+|really\s+)?(?:can'?t|cannot|can\s+not)\s+go\s+on\b(?!\s+(?:a|an|the|that|this|my|our|your|his|her|their|vacation|holiday|trips?|dates?|tour|stage|breaks?|rides?|social|line|live|air|tv|camera)\b)/, 'crisis'],
+  [/\b(?:jump|jumping)\s+(?:off|from)\s+(?:a|the|this)\s+(?:bridge|building|roof|cliff|balcony)\b/, 'crisis'],
+  [/\b(?:i'?m|i\s+am)\s+(?:in\s+danger(?!\s+of\b)|not\s+safe(?!\s+to\b))/, 'crisis'],
+  [/\b(?:don'?t|do\s+not)\s+feel\s+safe\s+(?:at\s+home|with\s+(?:him|her|them|my\s+\w+))\b/, 'crisis'],
   [/\bdone\s+with\s+(?:life|living)\b/, 'crisis'],
   [/\btired\s+of\s+(?:living|being\s+alive)\b/, 'crisis'],
   [/\b(?:nobody|no\s?one)\s+would\s+(?:miss\s+me|(?:care|notice)\s+if\s+i\s+(?:died|was\s+gone|were\s+gone|disappeared))\b/, 'crisis'],
-  [/\b(?:hits|beats|chokes|abuses)\s+me\b/, 'crisis'],
-  [/\b(?:hurting|hitting|beating|choking|abusing)\s+me\b/, 'crisis'],
+  // Someone hurting the writer: a person has to be the one doing it ("beats me" alone is an idiom).
+  [/\b(?:he|she|they|husband|wife|partner|boyfriend|girlfriend|fiance|fiancee|ex|dad|father|stepdad|stepfather|mom|mum|mother|stepmom|stepmother|parents|brother|sister|son|daughter|roommate|someone|somebody)(?:'s|'re|\s+is|\s+are|\s+was|\s+keeps|\s+kept|\s+has|\s+have)?(?:\s+been)?(?:\s+(?:always|still|sometimes|often|just|really|even|again|started|starts))?\s+(?:hits|hit|beats|chokes|choked|strangles|strangled|kicks|slaps|slapped|punches|punched|shoves|abuses|abused|rapes|raped|hurts|hitting|beating|choking|strangling|kicking|slapping|punching|shoving|abusing|hurting)\s+me\b(?!\s+(?:at|in|to|up|out|off)\b|\s+with\s+(?:a\s+|an\s+|the\s+|some\s+|this\s+|that\s+)?(?:surprise|question|joke|pun|bill|ticket|fine|news|text|message|call|request|deadline|project|offer|compliment|idea|story)\b)/, 'crisis'],
   [/\b(?:choked|strangled)\s+me\b(?!\s+up\b)/, 'crisis'],
-  [/\bbeat\s+me\s+up\b/, 'crisis'],
+  [/\bbeat(?:s|ing)?\s+me\s+up\b/, 'crisis'],
   [/\bthreaten(?:s|ed|ing)?\s+to\s+(?:kill|hurt|beat|stab|shoot)\s+me\b/, 'crisis'],
   [/\b(?:scared|afraid|terrified)\s+(?:that\s+)?(?:he|she|they)(?:'ll|\s+will|\s+is\s+going\s+to|'s\s+going\s+to|\s+are\s+going\s+to|'re\s+going\s+to|\s+gonna|\s+might|\s+could|\s+would)\s+(?:kill|hurt)\s+me\b/, 'crisis'],
   [/\b(?:nobody|no\s?one)\s+would\s+notice\s+me\b/, 'concern'],
   [/\b(?:want|wanna)\s+(?:to\s+)?disappear\s+(?:forever|for\s+good)\b/, 'concern'],
   [/\bwish\s+i\s+could\s+(?:disappear|vanish)\b/, 'concern'],
+  [/\b(?:can'?t|cannot|can\s+not)\s+(?:take|do|handle)\s+(?:it|this)\s+any\s?more\b/, 'concern'],
+  [/\b(?:i'?m|i\s+am|feel\s+like|be|being)\s+(?:just\s+|such\s+|nothing\s+but\s+)?a\s+burden\b/, 'concern'],
+  [/\b(?:scared|afraid|terrified)\s+to\s+go\s+home\b/, 'concern'],
+  [/\babusive\s+(?:relationship|partner|husband|wife|boyfriend|girlfriend|marriage|home|parents?|dad|mom|father|mother)\b/, 'concern'],
 ];
 
 // Real accidents ("cut myself shaving", "burned myself on the stove", "accidentally cut myself").
@@ -122,6 +141,9 @@ const FALSE_POSITIVES = [
   /\b(?:die|dye)\s+(?:my|her|his|their|the|our)\s+hair\b/g,
   /\bdie\s+of\s+(?:embarrassment|laughter|laughing|cuteness|boredom|shame)\b/g,
   /\bcut(?:ting)?\s+my\s?self\s+(?:a|an|some|off|short|loose|slack|out|free)\b/g,
+  /\bvirgin\s+suicides\b/g,
+  /\bshoot(?:ing)?\s+my\s?self\s+in\s+the\s+foot\b/g,
+  /\bhills?\s+(?:that\s+)?(?:i|i'd|i'll|i'm|im)\s+(?:\w+\s+){0,3}?die\s+on\b/g,
   /\bburn(?:ing|ed|t)?\s+my\s?self\s+out\b/g,
   new RegExp(`\\baccident(?:al)?ly\\s+${OOPS_VERB}\\b`, 'g'),
   new RegExp(`\\b${OOPS_VERB}(?:\\s+(?:with|on)\\s+(?:a|an|the|my)\\s+\\w+)?\\s+${MISHAP}`, 'g'),
@@ -141,12 +163,12 @@ const NEGATORS = new Set(['never', 'not', "don't", 'dont', "won't", 'wont', "wou
   "isn't", 'isnt', "wasn't", 'wasnt', "ain't", 'aint', 'stopped', 'quit']);
 // Words that may sit between a negator and the phrase it negates ("not going to", "never really").
 const BRIDGE = new Set(['going', 'to', 'gonna', 'ever', 'really', 'actually', 'even', 'truly', 'seriously', 'want', 'wanna',
-  'trying', 'planning', 'be', 'been', 'feeling', 'feel']);
+  'trying', 'planning', 'be', 'been', 'feeling', 'feel', 'i', "i'd", "i'll", "i'm", 'im', 'would', 'will']);
 // A comma or one of these words starts a new clause ("I have no friends and I want to die").
 const CLAUSE_WORDS = new Set(['and', 'but', 'so', 'because', 'though', 'although']);
 // Who a bare mention is about: the nearest subject before it decides.
 const ME = /\b(?:i|i'm|im|i've|ive|i'd|i'll|me|myself)\b/g;
-const SOMEONE_ELSE = /\b(?:he|she|they|he's|she's|they're|his|her|their|someone|somebody|my\s+(?:friend|best\s+friend|mom|mum|mother|dad|father|brother|sister|son|daughter|wife|husband|partner|girlfriend|boyfriend|cousin|aunt|uncle|grandma|grandpa|roommate|coworker|neighbou?r|kid))\b/g;
+const SOMEONE_ELSE = /\b(?:he|she|they|he's|she's|they're|his|her|their|him|them|someone|somebody|my\s+(?:friend|best\s+friend|mom|mum|mother|dad|father|brother|sister|son|daughter|wife|husband|partner|girlfriend|boyfriend|cousin|aunt|uncle|grandma|grandpa|grandmother|grandfather|roommate|coworker|neighbou?r|kid|child))\b/g;
 
 function normalize(text) {
   return String(text || '')
@@ -169,7 +191,7 @@ function isNegated(sentence, index) {
   const words = clauseBefore(sentence, index);
   for (let i = words.length - 1; i >= 0; i--) {
     const w = words[i];
-    if (NEGATORS.has(w) || (w === 'to' && words[i - 1] === 'used')) return true;
+    if (NEGATORS.has(w) || (w === 'to' && words[i - 1] === 'used') || (w === 'way' && words[i - 1] === 'no')) return true;
     if (!BRIDGE.has(w)) return false;
   }
   return false;

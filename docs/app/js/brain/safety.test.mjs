@@ -17,16 +17,23 @@ const CASES = {
     'I took a bunch of pills', 'he threatened to kill me', "I'm scared he will kill me", 'my boyfriend choked me',
     "I wish I'd never been born", 'I want to sleep forever and never wake up', 'nobody would notice if I was gone',
     "I'm not okay, I want to die", 'not suicidal but i want to die',
+    // Kept in step with the iPhone (SafetyGuardParityTests).
+    "I've got the pills ready", 'I stockpiled my meds', 'how many tylenol is a lethal dose',
+    "I'm not sure I want to live anymore", 'thinking about jumping off the bridge', "I don't feel safe at home",
+    'I do not want to be alive', 'my boyfriend beat me up', "I can't stop cutting", 'I deserve to die',
   ],
   concern: [
     'I would never kill myself', "I'm not going to kill myself", 'my friend is suicidal', 'suicide prevention month',
     'I watched a documentary about suicide', 'I used to cut myself', 'I want to disappear forever',
+    "I'm a burden to everyone", "I can't take it anymore",
   ],
   none: [
     'I cut myself shaving', 'I burned myself on the stove', 'I accidentally cut myself', 'I cut myself on a piece of glass',
     'Suicide Squad was fun', "I'm killing myself laughing", 'I could die of embarrassment', 'I cut myself a slice of cake',
     "I'm burning myself out at work", 'I ran 5 kms today', 'overdosed on coffee', "I'm going to end it with him",
     "I'm going to end it on a high note", 'That movie choked me up', 'My hair needs cutting again', 'my day was fine',
+    'beats me', "I can't go on the trip this weekend", 'that hill I want to die on', 'I do not want to wake up early tomorrow',
+    'my sister beats me at chess', 'he hits me up on Saturdays',
   ],
 };
 

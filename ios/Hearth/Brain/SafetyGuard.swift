@@ -83,13 +83,17 @@ enum SafetyGuard {
         #"\btak(e|ing)\s+my\s+(own\s+)?life\b"#,
         #"\bend\s+it\s+all\b"#,
         // "I'm going to end it tonight", "thinking about ending it" (not "end it with him" or "end it here").
-        #"\b(i'?m|i\s+am|i'll|i\s+will|going\s+to|gonna|about\s+to|want\s+to|wanna|ready\s+to|plan(ning)?\s+(to|on)|thinking\s+(about|of))\s+end(ing)?\s+it\b(?!\s+(with|for|between|here|there|early|off)\b)"#,
+        #"\b(i'?m|i\s+am|i'll|i\s+will|going\s+to|gonna|about\s+to|want\s+to|wanna|ready\s+to|plan(ning)?\s+(to|on)|think(ing)?\s+(about|of)|i\s+should(\s+just)?)\s+end(ing)?\s+it\b(?!\s+(with|for|between|here|there|early|off|properly|politely|nicely|amicably|on\s+(a|an|good|bad|friendly|the|that|this)|at\s+(that|this|the|\d)|by\s+(the|then|\w+day))\b)"#,
         #"\bways\s+to\s+(die|kill\s+my\s?self|end\s+(it|my\s+life))\b"#,
         // Wanting to die, or not to be alive.
         #"\b(want|wanna|wanted|wanting|wish|ready)\s+(to\s+)?die\b(?!\s+(of\s+(embarrassment|laughter|cuteness|boredom|shame)|laughing|from\s+laughing|happy))"#,
         #"\b(want|wanna|wanted|wanting|wish)\s+(to\s+)?be\s+dead\b"#,
         #"\brather\s+be\s+dead\b"#,
         #"\bi\s+should\s+(just\s+)?(die|be\s+dead)\b"#,
+        // "I'm worthless and should die", "I deserve to die".
+        #"\b(i'?m|i\s+am)\s+(\w+\s+){1,3}and\s+(i\s+)?(should|deserve\s+to)\s+(just\s+)?(die|be\s+dead)\b"#,
+        #"\bi\s+(just\s+|really\s+)?deserve\s+to\s+(die|be\s+dead)\b"#,
+        #"\bwish(ed)?\s+i(\s+had|'d)\s+never\s+been\s+born\b"#,
         #"\bwish(ed)?\s+i\s+(was|were)\s+(dead|never\s+born|gone)\b"#,
         #"\bwish(ed)?\s+i\s+(wasn't|weren't|wasnt|werent)\s+(alive|here|born)\b"#,
         #"\b(don't|dont|do\s+not)\s+(want|wanna)\s+to\s+(be\s+alive|exist)\b"#,
@@ -117,6 +121,9 @@ enum SafetyGuard {
         #"\b(won't|wont|will\s+not)\s+be\s+(a\s+burden|around|here)\s+(much\s+|for\s+much\s+|for\s+)?longer\b"#,
         // Hurting oneself on purpose (real accidents are left out, see `mishap`).
         #"(?<!accidentally )(?<!accidently )\b(hurt|hurting|harm|harming|harmed|cut|cutting|burn|burning|burned|burnt|starve|starving|starved)\s+my\s?self\b(?!(\s+(with|on)\s+(a|an|the|my)\s+\w+)?\s+"# + mishap + ")",
+        // "I've been cutting again", "I started cutting again", "I can't stop cutting."
+        #"\b(i'?ve|i\s+have|i'?m|i\s+am|i)\s+(been\s+|started\s+|starting\s+|begun\s+|gone\s+back\s+to\s+|back\s+to\s+)?cutting\s+again\b"#,
+        #"\b(can't|cant|cannot)\s+stop\s+cutting(?=\s*$|\s*[.!?,;])"#,
         #"\b(hang|hanging|shoot|shooting|drown|drowning|poison|poisoning|stab|stabbing)\s+my\s?self\b"#,
         #"\bslit(ting)?\s+my\s+wrists?\b"#,
         #"\b(jump|jumping)\s+(off|from)\s+(a|the|this)\s+(bridge|building|roof|cliff|balcony)\b"#,
@@ -130,6 +137,7 @@ enum SafetyGuard {
         #"\b(i'?m|i\s+am)\s+(in\s+danger(?!\s+of\b)|not\s+safe(?!\s+to\b))"#,
         #"\b(don't|dont|do\s+not)\s+feel\s+safe\s+(at\s+home|with\s+(him|her|them|my\s+\w+))\b"#,
         #"\b(he|she|they|husband|wife|partner|boyfriend|girlfriend|fiance|fiancee|ex|dad|father|stepdad|stepfather|mom|mum|mother|stepmom|stepmother|parents|brother|sister|son|daughter|roommate|someone|somebody)('s|'re|\s+is|\s+are|\s+was|\s+keeps|\s+kept|\s+has|\s+have)?(\s+been)?(\s+(always|still|sometimes|often|just|really|even|again|started|starts))?\s+(hits|hit|beats|chokes|choked|strangles|strangled|kicks|slaps|slapped|punches|punched|shoves|abuses|abused|rapes|raped|hurts|hitting|beating|choking|strangling|kicking|slapping|punching|shoving|abusing|hurting)\s+me\b(?!\s+(at|in|to|up|out|off)\b|\s+with\s+(a\s+|an\s+|the\s+|some\s+|this\s+|that\s+)?(surprise|question|joke|pun|bill|ticket|fine|news|text|message|call|request|deadline|project|offer|compliment|idea|story)\b)"#,
+        #"\bbeat(s|ing)?\s+me\s+up\b"#,
         #"\bthreaten(s|ed|ing)?\s+to\s+(kill|hurt|beat|stab|shoot)\s+me\b"#,
         #"\b(scared|afraid|terrified)\s+(that\s+)?(he|she|they)('ll|\s+will|\s+is\s+going\s+to|'s\s+going\s+to|\s+are\s+going\s+to|'re\s+going\s+to|\s+gonna|\s+might|\s+could|\s+would)\s+(kill|hurt)\s+me\b"#,
     ].compactMap { BrainText.regex($0) }

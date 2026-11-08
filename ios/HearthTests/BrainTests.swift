@@ -750,10 +750,35 @@ final class BrainSafetyTests: XCTestCase {
     }
 }
 
+final class SafetyGuardParityTests: XCTestCase {
+    /// The same phrases as docs/app/js/brain/safety.test.mjs, so the app and the website flag the same things.
+    func testPhrasesMatchTheWebsite() {
+        let crisis = ["I've got the pills ready", "I stockpiled my meds", "how many tylenol is a lethal dose",
+                      "I'm not sure I want to live anymore", "thinking about jumping off the bridge", "I don't feel safe at home",
+                      "I do not want to be alive", "my boyfriend beat me up", "I can't stop cutting", "I deserve to die",
+                      "I've been cutting again", "I think about ending it every day", "I should just end it",
+                      "I'm worthless and should die", "I wish I'd never been born"]
+        let concern = ["I'm a burden to everyone", "I can't take it anymore", "I want to disappear forever"]
+        let none = ["beats me", "I can't go on the trip this weekend", "that hill I want to die on",
+                    "I do not want to wake up early tomorrow", "my sister beats me at chess", "he hits me up on Saturdays",
+                    "My hair needs cutting again", "I'm going to end it on a high note"]
+        for p in crisis { XCTAssertEqual(SafetyGuard.assess(p), .crisis, p) }
+        for p in concern { XCTAssertEqual(SafetyGuard.assess(p), .concern, p) }
+        for p in none { XCTAssertEqual(SafetyGuard.assess(p), .none, p) }
+    }
+}
+
 final class BrainMemoryTests: XCTestCase {
     func testThirdPersonCrisisFactsAreNotKept() {
         XCTAssertTrue(MemoryKeeper.isSensitiveFact("Wants to die"))
         XCTAssertTrue(MemoryKeeper.isSensitiveFact("They want to kill themselves"))
+        for fact in ["Doesn't want to live anymore", "Hurts themselves when stressed", "Is in danger at home",
+                     "Their partner hits them", "Has been cutting again"] {
+            XCTAssertTrue(MemoryKeeper.isSensitiveFact(fact), fact)
+        }
+        for fact in ["Their mom died last year", "Hits the gym every morning", "Cuts hair for a living", "Is in a band"] {
+            XCTAssertFalse(MemoryKeeper.isSensitiveFact(fact), fact)
+        }
         XCTAssertFalse(MemoryKeeper.isSensitiveFact("Lives in Pittsburgh"))
         let kept = MemoryKeeper.merge(["Wants to die", "Loves foggy mornings"], into: [], characterID: "juno", source: .summary, shareable: true)
         XCTAssertEqual(kept.map(\.text), ["Loves foggy mornings"])

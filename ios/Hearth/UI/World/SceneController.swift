@@ -146,7 +146,10 @@ import SwiftUI
         ensureConversation()
         let lastSpeaker = conversation.messages.last { $0.role == .character }?.speakerID
         var rng = SystemRandomNumberGenerator()
-        await run(app.director.banterOrder(present: present, count: count, lastSpeakerID: lastSpeaker, using: &rng))
+        var order = app.director.banterOrder(present: present, count: count, lastSpeakerID: lastSpeaker, using: &rng)
+        // While the newest line someone wrote is worrying, one friend answers with care instead of banter.
+        if promptSafety != .none { order = Array(order.prefix(1)) }
+        await run(order)
     }
 
     /// Brings someone over until this part of the day ends. They say hello when the model is ready.
@@ -272,9 +275,14 @@ import SwiftUI
             return true
         }
 
+        // While the newest line someone wrote is worrying, nobody answers with an error, a refusal or nothing.
+        let worried = caring || promptSafety != .none
         let recentLines = Set(conversation.messages.suffix(8).filter { $0.role == .character }.map { Self.comparable($0.text) })
         for attempt in 0..<2 {
-            let request = PromptComposer.sceneRequest(context(at: location), speaker: speaker)
+            var request = PromptComposer.sceneRequest(context(at: location), speaker: speaker)
+            // Only the first friend answering a worrying line opens with the fixed caring words; later lines
+            // (a follow-up, a guest's hello) would repeat them word for word.
+            if !caring { request.replyOpener = nil }
             var raw = ""
             var stats: GenerationStats?
             do {
@@ -290,15 +298,31 @@ import SwiftUI
                     }
                 }
             } catch {
-                if case .cancelled? = error as? EngineError { return false }
+                if case .cancelled? = error as? EngineError {
+                    // Stopped before any words: the caring opener still stays, since it has the help in it.
+                    if let opener = request.replyOpener {
+                        add(ParsedReply(text: opener, photoCaption: nil), from: speaker, stats: nil)
+                    }
+                    return false
+                }
+                if worried {
+                    // Someone who may be hurting never gets an error in place of an answer.
+                    add(ParsedReply(text: Self.caringLine(userName: userName), photoCaption: nil), from: speaker, stats: nil)
+                    HearthLog.info("scene", "no line for a worrying message; added the caring line")
+                    return true
+                }
                 errorText = Self.friendly(error)
                 HearthLog.error("scene", "a line could not be written (\(type(of: error)))")
                 return false
             }
             let cancelled = stopRequested || stats?.stoppedBy == "cancelled"
-            let reply = ReplyParser.withOpener(request.replyOpener,
+            var reply = ReplyParser.withOpener(request.replyOpener,
                                                ReplyParser.clean(raw, speakerName: speaker.name, otherNames: others,
                                                                  userName: userName, cutByMaxTokens: stats?.stoppedBy == "maxTokens"))
+            // An empty line or a canned refusal is never the answer to a worrying line.
+            if worried, !cancelled, reply.text.isEmpty || ReplyParser.isCannedRefusal(reply.text) {
+                reply = ParsedReply(text: Self.caringLine(userName: userName), photoCaption: nil)
+            }
             if attempt == 0, !cancelled, !reply.text.isEmpty, recentLines.contains(Self.comparable(reply.text)) {
                 streamingText = nil
                 continue // the very same words as a moment ago: write it once more

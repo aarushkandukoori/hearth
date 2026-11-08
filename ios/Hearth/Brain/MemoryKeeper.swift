@@ -221,16 +221,39 @@ enum MemoryKeeper {
         SafetyGuard.assess(text) != .none || SafetyGuard.assess(firstPerson(text)) == .crisis
     }
 
+    /// Reads a stored fact as if the person said it ("Wants to die" -> "I want to die", "Their partner hits
+    /// them" -> "my partner hits me"). Only used to check safety, never shown.
     static func firstPerson(_ text: String) -> String {
         let swaps: [(String, String)] = [
-            (#"\bthemsel(?:f|ves)\b"#, "myself"), (#"\btheir\b"#, "my"), (#"\bthey(?:'re|\s+are)\b"#, "i am"),
-            (#"\bthey\b"#, "i"), (#"\bwishes\b"#, "wish"), (#"\b(want|plan|think|hope|feel|need)s\b"#, "$1"),
+            (#"\bthemsel(?:f|ves)\b"#, "myself"), (#"\btheir\b"#, "my"), (#"\bthem\b"#, "me"),
+            (#"\bthey(?:'re|\x{2019}re|\s+are)\b"#, "i am"), (#"\bthey\b"#, "i"),
+            (#"\bdoesn(?:'|\x{2019})?t\b"#, "don't"), (#"\bdoes\s+not\b"#, "do not"),
         ]
-        var t = text
+        var t = BrainText.oneLine(text)
         for (pattern, template) in swaps {
             t = t.replacingOccurrences(of: pattern, with: template, options: [.regularExpression, .caseInsensitive])
         }
-        return t
+        // Summary facts usually leave out the subject ("Is in danger at home"): put "I" back in front.
+        var words = t.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
+        guard let first = words.first?.lowercased() else { return t }
+        let subjects: Set<String> = ["i", "i'm", "i\u{2019}m", "my", "me", "myself", "i've", "i'll", "i'd"]
+        guard !subjects.contains(first) else { return t }
+        words[0] = firstPersonVerb(first)
+        return "I " + words.joined(separator: " ")
+    }
+
+    /// "is" -> "am", "has" -> "have", "wishes" -> "wish", "hurts" -> "hurt" (any other word stays as it is).
+    private static func firstPersonVerb(_ word: String) -> String {
+        switch word {
+        case "is": return "am"
+        case "has": return "have"
+        case "does": return "do"
+        default: break
+        }
+        for ending in ["shes", "ches", "sses", "xes", "zes"] where word.hasSuffix(ending) { return String(word.dropLast(2)) }
+        if word.hasSuffix("ies"), word.count > 4 { return String(word.dropLast(3)) + "y" }
+        if word.hasSuffix("s"), !word.hasSuffix("ss"), word.count > 3 { return String(word.dropLast()) }
+        return word
     }
 
     private static func capped(_ facts: [MemoryFact], characterID: String?) -> [MemoryFact] {

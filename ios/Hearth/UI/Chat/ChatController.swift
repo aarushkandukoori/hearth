@@ -463,6 +463,14 @@ import Observation
                                                                       cutByMaxTokens: stats.stoppedBy == "maxTokens"))
         // Never a picture in answer to someone who may be hurting, and for the rest of that visit only
         // ones they ask for (the model can copy a "[photo: ...]" line from the history on its own).
+        // A canned refusal is never stored as the friend's answer to someone who may be hurting. (A crisis
+        // reply's opener already swaps one out; this covers concern-level messages.)
+        if level != .none, !cancelled, ReplyParser.isCannedRefusal(parsed.text) {
+            forceVoiceNoteOnNextReply = false
+            addCaringReply(character: character, userName: userName, target: target)
+            HearthLog.info("chat", "the model declined a worrying message; added the caring line")
+            return
+        }
         let photoAllowed = level == .none && (photoRequested || safety == .none)
         let photoCaption = settings.picturesEnabled && !cancelled && photoAllowed ? parsed.photoCaption : nil
         guard !parsed.text.isEmpty || photoCaption != nil else {

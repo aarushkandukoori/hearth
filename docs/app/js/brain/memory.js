@@ -24,12 +24,34 @@ const tidy = (s) => s.trim().replace(/\s+(?:too|a lot|so much|very much|lol|haha
 /** True when the safety check flags this text at any level (MemoryKeeper on iPhone). */
 const isSensitive = (text) => assess(String(text || '')).level !== 'none';
 
-/** Facts read in third person ("Wants to die") but the safety check reads first person, so swap them. */
+/**
+ * Reads a stored fact as if the person said it ("Wants to die" -> "I want to die", "Their partner hits them"
+ * -> "my partner hits me"), because the safety check reads first person. Only used to check safety.
+ * Same rules as MemoryKeeper.firstPerson on iPhone.
+ */
 function firstPerson(text) {
-  return String(text || '')
-    .replace(/\bthemsel(?:f|ves)\b/gi, 'myself').replace(/\btheir\b/gi, 'my')
-    .replace(/\bthey(?:'re|\s+are)\b/gi, 'i am').replace(/\bthey\b/gi, 'i')
-    .replace(/\bwishes\b/gi, 'wish').replace(/\b(want|plan|think|hope|feel|need)s\b/gi, '$1');
+  let t = String(text || '').replace(/\s+/g, ' ').trim()
+    .replace(/\bthemsel(?:f|ves)\b/gi, 'myself').replace(/\btheir\b/gi, 'my').replace(/\bthem\b/gi, 'me')
+    .replace(/\bthey(?:'re|\u2019re|\s+are)\b/gi, 'i am').replace(/\bthey\b/gi, 'i')
+    .replace(/\bdoesn(?:'|\u2019)?t\b/gi, "don't").replace(/\bdoes\s+not\b/gi, 'do not');
+  // Summary facts usually leave out the subject ("Is in danger at home"): put "I" back in front.
+  const words = t.split(' ').filter(Boolean);
+  if (!words.length) return t;
+  const first = words[0].toLowerCase();
+  if (['i', "i'm", 'i\u2019m', 'my', 'me', 'myself', "i've", "i'll", "i'd"].includes(first)) return t;
+  words[0] = firstPersonVerb(first);
+  return `I ${words.join(' ')}`;
+}
+
+/** "is" -> "am", "has" -> "have", "wishes" -> "wish", "hurts" -> "hurt" (any other word stays as it is). */
+function firstPersonVerb(word) {
+  if (word === 'is') return 'am';
+  if (word === 'has') return 'have';
+  if (word === 'does') return 'do';
+  if (/(?:shes|ches|sses|xes|zes)$/.test(word)) return word.slice(0, -2);
+  if (word.endsWith('ies') && word.length > 4) return `${word.slice(0, -3)}y`;
+  if (word.endsWith('s') && !word.endsWith('ss') && word.length > 3) return word.slice(0, -1);
+  return word;
 }
 
 /** A stored fact that sounds like someone may be in danger: flagged as written, or a crisis read in first person. */

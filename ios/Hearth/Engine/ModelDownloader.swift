@@ -64,7 +64,16 @@ import Observation
         }
         let session = Self.session(owner: self)
         let task: URLSessionDownloadTask
-        if let resume = Self.loadResumeData(spec) {
+        var saved = Self.loadResumeData(spec)
+        // Saved progress keeps the network rule its download started with (older saves allowed cellular),
+        // so when the person's choice is different the download starts over under the new rule.
+        if saved != nil, (UserDefaults.standard.object(forKey: Self.cellularKey(spec)) as? Bool ?? true) != allowsCellular {
+            Self.deleteResumeData(spec)
+            saved = nil
+            HearthLog.info("download", "cellular choice changed for \(spec.id); starting over")
+        }
+        UserDefaults.standard.set(allowsCellular, forKey: Self.cellularKey(spec))
+        if let resume = saved {
             task = session.downloadTask(withResumeData: resume)
         } else {
             var request = URLRequest(url: spec.url)
@@ -223,6 +232,9 @@ import Observation
     nonisolated static func stagingURL(for spec: ModelSpec) -> URL {
         HearthPaths.models.appendingPathComponent(spec.fileName + ".download")
     }
+
+    /// Whether the download now saved or running for `spec` may use cellular data.
+    nonisolated private static func cellularKey(_ spec: ModelSpec) -> String { "hearth.download.cellular.\(spec.id)" }
 
     nonisolated private static func resumeURL(for spec: ModelSpec) -> URL {
         HearthPaths.state.appendingPathComponent("download-\(spec.id).resume")
