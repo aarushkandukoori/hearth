@@ -87,7 +87,7 @@ enum HearthBenchmark {
     /// Five characters from the bundled world (or built-in stand-ins if it can't be read), each with a
     /// ~1,200-token prompt: persona plus a synthetic, harmless chat history. `tag` makes this run's prompts
     /// new to Pie, so pass 1 really is cold even if the benchmark ran before in this launch.
-    static func makePersonas(tag: String = "") -> [Persona] {
+    static func makePersonas(tag: String = "", estimatedTokens: Double = 1_150) -> [Persona] {
         var cast = bundledCast()
         if cast.count < 5 { cast += fallbackCast.filter { f in !cast.contains { $0.name == f.name } } }
         return cast.prefix(5).map { member in
@@ -119,7 +119,7 @@ enum HearthBenchmark {
             var turns = [ChatTurn(role: .system, content: system), ChatTurn(role: .assistant, content: member.greeting)]
             var chars = system.count + member.greeting.count
             var i = 0
-            while Double(chars) / 3.6 < 1_150 { // SPEC §7 estimate: characters / 3.6
+            while Double(chars) / 3.6 < estimatedTokens { // SPEC §7 estimate: characters / 3.6
                 let pair = smallTalk[i % smallTalk.count]
                 turns.append(ChatTurn(role: .user, content: pair.0))
                 turns.append(ChatTurn(role: .assistant, content: pair.1))
@@ -182,7 +182,7 @@ enum HearthBenchmark {
     // MARK: - Running and reporting
 
     @MainActor
-    private static func generate(_ host: EngineHost, _ request: GenerationRequest) async -> (String, GenerationStats?) {
+    static func generate(_ host: EngineHost, _ request: GenerationRequest) async -> (String, GenerationStats?) {
         var text = ""
         var stats: GenerationStats?
         do {
@@ -202,12 +202,12 @@ enum HearthBenchmark {
         s.prefillTokensPerSecond > 0 ? Double(s.prefilledTokens) / s.prefillTokensPerSecond * 1000 : 0
     }
 
-    /// Prints `HEARTHBENCH {json}` and appends the JSON to Documents/bench.jsonl.
-    static func emit(_ object: [String: Any]) {
+    /// Prints `HEARTHBENCH {json}` and appends the JSON to Documents/bench.jsonl (the sweep uses its own pair).
+    static func emit(_ object: [String: Any], marker: String = "HEARTHBENCH", file: String = "bench.jsonl") {
         guard let data = try? JSONSerialization.data(withJSONObject: object, options: [.sortedKeys]),
               let json = String(data: data, encoding: .utf8) else { return }
-        HearthLog.emit("HEARTHBENCH \(json)")
-        let url = HearthPaths.documents.appendingPathComponent("bench.jsonl")
+        HearthLog.emit("\(marker) \(json)")
+        let url = HearthPaths.documents.appendingPathComponent(file)
         guard let line = (json + "\n").data(using: .utf8) else { return }
         if let handle = try? FileHandle(forWritingTo: url) {
             _ = try? handle.seekToEnd()
@@ -239,7 +239,7 @@ enum HearthBenchmark {
     }
 
     /// One decimal place, printed as written (a plain Double would print as 29.199999999999999).
-    private static func round1(_ x: Double) -> NSDecimalNumber {
+    static func round1(_ x: Double) -> NSDecimalNumber {
         NSDecimalNumber(string: String(format: "%.1f", x.isFinite ? x : 0))
     }
 }

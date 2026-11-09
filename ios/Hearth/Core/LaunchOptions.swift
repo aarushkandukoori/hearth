@@ -11,6 +11,8 @@ struct LaunchOptions: Sendable {
     /// Pie artifact (.metal.zt) file name to load instead of the chosen catalog model.
     var modelFile: String?
     var benchmark = false
+    /// -HearthSweep 1: the controlled measurements in Dev/PieSweep.swift (Documents/sweep.jsonl).
+    var sweep = false
     var uiTour = false
     /// With -HearthUITour: also save the window about 10 times a second to Documents/tour/footage (trailer footage).
     var footage = false
@@ -20,7 +22,7 @@ struct LaunchOptions: Sendable {
     var verbose = false
 
     /// Developer runs keep Documents/hearth-console.log for `ios/scripts/device.sh pull`. Normal use doesn't.
-    var writesLogFile: Bool { verbose || benchmark || uiTour }
+    var writesLogFile: Bool { verbose || benchmark || sweep || uiTour }
 
     init(arguments: [String]) {
         func value(_ name: String) -> String? {
@@ -34,6 +36,7 @@ struct LaunchOptions: Sendable {
         engine = value("-HearthEngine")
         modelFile = value("-HearthModel")
         benchmark = flag("-HearthBenchmark")
+        sweep = flag("-HearthSweep")
         uiTour = flag("-HearthUITour")
         footage = flag("-HearthFootage")
         reset = flag("-HearthReset")

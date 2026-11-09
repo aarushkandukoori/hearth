@@ -68,6 +68,8 @@ import SwiftUI
 
     /// Starts a new batch when one is due and the engine is free. Returns right away; the store updates later.
     func refreshIfDue(app: AppModel, now: Date = .now) {
+        // Developer measurements need the engine to themselves.
+        guard !LaunchOptions.shared.sweep, !LaunchOptions.shared.benchmark else { return }
         guard !isRefreshing, Self.isDue(lastBatchAt: app.settings.lastAwayEventsAt, now: now) else { return }
         let plan = Self.plan(engineState: app.engine.state, isGenerating: app.engine.isGenerating,
                              engineID: app.engine.active?.id)

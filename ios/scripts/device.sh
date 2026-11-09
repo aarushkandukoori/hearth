@@ -4,7 +4,7 @@
 #   ios/scripts/device.sh build                 build a signed Release app for the device
 #   ios/scripts/device.sh install               install the last build
 #   ios/scripts/device.sh run [launch args...]  launch with console attached (e.g. -HearthBenchmark 1)
-#   ios/scripts/device.sh pull                  copy Documents/{tour,bench.jsonl,hearth-console.log} to ios/build/device/
+#   ios/scripts/device.sh pull                  copy Documents/{tour,bench.jsonl,sweep.jsonl,hearth-console.log} to ios/build/device/
 #   ios/scripts/device.sh push-model <file>     copy a Pie model (.metal.zt) into the app's Documents over USB
 # DEVICE env var overrides the CoreDevice id.
 set -euo pipefail
@@ -28,7 +28,7 @@ case "${1:-}" in
     xcrun devicectl device process launch --console --terminate-existing --device "$DEVICE" "$BUNDLE" -- "$@" ;;
   pull)
     mkdir -p "$OUT"
-    for item in tour bench.jsonl hearth-console.log art; do
+    for item in tour bench.jsonl sweep.jsonl hearth-console.log art; do
       xcrun devicectl device copy from --device "$DEVICE" --domain-type appDataContainer \
         --domain-identifier "$BUNDLE" --source "Documents/$item" --destination "$OUT/$item" > /dev/null 2>&1 \
         && echo "pulled $item" || echo "no $item"

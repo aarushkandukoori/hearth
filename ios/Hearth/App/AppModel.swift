@@ -78,6 +78,7 @@ import SwiftUI
         await engine.start(preferredEngineID: settings.preferredEngineID)
         HearthLog.info("app", "booted engine=\(engine.active?.id ?? "none") characters=\(library.allCharacters.count)")
         if options.benchmark { await HearthBenchmark.run(host: engine) }
+        if options.sweep { await PieSweep.run(host: engine) }
         if UserDefaults.standard.bool(forKey: "HearthPhotoProbe"), let url = HearthPaths.bundledArt("loc-harbor"),
            let jpeg = try? Data(contentsOf: url) {
             // Developer check (-HearthPhotoProbe 1): describe a bundled picture with the model's own vision.

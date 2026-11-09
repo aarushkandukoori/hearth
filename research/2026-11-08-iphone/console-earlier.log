@@ -1,0 +1,51 @@
+04:08:43.096 [INFO] [library] world loaded: 16 residents, 8 places
+04:08:43.101 [INFO] [chats] loaded 4 conversation(s)
+04:08:43.612 [INFO] [voice] 16 characters share 6 voices
+Apple A18 Pro GPU: running checked-in profile apple9.toml, none of whose numbers were measured on it.
+To tune it (minutes; --full for a file to contribute):
+    pie tune metal
+and consider contributing the result:
+    pie profile export apple-a18-pro-gpu > apple-a18-pro-gpu.toml
+and open a PR at https://github.com/pie-project/pie adding it under crates/engine-metal/profiles/. The file holds device facts and measured numbers, nothing else.
+ane: 24 MLP layers split, Neural Engine takes 3072 of 6144 columns
+ane: 18 projections of 2048 -> 8192 split, Neural Engine takes 4096 columns
+ane: 6 projections of 2048 -> 5120 split, Neural Engine takes 2560 columns
+ane: the Neural Engine MLP program did not compile (Operation not permitted (os error 1)); the GPU runs the MLP alone
+ane: the Neural Engine 2048 -> 8192 program did not compile (Operation not permitted (os error 1)); the GPU runs it alone
+ane: the Neural Engine 2048 -> 5120 program did not compile (Operation not permitted (os error 1)); the GPU runs it alone
+2026-11-08T09:08:45.644315Z  WARN wasmtime_internal_cache::worker: Failed to lower worker thread priority (Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }). It might affect application performance.
+04:08:45.684 [INFO] [pie] booted qwen35-d2b-u4g64-kv-bf16 in 2186 ms: weights 1048 MiB, kv pages 5042 x 16, lanes 4, program hearth@0.1.0
+04:08:45.684 [INFO] [engine] active engine: qwen3.5-2b
+04:08:45.685 [INFO] [app] booted engine=qwen3.5-2b characters=16
+HEARTHBENCH {"availableMB":1752.7,"characters":["juno","theo","wren","mika","iris"],"contextLength":4096,"engine":"qwen3.5-2b","event":"start","footprintMB":1623.3,"model":"Qwen3.5 2B"}
+04:08:49.142 [INFO] [pie] reply: prompt 1339 (reused 0, new 1339), 32 tokens, ttft 2515 ms, decode 35.3 tok/s, stop maxTokens
+HEARTHBENCH {"character":"juno","decodeTokPerSec":35.3,"generatedTokens":32,"phase":"cold","prefilledTokens":1339,"prefillTokPerSec":532.5,"promptTokens":1339,"reusedTokens":0,"ttftMs":2514.6}
+04:08:52.397 [INFO] [pie] reply: prompt 1335 (reused 0, new 1335), 32 tokens, ttft 2474 ms, decode 39.8 tok/s, stop maxTokens
+HEARTHBENCH {"character":"theo","decodeTokPerSec":39.8,"generatedTokens":32,"phase":"cold","prefilledTokens":1335,"prefillTokPerSec":539.6,"promptTokens":1335,"reusedTokens":0,"ttftMs":2473.9}
+04:08:55.616 [INFO] [pie] reply: prompt 1312 (reused 0, new 1312), 32 tokens, ttft 2473 ms, decode 41.7 tok/s, stop maxTokens
+HEARTHBENCH {"character":"wren","decodeTokPerSec":41.7,"generatedTokens":32,"phase":"cold","prefilledTokens":1312,"prefillTokPerSec":530.4,"promptTokens":1312,"reusedTokens":0,"ttftMs":2473.4}
+04:08:58.897 [INFO] [pie] reply: prompt 1307 (reused 0, new 1307), 21 tokens, ttft 2537 ms, decode 27.0 tok/s, stop eos
+HEARTHBENCH {"character":"mika","decodeTokPerSec":27,"generatedTokens":21,"phase":"cold","prefilledTokens":1307,"prefillTokPerSec":515.1,"promptTokens":1307,"reusedTokens":0,"ttftMs":2537.3}
+04:09:02.451 [INFO] [pie] reply: prompt 1317 (reused 0, new 1317), 32 tokens, ttft 2784 ms, decode 40.3 tok/s, stop maxTokens
+HEARTHBENCH {"character":"iris","decodeTokPerSec":40.3,"generatedTokens":32,"phase":"cold","prefilledTokens":1317,"prefillTokPerSec":473,"promptTokens":1317,"reusedTokens":0,"ttftMs":2784.1}
+HEARTHBENCH {"availableMB":652,"event":"after-cold","footprintMB":2724}
+04:09:06.103 [INFO] [pie] reply: prompt 1401 (reused 0, new 1401), 32 tokens, ttft 2911 ms, decode 41.9 tok/s, stop maxTokens
+04:09:09.905 [INFO] [pie] reply: prompt 1414 (reused 0, new 1414), 32 tokens, ttft 3065 ms, decode 42.1 tok/s, stop maxTokens
+HEARTHBENCH {"character":"juno","decodeTokPerSec":41.9,"phase":"return","prefilledTokens":1401,"promptTokens":1401,"rereadPrefilledTokens":1414,"reusedTokens":0,"ttftRereadMs":3064.5,"ttftReturnMs":2911}
+04:09:13.579 [INFO] [pie] reply: prompt 1397 (reused 0, new 1397), 28 tokens, ttft 2933 ms, decode 36.5 tok/s, stop eos
+04:09:17.461 [INFO] [pie] reply: prompt 1409 (reused 0, new 1409), 28 tokens, ttft 3144 ms, decode 36.6 tok/s, stop eos
+HEARTHBENCH {"character":"theo","decodeTokPerSec":36.5,"phase":"return","prefilledTokens":1397,"promptTokens":1397,"rereadPrefilledTokens":1409,"reusedTokens":0,"ttftRereadMs":3144.2,"ttftReturnMs":2932.9}
+04:09:21.143 [INFO] [pie] reply: prompt 1374 (reused 0, new 1374), 29 tokens, ttft 2939 ms, decode 37.7 tok/s, stop eos
+04:09:24.915 [INFO] [pie] reply: prompt 1386 (reused 0, new 1386), 29 tokens, ttft 3036 ms, decode 38.1 tok/s, stop eos
+HEARTHBENCH {"character":"wren","decodeTokPerSec":37.7,"phase":"return","prefilledTokens":1374,"promptTokens":1374,"rereadPrefilledTokens":1386,"reusedTokens":0,"ttftRereadMs":3036.3,"ttftReturnMs":2939.1}
+04:09:28.646 [INFO] [pie] reply: prompt 1358 (reused 0, new 1358), 21 tokens, ttft 2988 ms, decode 27.0 tok/s, stop eos
+2026-11-08T09:09:32.400283Z ERROR runtime::store::extent: a pool commit failed error=impossible submission: this fire wants 150994944 bytes of an elastic buffer and the load reserved 149409792
+04:09:33.010 [INFO] [pie] reply: prompt 1371 (reused 0, new 1371), 21 tokens, ttft 3715 ms, decode 30.8 tok/s, stop eos
+HEARTHBENCH {"character":"mika","decodeTokPerSec":27,"phase":"return","prefilledTokens":1358,"promptTokens":1358,"rereadPrefilledTokens":1371,"reusedTokens":0,"ttftRereadMs":3714.5,"ttftReturnMs":2987.7}
+04:09:38.069 [INFO] [pie] reply: prompt 1379 (reused 0, new 1379), 32 tokens, ttft 4283 ms, decode 40.0 tok/s, stop maxTokens
+04:08:42  Acquired tunnel connection to device.
+04:08:42  Enabling developer disk image services.
+04:08:42  Acquired usage assertion.
+Launched application with com.aarushkandukoori.hearth bundle identifier.
+Waiting for the application to terminate...
+App terminated due to signal 9.
